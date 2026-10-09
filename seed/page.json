@@ -1,0 +1,562 @@
+{
+ "v": 1,
+ "sample": false,
+ "profile": {
+  "name": "Brandon Lazarre",
+  "role": "Développeur, designer & photographe",
+  "bio": "Je crée des sites et des apps événementielles, des identités visuelles, et je réalise photo et vidéo. Basé à Troyes.",
+  "location": "Troyes, France",
+  "status": "Disponible pour des projets",
+  "statusOn": true,
+  "avatar": ""
+ },
+ "theme": {
+  "skin": "auto",
+  "accent": "#0B7A75",
+  "radius": 24,
+  "font": "grotesk",
+  "layout": "side",
+  "gap": 14
+ },
+ "tiles": [
+  {
+   "id": "f4vi4kt",
+   "type": "link",
+   "size": "w",
+   "data": {
+    "title": "brandonlazarre.fr",
+    "url": "https://brandonlazarre.fr",
+    "desc": "Portfolio, services et contact",
+    "color": ""
+   }
+  },
+  {
+   "id": "4mqulb4",
+   "type": "social",
+   "size": "s",
+   "data": {
+    "platform": "instagram",
+    "handle": "brandonlazarre",
+    "url": "",
+    "cta": "Suivre"
+   }
+  },
+  {
+   "id": "093ydh5",
+   "type": "map",
+   "size": "s",
+   "data": {
+    "place": "Troyes",
+    "note": "Aube, Grand Est",
+    "url": ""
+   }
+  },
+  {
+   "id": "h5wjvno",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "Projets"
+   }
+  },
+  {
+   "id": "hvjxay8",
+   "type": "project",
+   "size": "l",
+   "data": {
+    "title": "EventFlow",
+    "role": "SaaS · conception & dev",
+    "year": "2026",
+    "desc": "Plateforme de gestion d’événements : rôles et permissions sur trois niveaux (plateforme, événement, utilisateur) et facturation par modules.",
+    "tags": "SaaS, PHP, Architecture",
+    "image": "",
+    "url": ""
+   },
+   "spot": true
+  },
+  {
+   "id": "kppny3l",
+   "type": "project",
+   "size": "t",
+   "data": {
+    "title": "IMPACT 2026",
+    "role": "App festival · React",
+    "year": "2026",
+    "desc": "L’app du festival IMPACT à Montluçon, thème UNBROKEN : programme personnalisé, mode live, plan SVG interactif, FR/EN.",
+    "tags": "React, Event tech, UX",
+    "image": "",
+    "url": ""
+   }
+  },
+  {
+   "id": "8wfmcoj",
+   "type": "skills",
+   "size": "t",
+   "data": {
+    "title": "Boîte à outils",
+    "items": "HTML, CSS, JavaScript, React, PHP, Python, SQL, JSON, Flutter, Bootstrap, Adobe Suite, Canva, Photo, Vidéo, Retouche"
+   }
+  },
+  {
+   "id": "c7mleu5",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "Labo · essais récents"
+   }
+  },
+  {
+   "id": "dqbsdn1",
+   "type": "project",
+   "size": "w",
+   "data": {
+    "title": "Tuile",
+    "role": "Outil perso · Vanilla JS + PHP",
+    "year": "2026",
+    "desc": "Mon link-in-bio façon bento, qui fait tourner cette page.",
+    "tags": "Vanilla JS, PHP",
+    "image": "",
+    "url": ""
+   },
+   "spot": true
+  },
+  {
+   "id": "u5p8z5b",
+   "type": "project",
+   "size": "s",
+   "data": {
+    "title": "App de notes",
+    "role": "Mobile-first",
+    "year": "2026",
+    "desc": "Une interface pensée pour le pouce : trois îlots de navigation en bas d’écran.",
+    "tags": "UX, Mobile",
+    "image": "",
+    "url": ""
+   }
+  },
+  {
+   "id": "xy6x628",
+   "type": "project",
+   "size": "s",
+   "data": {
+    "title": "Composants miuix",
+    "role": "Compose Multiplatform",
+    "year": "2026",
+    "desc": "FloatingNavigationBar et FloatingToolbar pour la bibliothèque miuix.",
+    "tags": "Kotlin, UI",
+    "image": "",
+    "url": ""
+   }
+  },
+  {
+   "id": "gu7os67",
+   "type": "project",
+   "size": "s",
+   "data": {
+    "title": "Organiseur Spotify",
+    "role": "React · IA",
+    "year": "2026",
+    "desc": "Trie les titres likés et crée les playlists automatiquement.",
+    "tags": "React, API",
+    "image": "",
+    "url": ""
+   }
+  },
+  {
+   "id": "0ry1y9r",
+   "type": "project",
+   "size": "s",
+   "data": {
+    "title": "F1 2026",
+    "role": "Projet perso · Vanilla JS",
+    "year": "2026",
+    "desc": "Galerie de livrées interactive : notes, badges, easter eggs et classement des sons moteur.",
+    "tags": "F1, Data, UI",
+    "image": "",
+    "url": ""
+   }
+  },
+  {
+   "id": "xzjosnn",
+   "type": "now",
+   "size": "w",
+   "data": {
+    "text": "Je construis Tuile, mon propre outil link-in-bio, pour héberger ce portfolio.",
+    "updated": "Oct. 2026"
+   }
+  },
+  {
+   "id": "sgl7x4k",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "Église"
+   }
+  },
+  {
+   "id": "x8yglf1",
+   "type": "project",
+   "size": "w",
+   "data": {
+    "title": "Site de l’église de Troyes",
+    "role": "Site web · en cours",
+    "year": "2026",
+    "desc": "Pour les membres et les nouveaux visiteurs : première visite, programme du samedi, événements, médias.",
+    "tags": "Web, Vanilla",
+    "image": "",
+    "url": "https://troyes.adventiste.org"
+   }
+  },
+  {
+   "id": "ylannek",
+   "type": "project",
+   "size": "w",
+   "data": {
+    "title": "Charte graphique de Troyes",
+    "role": "Identité visuelle",
+    "year": "2026",
+    "desc": "« Lumière & Structure » : six motifs tirés du patrimoine troyen (vitrail, colombage, rosace), logo, ton, gabarits print et réseaux.",
+    "tags": "Branding, SVG",
+    "image": "",
+    "url": ""
+   }
+  },
+  {
+   "id": "uu48n57",
+   "type": "project",
+   "size": "w",
+   "data": {
+    "title": "Plateforme adventiste",
+    "role": "PHP 8.5 · zéro dépendance",
+    "year": "2026",
+    "desc": "Plateforme multi-sites pour les églises, avec gestionnaire de fichiers en ligne.",
+    "tags": "PHP, Multi-tenant",
+    "image": "",
+    "url": ""
+   }
+  },
+  {
+   "id": "hktzame",
+   "type": "faith",
+   "size": "w",
+   "data": {
+    "verse": "Be still, and know that I am God.",
+    "ref": "Psalm 46:10",
+    "church": "Église adventiste de Troyes",
+    "url": "https://troyes.adventiste.org"
+   }
+  },
+  {
+   "id": "o3c3tj4",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "Parcours"
+   }
+  },
+  {
+   "id": "68aan28",
+   "type": "experience",
+   "size": "t",
+   "data": {
+    "title": "Création",
+    "items": "Développeur & designer web | Indépendant | Sites, apps, identités visuelles\nPhotographe & vidéaste | Événements et portraits | Tournage, montage, retouche"
+   }
+  },
+  {
+   "id": "dsu8mgy",
+   "type": "experience",
+   "size": "l",
+   "data": {
+    "title": "Missions en intérim",
+    "items": "Employé de libre-service · Inventoriste | Action — Barberey-Saint-Sulpice, Rosières-près-Troyes, La Chapelle-Saint-Luc | 2023 – 2026\nAgent de magasinage · Gestionnaire de stock | Hugo Boss Retail | 2022 et 2026\nAgent d’accueil | Basic-Fit | 2022"
+   }
+  },
+  {
+   "id": "1qjivdm",
+   "type": "stat",
+   "size": "s",
+   "data": {
+    "value": "19",
+    "label": "missions d’intérim depuis 2022",
+    "color": ""
+   }
+  },
+  {
+   "id": "6p4sx89",
+   "type": "stat",
+   "size": "s",
+   "data": {
+    "value": "3",
+    "label": "enseignes : Action, Hugo Boss, Basic-Fit",
+    "color": ""
+   }
+  },
+  {
+   "id": "ktvsvau",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "Photo & vidéo"
+   }
+  },
+  {
+   "id": "raie24f",
+   "type": "gallery",
+   "size": "l",
+   "data": {
+    "title": "Photographie événementielle",
+    "images": [],
+    "url": ""
+   }
+  },
+  {
+   "id": "nuuilnu",
+   "type": "video",
+   "size": "l",
+   "data": {
+    "title": "Showreel 2026",
+    "platform": "YouTube",
+    "url": "",
+    "image": ""
+   }
+  },
+  {
+   "id": "n3q4pwv",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "Car spotting"
+   }
+  },
+  {
+   "id": "o98bybn",
+   "type": "image",
+   "size": "l",
+   "data": {
+    "image": "uploads/car-0.jpg",
+    "caption": "Audi RS6 Avant & Porsche Cayenne · à la tombée de la nuit",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "01v9xrx",
+   "type": "image",
+   "size": "t",
+   "data": {
+    "image": "uploads/car-1.jpg",
+    "caption": "Fiat 1500 S Cabriolet · Troyes",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "sezmm2a",
+   "type": "image",
+   "size": "s",
+   "data": {
+    "image": "uploads/car-2.jpg",
+    "caption": "Porsche 911",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "kti0n15",
+   "type": "image",
+   "size": "s",
+   "data": {
+    "image": "uploads/car-3.jpg",
+    "caption": "BMW M4 Competition",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "go0rwep",
+   "type": "image",
+   "size": "w",
+   "data": {
+    "image": "uploads/car-4.jpg",
+    "caption": "Fiat 1500 S · calandre chromée",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "tb3awaw",
+   "type": "image",
+   "size": "s",
+   "data": {
+    "image": "uploads/car-5.jpg",
+    "caption": "Audi RS6",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "t45m79z",
+   "type": "image",
+   "size": "s",
+   "data": {
+    "image": "uploads/car-6.jpg",
+    "caption": "M4 · peinture caméléon",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "wlg7uyt",
+   "type": "image",
+   "size": "w",
+   "data": {
+    "image": "uploads/car-7.jpg",
+    "caption": "BMW M4 Competition Cabriolet",
+    "url": "https://instagram.com/brandonlazarre"
+   }
+  },
+  {
+   "id": "j8581xd",
+   "type": "text",
+   "size": "w",
+   "data": {
+    "text": "Le car spotting, c’est mon terrain de jeu photo : lumière du soir, reflets, détails. Plus de spots sur Instagram @brandonlazarre.",
+    "style": "quote"
+   }
+  },
+  {
+   "id": "wojpaqd",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "En dehors du travail"
+   }
+  },
+  {
+   "id": "gc7otp1",
+   "type": "instrument",
+   "size": "l",
+   "data": {
+    "name": "Piano",
+    "since": "Aussi : chant, basse et saxophone",
+    "note": "Gospel et classique."
+   }
+  },
+  {
+   "id": "kzu78kv",
+   "type": "music",
+   "size": "s",
+   "data": {
+    "title": "Gospel & classique",
+    "artist": "Ma playlist",
+    "service": "spotify",
+    "url": "",
+    "image": ""
+   }
+  },
+  {
+   "id": "4j1ho8k",
+   "type": "interest",
+   "size": "s",
+   "data": {
+    "title": "Formule 1",
+    "desc": "Supporter de Max Verstappen",
+    "color": "#E10600"
+   }
+  },
+  {
+   "id": "5h9duug",
+   "type": "team",
+   "size": "w",
+   "data": {
+    "club": "Paris Saint-Germain",
+    "league": "et l’Équipe de France",
+    "c1": "#004170",
+    "c2": "#DA291C",
+    "url": ""
+   }
+  },
+  {
+   "id": "8sfzed8",
+   "type": "section",
+   "size": "full",
+   "data": {
+    "title": "Contact"
+   }
+  },
+  {
+   "id": "lf8oufv",
+   "type": "contact",
+   "size": "w",
+   "data": {
+    "title": "Travaillons ensemble",
+    "email": "brandonlazarre@outlook.fr",
+    "phone": ""
+   }
+  },
+  {
+   "id": "wdr127r",
+   "type": "booking",
+   "size": "w",
+   "data": {
+    "title": "Réserver un shooting",
+    "duration": "Portrait ou événement · appel de 30 min",
+    "url": "https://cal.com/"
+   }
+  },
+  {
+   "id": "nawn0wr",
+   "type": "social",
+   "size": "bar",
+   "data": {
+    "platform": "linkedin",
+    "handle": "à compléter",
+    "url": "",
+    "cta": "Voir"
+   },
+   "hidden": true
+  },
+  {
+   "id": "ymr4ygt",
+   "type": "social",
+   "size": "bar",
+   "data": {
+    "platform": "github",
+    "handle": "à compléter",
+    "url": "",
+    "cta": ""
+   },
+   "hidden": true
+  },
+  {
+   "id": "7yolc4d",
+   "type": "social",
+   "size": "bar",
+   "data": {
+    "platform": "youtube",
+    "handle": "à compléter",
+    "url": "",
+    "cta": "S’abonner"
+   },
+   "hidden": true
+  },
+  {
+   "id": "sqmkjna",
+   "type": "form",
+   "size": "w",
+   "data": {
+    "title": "Newsletter",
+    "desc": "Nouveaux projets, une fois par mois.",
+    "button": "S’abonner"
+   },
+   "hidden": true
+  },
+  {
+   "id": "dknrsyv",
+   "type": "tip",
+   "size": "w",
+   "data": {
+    "title": "M’offrir un café",
+    "desc": "Si mon travail t’a aidé.",
+    "amounts": "3, 5, 10",
+    "currency": "€",
+    "url": ""
+   },
+   "hidden": true
+  }
+ ]
+}

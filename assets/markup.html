@@ -1,0 +1,36 @@
+<div id="app">
+  <header class="bar" id="bar">
+    <div class="bar-in">
+      <div class="brand"><span class="brand-mark"><i></i><i></i><i></i></span>Tiles<span id="savestate" class="savestate" aria-live="polite">Saved</span></div>
+      <div class="seg" role="group" aria-label="Mode">
+        <button data-mode="edit" aria-pressed="true">Edit</button>
+        <button data-mode="preview" aria-pressed="false">Preview</button>
+        <button data-mode="stats" aria-pressed="false">Stats</button>
+      </div>
+      <div class="acts">
+        <a class="btn ghost" href="./" target="_blank" rel="noopener" aria-label="Open public page"><span class="i-eye"></span><span class="lbl">Live page</span></a>
+        <button class="btn" data-act="design" aria-label="Design"><span class="i-pal"></span><span class="lbl">Design</span></button>
+        <button class="btn" data-act="export" aria-label="Export and import"><span class="i-code"></span><span class="lbl">Export</span></button>
+        <button class="btn pri" data-act="add" aria-label="Add block"><span class="i-plus"></span><span class="lbl">Add block</span></button>
+      </div>
+    </div>
+  </header>
+  <div class="banner" id="banner" hidden>
+    <div class="banner-in"><span class="sp"><b>Sample page.</b> Click any block to edit it, drag blocks to reorder, and use the size buttons to reshape them. Changes save to your site automatically.</span>
+      <button class="btn sm" data-act="empty">Start empty</button><button class="btn sm ghost" data-act="hide-banner">Dismiss</button></div>
+  </div>
+  <main class="page" id="page">
+    <div class="page-in">
+      <aside class="prof" id="prof"></aside>
+      <div class="grid-wrap"><div id="statsbox"></div><div class="grid" id="grid"></div></div>
+    </div>
+  </main>
+  <div class="fab" id="fab" hidden><button data-mode="edit"><span class="i-edit"></span>Back to editor</button><button data-mode="stats"><span class="i-chart"></span>Stats</button></div>
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="dh"><h3 id="dtitle">Edit</h3><button class="icon-btn" data-act="close" aria-label="Close panel"><span class="i-x"></span></button></div>
+    <div class="db" id="dbody"></div>
+  </aside>
+  <div class="toast" id="toast" role="status"><span id="tmsg"></span><button id="tbtn" hidden>Undo</button></div>
+</div>
+
