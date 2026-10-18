@@ -8,6 +8,12 @@ const DATA_DIR = __DIR__ . '/data';
 const UPLOAD_DIR = __DIR__ . '/uploads';
 const SEED_DIR = __DIR__ . '/seed';
 
+// Refuse to run as a nested copy of the app (for example a stray clone in a subfolder).
+if (is_file(dirname(__DIR__) . '/lib.php') && is_file(dirname(__DIR__) . '/assets/app.js')) {
+    http_response_code(404);
+    exit;
+}
+
 /**
  * First run: copy the starting content out of seed/ into data/ and uploads/.
  * Runtime files are never tracked in Git, so redeploying the code never
