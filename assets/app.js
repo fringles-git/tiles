@@ -247,8 +247,9 @@ function daysLabel(d){const on=d.map(Boolean);if(!on.some(x=>x))return '';if(on.
  return runs.join(', ')}
 function parisNow(){try{const f=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=k=>(f.find(x=>x.type===k)||{}).value;
  return {d:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].indexOf(g('weekday')),m:(+g('hour'))*60+(+g('minute'))}}catch(e){const n=new Date();return {d:(n.getDay()+6)%7,m:n.getHours()*60+n.getMinutes()}}}
+const isAllDay=h=>!!h.allDay||(h.from&&h.from===h.to);
 function openState(h){if(!h.days.some(Boolean))return null;
- if(h.allDay){const {d}=parisNow();if(h.days[d])return {open:true,text:'Disponible maintenant'};
+ if(isAllDay(h)){const {d}=parisNow();if(h.days[d])return {open:true,text:'Disponible maintenant'};
   for(let k=1;k<8;k++){const dd=(d+k)%7;if(h.days[dd])return {open:false,text:'Indisponible aujourd’hui · reprend '+(k===1?'demain':DAYS_LONG[dd])}}return null}
  const a=toMin(h.from),b=toMin(h.to);if(a==null||b==null||b<=a)return null;
  const {d,m}=parisNow();if(h.days[d]&&m>=a&&m<b)return {open:true,text:'Disponible maintenant · jusqu’à '+fmtH(h.to)};
@@ -301,7 +302,7 @@ function profileExtras(p){
  if((p.email||'').trim())rows.push(`<div class="prow"><a href="mailto:${esc(p.email)}">${ic('mail',16)}<span>${esc(p.email)}</span></a><button type="button" class="pcopy" data-copy="${esc(p.email)}" aria-label="Copier l’adresse email">Copier</button></div>`);
  const hrs=p.hours||{};const dl=daysLabel(hrs.days||[]);const st=openState(hrs);
  const closed=DAYS_LONG.filter((x,i)=>!(hrs.days||[])[i]);
- if(dl&&(hrs.allDay||(fmtH(hrs.from)&&fmtH(hrs.to))))rows.push(`<div class="prow hours">${ic('clock',16)}<div><b>${esc(dl)} · ${hrs.allDay?'24h/24':fmtH(hrs.from)+'–'+fmtH(hrs.to)}</b>${hrs.allDay&&closed.length&&closed.length<=2?`<small>Fermé le ${esc(closed.join(' et '))}</small>`:''}${st?`<span class="openst ${st.open?'on':'off'}"><i></i>${esc(st.text)}</span>`:''}${hrs.note?`<small>${esc(hrs.note)}</small>`:''}</div></div>`);
+ if(dl&&(isAllDay(hrs)||(fmtH(hrs.from)&&fmtH(hrs.to))))rows.push(`<div class="prow hours">${ic('clock',16)}<div><b>${esc(dl)} · ${isAllDay(hrs)?'24h/24':fmtH(hrs.from)+'–'+fmtH(hrs.to)}</b>${isAllDay(hrs)&&closed.length&&closed.length<=2?`<small>Fermé le ${esc(closed.join(' et '))}</small>`:''}${st?`<span class="openst ${st.open?'on':'off'}"><i></i>${esc(st.text)}</span>`:''}${hrs.note?`<small>${esc(hrs.note)}</small>`:''}</div></div>`);
  if(rows.length)h+=`<div class="pcard">${rows.join('')}</div>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('plus',16)}Ajouter téléphone, email et horaires</button>`;
  const secs=navSections();
