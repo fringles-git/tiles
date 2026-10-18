@@ -31,7 +31,7 @@ if ($action === 'track') {
             out(['error' => 'Bad id.'], 400);
         }
         $ids = array_column(read_json('page.json', ['tiles' => []])['tiles'] ?? [], 'id');
-        if (!in_array($id, $ids, true) && !in_array($id, ['p-cv', 'p-phone'], true)) {
+        if (!in_array($id, $ids, true) && !in_array($id, ['p-cv', 'p-phone', 'p-mail', 'p-rdv'], true)) {
             out(['error' => 'Unknown block.'], 400);
         }
     } elseif ($type !== 'view') {
@@ -92,7 +92,14 @@ switch ($action) {
             out(['error' => 'The page data is invalid.'], 400);
         }
         unset($page['stats']);
-        with_lock('page', function () use ($page) {
+        $base = $in['base'] ?? null;
+        $rev = with_lock('page', function () use ($page, $base) {
+            $current = read_json('page.json', []);
+            $currentRev = (int) ($current['rev'] ?? 0);
+            if ($currentRev > 0 && (int) $base !== $currentRev) {
+                out(['error' => 'La page a été mise à jour sur le serveur. Recharge l’éditeur avant de continuer.', 'stale' => true], 409);
+            }
+            $page['rev'] = $currentRev + 1;
             if (!is_dir(DATA_DIR . '/backups')) {
                 mkdir(DATA_DIR . '/backups', 0755, true);
             }
@@ -110,8 +117,9 @@ switch ($action) {
             if (!write_json('page.json', $page)) {
                 out(['error' => 'The server could not write the page file.'], 500);
             }
+            return $page['rev'];
         });
-        out([]);
+        out(['rev' => $rev]);
 
     case 'upload':
         $f = $_FILES['file'] ?? null;

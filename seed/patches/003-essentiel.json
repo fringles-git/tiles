@@ -1,0 +1,49 @@
+{
+ "profile": {
+  "statusOn": false,
+  "tags": "Développeur, Designer, Photographe",
+  "booking": ""
+ },
+ "removeTiles": [
+  "093ydh5",
+  "xzjosnn",
+  "cv2026a",
+  "68aan28",
+  "lf8oufv",
+  "wdr127r",
+  "8sfzed8",
+  "nawn0wr",
+  "ymr4ygt",
+  "7yolc4d",
+  "sqmkjna",
+  "dknrsyv",
+  "raie24f",
+  "nuuilnu",
+  "ktvsvau",
+  "kzu78kv"
+ ],
+ "tiles": {
+  "4mqulb4": {
+   "size": "w"
+  },
+  "n3q4pwv": {
+   "data": {
+    "title": "Photo · car spotting"
+   }
+  },
+  "dsu8mgy": {
+   "data": {
+    "items": "Développeur & designer web | Indépendant | Sites, apps, identités visuelles\nPhotographe & vidéaste | Événements et portraits | Tournage, montage, retouche\nLogistique | SOLODI, Mondial Relay, STEF, Déménageurs Aubois & Bretons | 2017 – 2025 · 4 mois\nRestauration | Flunch | 2024 – 2025 · 1 semaine\nCommerce & distribution | Thiriet, Action, Hugo Boss, STEF | 2022 – 2024 · 6 mois\nIndustrie & production | CEMOI, Serenity Médical | 2022 – 2024 · 4 mois\nAccueil & service client | 3Media (support EDF), Basic-Fit | 2020 – 2022 · 10 mois"
+   }
+  },
+  "dqbsdn1": {
+   "size": "l"
+  },
+  "gc7otp1": {
+   "size": "w"
+  },
+  "5h9duug": {
+   "size": "s"
+  }
+ }
+}

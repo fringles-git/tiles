@@ -272,8 +272,8 @@ function setSaveState(t,cls){const el=document.getElementById('savestate');if(el
 function save(){if(PUBLIC)return;dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
 function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Saving…','busy');
  const page=Object.assign({},S);delete page.stats;
- api('save',{page}).then(()=>{saving=false;setSaveState(dirty?'Unsaved changes':'Saved','ok');if(dirty)flush()})
- .catch(err=>{saving=false;dirty=true;setSaveState('Not saved','err');toast('Not saved: '+err.message+'. Retrying in 10 s.');clearTimeout(saveT);saveT=setTimeout(flush,10000)})}
+ api('save',{page,base:S.rev||0}).then(j=>{S.rev=j.rev;saving=false;setSaveState(dirty?'Unsaved changes':'Saved','ok');if(dirty)flush()})
+ .catch(err=>{saving=false;dirty=true;setSaveState('Not saved','err');if(/mise à jour sur le serveur/.test(err.message)){toast(err.message);return}toast('Not saved: '+err.message+'. Retrying in 10 s.');clearTimeout(saveT);saveT=setTimeout(flush,10000)})}
 window.addEventListener('beforeunload',e=>{if(dirty||saving){e.preventDefault();e.returnValue=''}});
 
 /* ---------- Helpers ---------- */
@@ -291,23 +291,29 @@ function applyTheme(){
 }
 function renderProfile(){
  const p=S.profile;const ini=(p.name||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
- prof.innerHTML=`<button class="avatar" type="button" data-act="profile" aria-label="Profile photo" ${ui.mode!=='edit'?'tabindex="-1"':''}>${isImg(p.avatar)?`<img src="${p.avatar}" alt="">`:esc(ini)}</button>
- <h1>${esc(p.name)}</h1>${p.role?`<p class="role">${esc(p.role)}</p>`:''}${p.bio?`<p class="bio">${esc(p.bio)}</p>`:''}
- <div class="chips">${p.location?`<span class="chip">${ic('pin',14)}${esc(p.location)}</span>`:''}${p.statusOn&&p.status?`<span class="chip live"><i></i>${esc(p.status)}</span>`:''}</div>
+ const tags=profileTags(p);const hasHours=!!daysLabel((p.hours||{}).days||[]);
+ prof.innerHTML=`<div class="phead"><button class="avatar" type="button" data-act="profile" aria-label="Profile photo" ${ui.mode!=='edit'?'tabindex="-1"':''}>${isImg(p.avatar)?`<img src="${p.avatar}" alt="">`:esc(ini)}</button>
+ <div class="pid"><h1>${esc(p.name)}</h1>${tags.length?`<div class="ptags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}${p.location?`<span class="ploc">${ic('pin',13)}${esc(p.location)}</span>`:''}</div></div>
+ ${p.bio?`<p class="bio">${esc(p.bio)}</p>`:''}
+ ${p.statusOn&&p.status&&!hasHours?`<div class="chips"><span class="chip live"><i></i>${esc(p.status)}</span></div>`:''}
  ${profileExtras(p)}
  ${ui.mode==='edit'?`<div><button class="btn sm" data-act="profile">${ic('edit',14)}Edit profile</button></div>`:''}`;
  renderJumpbar();
 }
+function profileTags(p){const raw=(p.tags!=null&&String(p.tags).trim()!=='')?String(p.tags):String(p.role||'');
+ return raw.split(/,|&|\s+et\s+/).map(x=>x.trim()).filter(Boolean).map(x=>x[0].toUpperCase()+x.slice(1))}
 function profileExtras(p){
  let h='';const edit=ui.mode==='edit';
  if(isDoc(p.cv))h+=`<a class="pcv" href="${esc(p.cv)}" target="_blank" rel="noopener" download="CV-${esc((p.name||'CV').replace(/\s+/g,'-'))}.pdf" data-pclick="p-cv">${ic('doc',18)}<span><b>Télécharger mon CV</b><small>PDF · ${esc(p.cvNote||'1 page')}</small></span>${ic('upload',16).replace('<path','<path transform="rotate(180 12 12)"')}</a>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('doc',16)}Ajouter mon CV (PDF)</button>`;
- const rows=[];
- if((p.phone||'').trim())rows.push(`<div class="prow"><a href="${esc(telHref(p.phone))}" data-track-profile="phone">${ic('phone',16)}<span>${esc(p.phone)}</span></a><button type="button" class="pcopy" data-copy="${esc(p.phone)}" aria-label="Copier le numéro">Copier</button></div>`);
- if((p.email||'').trim())rows.push(`<div class="prow"><a href="mailto:${esc(p.email)}">${ic('mail',16)}<span>${esc(p.email)}</span></a><button type="button" class="pcopy" data-copy="${esc(p.email)}" aria-label="Copier l’adresse email">Copier</button></div>`);
- const hrs=p.hours||{};const dl=daysLabel(hrs.days||[]);const st=openState(hrs);
+ const rows=[];const hrs=p.hours||{};const dl=daysLabel(hrs.days||[]);const st=openState(hrs);
+ const canCall=!st||st.open;
  const closed=DAYS_LONG.filter((x,i)=>!(hrs.days||[])[i]);
- if(dl&&(isAllDay(hrs)||(fmtH(hrs.from)&&fmtH(hrs.to))))rows.push(`<div class="prow hours">${ic('clock',16)}<div><b>${esc(dl)} · ${isAllDay(hrs)?'24h/24':fmtH(hrs.from)+'–'+fmtH(hrs.to)}</b>${isAllDay(hrs)&&closed.length&&closed.length<=2?`<small>Fermé le ${esc(closed.join(' et '))}</small>`:''}${st?`<span class="openst ${st.open?'on':'off'}"><i></i>${esc(st.text)}</span>`:''}${hrs.note?`<small>${esc(hrs.note)}</small>`:''}</div></div>`);
+ if(dl&&(isAllDay(hrs)||(fmtH(hrs.from)&&fmtH(hrs.to))))rows.push(`<div class="pstat ${st&&!st.open?'off':'on'}"><span class="openst ${st&&!st.open?'off':'on'}"><i></i>${esc(st?st.text:'Disponible')}</span><small>${esc(dl)} · ${isAllDay(hrs)?'24h/24':fmtH(hrs.from)+'–'+fmtH(hrs.to)}${isAllDay(hrs)&&closed.length&&closed.length<=2?' · fermé le '+esc(closed.join(' et ')):''}${hrs.note?' · '+esc(hrs.note):''}</small></div>`);
+ if((p.phone||'').trim())rows.push(`<div class="prow"><span class="pv">${ic('phone',16)}<span>${esc(p.phone)}</span></span><span class="pact">${canCall?`<a class="ib pri" href="${esc(telHref(p.phone))}" aria-label="Appeler" title="Appeler">${ic('phone',16)}</a>`:''}<button type="button" class="ib" data-copy="${esc(p.phone)}" aria-label="Copier le numéro" title="Copier">${ic('copy',15)}</button></span></div>`);
+ if((p.email||'').trim())rows.push(`<div class="prow"><span class="pv">${ic('mail',16)}<span>${esc(p.email)}</span></span><span class="pact"><a class="ib" href="mailto:${esc(p.email)}" data-pclick="p-mail" aria-label="Envoyer un email" title="Envoyer un email">${ic('ext',15)}</a><button type="button" class="ib" data-copy="${esc(p.email)}" aria-label="Copier l’adresse email" title="Copier">${ic('copy',15)}</button></span></div>`);
+ const book=safeUrl(p.booking)||((p.email||'').trim()?'mailto:'+p.email+'?subject='+encodeURIComponent('Demande de rendez-vous'):'');
+ if(rows.length&&book)rows.push(`<a class="pcta" href="${esc(book)}"${/^https?:/.test(book)?' target="_blank" rel="noopener"':''} data-pclick="p-rdv">${ic('cal',16)}Prendre rendez-vous</a>`);
  if(rows.length)h+=`<div class="pcard">${rows.join('')}</div>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('plus',16)}Ajouter téléphone, email et horaires</button>`;
  const secs=navSections();
@@ -334,6 +340,7 @@ document.addEventListener('click',e=>{
  if(e.target.closest('#prof a[href^="tel:"]')&&PUBLIC)beacon({type:'click',id:'p-phone'});
  const cp=e.target.closest('#prof [data-copy]');if(cp){e.preventDefault();copyText(cp.dataset.copy,cp.previousElementSibling&&cp.previousElementSibling.querySelector('span'));return}
 });
+const FLOW=['experience','education','skills','text','now','faith','testimonial','instrument','contact'];
 function sizeIcon(cells){return `<span class="sz-ico">${cells.map(c=>`<i class="${c?'f':''}"></i>`).join('')}</span>`}
 function toolbar(t){
  const def=T[t.type];const sizes=def.sizes?[]:SIZES;
@@ -347,7 +354,7 @@ function tileHTML(t){
  const inter=typeof def.interactive==='function'?def.interactive(t.data,t):def.interactive;
  const asLink=mode!=='edit'&&href&&!inter;
  const tag=asLink?'a':'div';
- const cls=['tile','sz-'+t.size,'ty-'+t.type,def.bleed?'bleed':'',def.bare?'bare':'',t.spot?'spot':'',ui.sel===t.id&&mode==='edit'?'is-sel':'',flag&&mode==='edit'?'dim':''].filter(Boolean).join(' ');
+ const cls=['tile','sz-'+t.size,'ty-'+t.type,FLOW.includes(t.type)?'flow':'',def.bleed?'bleed':'',def.bare?'bare':'',t.spot?'spot':'',ui.sel===t.id&&mode==='edit'?'is-sel':'',flag&&mode==='edit'?'dim':''].filter(Boolean).join(' ');
  const c=(S.stats.clicks[t.id]||0);
  return `<article class="${cls}" data-id="${t.id}"${mode==='edit'?' draggable="true" tabindex="0"':''}${tint?` style="--tint:${tint}"`:''}><${tag} class="ti"${asLink?` href="${esc(href)}" target="_blank" rel="noopener" data-track`:''}>${def.render(t.data,t)}</${tag}>${flag&&mode==='edit'?`<span class="flag">${flag}</span>`:''}${mode==='stats'&&t.type!=='section'?`<span class="cnt">${c} clics</span>`:''}${mode==='edit'?toolbar(t):''}</article>`;
 }
@@ -421,9 +428,9 @@ function openAdd(){
 }
 function openProfile(){
  const p=S.profile;
- openDrawer('Profile',`<div id="prof-form" style="display:flex;flex-direction:column;gap:14px">${fieldHTML(F('avatar','Photo','image'),p.avatar,'p')}${[F('name','Name'),F('role','Headline'),F('bio','Bio','area'),F('location','Location'),F('status','Status')].map(f=>fieldHTML(f,p[f.k],'p')).join('')}<label class="chk"><input type="checkbox" id="p-statusOn" data-pk="statusOn"${p.statusOn?' checked':''}>Show status badge</label>
+ openDrawer('Profile',`<div id="prof-form" style="display:flex;flex-direction:column;gap:14px">${fieldHTML(F('avatar','Photo','image'),p.avatar,'p')}${[F('name','Name'),F('role','Headline (titre de la page)'),F('tags','Tags à côté de la photo (séparés par des virgules)'),F('bio','Bio','area'),F('location','Location'),F('status','Status (affiché seulement sans horaires)')].map(f=>fieldHTML(f,f.k==='tags'?(p.tags!=null?p.tags:profileTags(p).join(', ')):p[f.k],'p')).join('')}<label class="chk"><input type="checkbox" id="p-statusOn" data-pk="statusOn"${p.statusOn?' checked':''}>Show status badge</label>
  <div class="grp"><h4>CV</h4>${fieldHTML(F('cv','CV (PDF)','pdf'),p.cv,'p')}${fieldHTML(F('cvNote','Détail sous le bouton'),p.cvNote||'1 page','p')}</div>
- <div class="grp"><h4>Coordonnées</h4>${fieldHTML(F('phone','Téléphone','tel'),p.phone,'p')}${fieldHTML(F('email','Email','email'),p.email,'p')}<span class="hint">Affichés dans la colonne de gauche avec un bouton Copier. Laisse vide pour masquer.</span></div>
+ <div class="grp"><h4>Coordonnées</h4>${fieldHTML(F('phone','Téléphone','tel'),p.phone,'p')}${fieldHTML(F('email','Email','email'),p.email,'p')}${fieldHTML(F('booking','Lien de prise de rendez-vous (Calendly, Cal.com…)','url'),p.booking||'','p')}<span class="hint">Le bouton Appeler n’apparaît que pendant tes horaires. Sans lien de rendez-vous, « Prendre rendez-vous » ouvre un email.</span></div>
  <div class="grp"><h4>Horaires de disponibilité</h4>
   <div class="fld"><span class="lb">Jours</span><div class="sizes days">${DAYS.map((d,i)=>`<button type="button" data-day="${i}" aria-pressed="${!!p.hours.days[i]}">${d}</button>`).join('')}</div></div>
   <label class="chk"><input type="checkbox" id="p-h-allday" data-hk="allDay"${p.hours.allDay?' checked':''}>24h/24 les jours cochés</label>

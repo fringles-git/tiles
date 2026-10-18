@@ -62,6 +62,10 @@ if (is_file(dirname(__DIR__) . '/lib.php') && is_file(dirname(__DIR__) . '/asset
                         if (isset($patch['profile']) && is_array($patch['profile'])) {
                             $page['profile'] = array_replace_recursive($page['profile'] ?? [], $patch['profile']);
                         }
+                        $remove = array_map('strval', (array) ($patch['removeTiles'] ?? []));
+                        if ($remove) {
+                            $page['tiles'] = array_values(array_filter($page['tiles'], fn($tl) => !in_array((string) ($tl['id'] ?? ''), $remove, true)));
+                        }
                         $existing = array_column($page['tiles'], 'id');
                         foreach (($patch['addTiles'] ?? []) as $add) {
                             $tile = $add['tile'] ?? null;
@@ -82,6 +86,7 @@ if (is_file(dirname(__DIR__) . '/lib.php') && is_file(dirname(__DIR__) . '/asset
                     }
                     $done[] = basename($f);
                 }
+                $page['rev'] = (int) ($page['rev'] ?? 0) + 1;
                 foreach (glob(SEED_DIR . '/uploads/*') ?: [] as $file) {
                     if (!is_file(UPLOAD_DIR . '/' . basename($file))) {
                         @copy($file, UPLOAD_DIR . '/' . basename($file));
