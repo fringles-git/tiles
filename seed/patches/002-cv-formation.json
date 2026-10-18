@@ -1,0 +1,60 @@
+{
+ "profile": {
+  "cv": "uploads/cv-brandon-lazarre.pdf",
+  "cvNote": "1 page · mis à jour en 2026"
+ },
+ "tiles": {
+  "dsu8mgy": {
+   "data": {
+    "title": "Expériences professionnelles",
+    "items": "Logistique | SOLODI, Mondial Relay, STEF, Déménageurs Aubois & Bretons | 2017 – 2025 · 4 mois\nRestauration | Flunch | 2024 – 2025 · 1 semaine\nCommerce & distribution | Thiriet, Action, Hugo Boss, STEF | 2022 – 2024 · 6 mois\nIndustrie & production | CEMOI, Serenity Médical | 2022 – 2024 · 4 mois\nAccueil & service client | 3Media (support EDF), Basic-Fit | 2020 – 2022 · 10 mois"
+   }
+  },
+  "6p4sx89": {
+   "data": {
+    "value": "13",
+    "label": "entreprises : logistique, commerce, industrie, accueil"
+   }
+  }
+ },
+ "addTiles": [
+  {
+   "after": "6p4sx89",
+   "tile": {
+    "id": "edu2026a",
+    "type": "education",
+    "size": "l",
+    "data": {
+     "title": "Formation",
+     "items": "Titre pro Développeur Web & Web Mobile (Bac+2) | Greta de Troyes | 2019 – 2020\nDiplôme de compétence en langue | Anglais, niveau B2+ | 2019 – 2020\nDUT Métiers du Multimédia et de l’Internet | IUT de Troyes · 2 semestres | 2018\nLicence Informatique | Université de Bourgogne, Dijon · 2 semestres | 2016 – 2017\nBac S-SI, mention européenne | Lycée Denis Diderot, Langres | 2015 – 2016"
+    }
+   }
+  },
+  {
+   "after": "edu2026a",
+   "tile": {
+    "id": "lang2026a",
+    "type": "skills",
+    "size": "w",
+    "data": {
+     "title": "Langues",
+     "items": "Anglais · B2+ certifié, Espagnol · notions"
+    }
+   }
+  },
+  {
+   "after": "lang2026a",
+   "tile": {
+    "id": "cv2026a",
+    "type": "cv",
+    "size": "w",
+    "data": {
+     "title": "Mon CV",
+     "updated": "PDF · 1 page",
+     "file": "uploads/cv-brandon-lazarre.pdf",
+     "url": ""
+    }
+   }
+  }
+ ]
+}

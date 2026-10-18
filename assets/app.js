@@ -5,6 +5,8 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const uid=()=>Math.random().toString(36).slice(2,9);
 const ytId=u=>{const m=String(u||'').match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''};
 const spotEmbed=u=>{const m=String(u||'').match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(playlist|album|track|artist|episode|show)\/([A-Za-z0-9]+)/);return m?`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator`:''};
+const isDoc=u=>typeof u==='string'&&/^uploads\/[A-Za-z0-9_-]+\.pdf$/.test(u);
+const safeHref=u=>isDoc(u)?u:safeUrl(u);
 const domain=u=>{try{return new URL(u).hostname.replace(/^www\./,'')}catch(e){return u||''}};
 const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 const col=c=>/^#[0-9a-f]{3,8}$/i.test(c||'')?c:'';
@@ -81,9 +83,9 @@ const T={
   fields:[F('title','Title'),F('items','Skills (comma separated)','area')],
   def:{title:'Skills',items:'Design, Development'},
   render:d=>`<span class="eyebrow">${esc(d.title)}</span><div class="cl">${list(d.items).map(s=>`<span>${esc(s)}</span>`).join('')}</div>`},
- cv:{label:'Résumé',cat:'Work',hint:'Link to your CV',size:'s',
-  fields:[F('title','Title'),F('updated','Last updated'),F('url','CV link (PDF or page)','url')],
-  def:{title:'Résumé',updated:'Updated Oct 2026',url:''},href:d=>d.url,
+ cv:{label:'Résumé',cat:'Work',hint:'Upload your CV as a PDF',size:'s',
+  fields:[F('title','Title'),F('updated','Detail'),F('file','CV file (PDF)','pdf'),F('url','Or a link to your CV','url')],
+  def:{title:'Mon CV',updated:'PDF',file:'',url:''},href:d=>isDoc(d.file)?d.file:d.url,
   render:d=>`<div class="doc"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="row"><div class="grow"><b class="t-title">${esc(d.title)}</b><br><small class="muted">${esc(d.updated)}</small></div>${ic('doc',20)}</div>`},
  stat:{label:'Big number',cat:'Work',hint:'A figure that sums you up',size:'s',
   fields:[F('value','Number'),F('label','Label'),F('color','Tint','color')],
@@ -237,7 +239,8 @@ const ui={mode:PUBLIC?'preview':'edit',sel:null,drawer:null};
  if(p.email===undefined){const ct=(S.tiles||[]).find(t=>t.type==='contact'&&t.data&&t.data.email);p.email=ct?ct.data.email:''}
  if(p.phone===undefined)p.phone='';
  if(!p.hours||!Array.isArray(p.hours.days))p.hours={days:[0,0,0,0,0,0,0],from:'09:00',to:'18:00',note:''};
- if(p.showNav===undefined)p.showNav=true;})();
+ if(p.showNav===undefined)p.showNav=true;
+ if(p.cv===undefined)p.cv='';})();
 const DAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 const DAYS_LONG=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const toMin=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1])*60+(+m[2]):null};
@@ -297,6 +300,8 @@ function renderProfile(){
 }
 function profileExtras(p){
  let h='';const edit=ui.mode==='edit';
+ if(isDoc(p.cv))h+=`<a class="pcv" href="${esc(p.cv)}" target="_blank" rel="noopener" download="CV-${esc((p.name||'CV').replace(/\s+/g,'-'))}.pdf" data-pclick="p-cv">${ic('doc',18)}<span><b>Télécharger mon CV</b><small>PDF · ${esc(p.cvNote||'1 page')}</small></span>${ic('upload',16).replace('<path','<path transform="rotate(180 12 12)"')}</a>`;
+ else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('doc',16)}Ajouter mon CV (PDF)</button>`;
  const rows=[];
  if((p.phone||'').trim())rows.push(`<div class="prow"><a href="${esc(telHref(p.phone))}" data-track-profile="phone">${ic('phone',16)}<span>${esc(p.phone)}</span></a><button type="button" class="pcopy" data-copy="${esc(p.phone)}" aria-label="Copier le numéro">Copier</button></div>`);
  if((p.email||'').trim())rows.push(`<div class="prow"><a href="mailto:${esc(p.email)}">${ic('mail',16)}<span>${esc(p.email)}</span></a><button type="button" class="pcopy" data-copy="${esc(p.email)}" aria-label="Copier l’adresse email">Copier</button></div>`);
@@ -325,6 +330,8 @@ setInterval(()=>{if(!ui.drawer||ui.drawer!=='profile')renderProfile()},60000);
 document.addEventListener('click',e=>{
  const j=e.target.closest('[data-jump]');
  if(j){e.preventDefault();const el=grid.querySelector(`[data-id="${j.dataset.jump}"]`);if(el){const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});activeId='';setTimeout(markActive,reduce?0:600)}return}
+ const pc=e.target.closest('#prof [data-pclick]');if(pc&&PUBLIC)beacon({type:'click',id:pc.dataset.pclick});
+ if(e.target.closest('#prof a[href^="tel:"]')&&PUBLIC)beacon({type:'click',id:'p-phone'});
  const cp=e.target.closest('#prof [data-copy]');if(cp){e.preventDefault();copyText(cp.dataset.copy,cp.previousElementSibling&&cp.previousElementSibling.querySelector('span'));return}
 });
 function sizeIcon(cells){return `<span class="sz-ico">${cells.map(c=>`<i class="${c?'f':''}"></i>`).join('')}</span>`}
@@ -334,7 +341,7 @@ function toolbar(t){
 }
 function tileHTML(t){
  const def=T[t.type];if(!def)return '';
- const mode=ui.mode;const href=def.href?safeUrl(def.href(t.data)):'';
+ const mode=ui.mode;const href=def.href?safeHref(def.href(t.data)):'';
  const tint=def.tint?def.tint(t.data):'';
  const flag=t.hidden?'Hidden':(!inWindow(t)?'Scheduled':'');
  const inter=typeof def.interactive==='function'?def.interactive(t.data,t):def.interactive;
@@ -352,10 +359,10 @@ function statsHTML(){
  const last=pts[pts.length-1];
  const totalClicks=Object.values(st.clicks).reduce((a,b)=>a+b,0);
  const ctr=st.views?Math.round(totalClicks/st.views*100):0;
- const tops=S.tiles.filter(t=>t.type!=='section').map(t=>[t,st.clicks[t.id]||0]).sort((a,b)=>b[1]-a[1]).slice(0,6);
+ const tops=S.tiles.filter(t=>t.type!=='section').map(t=>[t,st.clicks[t.id]||0]).concat([[{type:'x',data:{title:'Téléphone (appel)'}},st.clicks['p-phone']||0]]).sort((a,b)=>b[1]-a[1]).slice(0,6);
  const tmax=Math.max(1,...tops.map(x=>x[1]));
  return `<section class="stats" aria-label="Page statistics"><div class="stats-head"><h2>14 derniers jours</h2>${st.sample?'<span class="samp">Inclut des chiffres d’exemple</span>':''}<button class="btn sm" data-act="reset-stats">Réinitialiser</button></div>
- <div class="kpis"><div class="kpi"><small>Vues</small><b>${st.views.toLocaleString('en-GB')}</b></div><div class="kpi"><small>Clics</small><b>${totalClicks.toLocaleString('en-GB')}</b></div><div class="kpi"><small>Taux de clic</small><b>${ctr}%</b></div><div class="kpi"><small>Inscriptions email</small><b>${st.leads.length}</b></div></div>
+ <div class="kpis"><div class="kpi"><small>Vues</small><b>${st.views.toLocaleString('en-GB')}</b></div><div class="kpi"><small>Clics</small><b>${totalClicks.toLocaleString('en-GB')}</b></div><div class="kpi"><small>Taux de clic</small><b>${ctr}%</b></div><div class="kpi"><small>CV téléchargé</small><b>${(st.clicks['p-cv']||0).toLocaleString('fr-FR')}</b></div></div>
  <svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Vues par jour, 14 derniers jours"><line class="gd" x1="0" x2="${W}" y1="${H-14}" y2="${H-14}"/><path class="ar" d="${area}"/><path class="ln" d="${path}" vector-effect="non-scaling-stroke"/><circle class="dt" cx="${last[0]}" cy="${last[1]}" r="4" vector-effect="non-scaling-stroke"/></svg>
  <div class="tops">${tops.map(([t,v])=>`<div class="top"><span>${esc(tileName(t))}</span><span class="barx"><i style="width:${(v/tmax*100).toFixed(1)}%"></i></span><b>${v}</b></div>`).join('')}</div>
  ${st.leads.length?`<div><span class="eyebrow">Inscriptions</span><div class="leads" style="margin-top:6px">${st.leads.slice(-12).map(l=>`<span>${esc(l)}</span>`).join('')}</div></div>`:''}
@@ -393,6 +400,7 @@ function fieldHTML(f,val,prefix){
  if(f.t==='select')return `<div class="fld"><label for="${id}">${esc(f.l)}</label><select id="${id}" data-k="${f.k}">${f.o.map(([v,l])=>`<option value="${esc(v)}"${v===val?' selected':''}>${esc(l)}</option>`).join('')}</select></div>`;
  if(f.t==='color')return `<div class="fld"><label for="${id}">${esc(f.l)}</label><div class="row"><input id="${id}" type="color" data-k="${f.k}" value="${col(val)||'#0B7A75'}" style="width:44px;height:36px;border:0;background:none;padding:0"><button type="button" class="btn sm ghost" data-clear="${f.k}">Use accent</button></div></div>`;
  if(f.t==='image')return `<div class="fld"><span class="lb">${esc(f.l)}</span><div class="drop-img"><div class="thumb" style="${isImg(val)?`background-image:url('${val}')`:''}"></div><span class="btn sm file-btn">${ic('upload',14)}Upload<input id="${id}" type="file" accept="image/*" data-img="${f.k}" aria-label="${esc(f.l)}"></span>${isImg(val)?`<button type="button" class="btn sm ghost" data-clear="${f.k}">Remove</button>`:''}</div><span class="hint">Images are resized to 1200px and stored with the page.</span></div>`;
+ if(f.t==='pdf'){const ok=isDoc(val);return `<div class="fld"><span class="lb">${esc(f.l)}</span><div class="drop-img"><div class="thumb doc-thumb">${ic('doc',22)}</div><span class="btn sm file-btn">${ic('upload',14)}${ok?'Replace':'Upload'} PDF<input id="${id}" type="file" accept="application/pdf,.pdf" data-pdf="${f.k}" aria-label="${esc(f.l)}"></span>${ok?`<a class="btn sm ghost" href="${esc(val)}" target="_blank" rel="noopener">Open</a><button type="button" class="btn sm ghost" data-clear="${f.k}">Remove</button>`:''}</div><span class="hint">${ok?'A PDF is online.':'PDF up to 15 MB.'}</span></div>`}
  if(f.t==='images'){const im=(val||[]).filter(isImg);return `<div class="fld"><span class="lb">${esc(f.l)}</span><div class="thumbs">${im.map((s,i)=>`<div><div class="thumb" style="background-image:url('${s}')"></div><button type="button" data-rmimg="${i}" aria-label="Remove photo">${ic('x',12)}</button></div>`).join('')}</div><span class="btn sm file-btn" style="align-self:flex-start">${ic('upload',14)}Add photos<input id="${id}" type="file" accept="image/*" multiple data-imgs="${f.k}" aria-label="${esc(f.l)}"></span></div>`}
  const type=f.t==='url'?'url':f.t==='email'?'email':f.t==='date'?'date':f.t==='tel'?'tel':'text';
  return `<div class="fld"><label for="${id}">${esc(f.l)}</label><input id="${id}" type="${type}" data-k="${f.k}" value="${esc(val)}"${type==='url'?' placeholder="https://"':''}></div>`;
@@ -414,6 +422,7 @@ function openAdd(){
 function openProfile(){
  const p=S.profile;
  openDrawer('Profile',`<div id="prof-form" style="display:flex;flex-direction:column;gap:14px">${fieldHTML(F('avatar','Photo','image'),p.avatar,'p')}${[F('name','Name'),F('role','Headline'),F('bio','Bio','area'),F('location','Location'),F('status','Status')].map(f=>fieldHTML(f,p[f.k],'p')).join('')}<label class="chk"><input type="checkbox" id="p-statusOn" data-pk="statusOn"${p.statusOn?' checked':''}>Show status badge</label>
+ <div class="grp"><h4>CV</h4>${fieldHTML(F('cv','CV (PDF)','pdf'),p.cv,'p')}${fieldHTML(F('cvNote','Détail sous le bouton'),p.cvNote||'1 page','p')}</div>
  <div class="grp"><h4>Coordonnées</h4>${fieldHTML(F('phone','Téléphone','tel'),p.phone,'p')}${fieldHTML(F('email','Email','email'),p.email,'p')}<span class="hint">Affichés dans la colonne de gauche avec un bouton Copier. Laisse vide pour masquer.</span></div>
  <div class="grp"><h4>Horaires de disponibilité</h4>
   <div class="fld"><span class="lb">Jours</span><div class="sizes days">${DAYS.map((d,i)=>`<button type="button" data-day="${i}" aria-pressed="${!!p.hours.days[i]}">${d}</button>`).join('')}</div></div>
@@ -459,6 +468,11 @@ dbody.addEventListener('input',async e=>{
 });
 dbody.addEventListener('change',async e=>{
  const el=e.target;
+ if(el.dataset.pdf&&el.files&&el.files[0]){
+  const fd=new FormData();fd.append('file',el.files[0]);toast('Uploading PDF…');
+  try{const j=await api('upload-doc',fd,true);if(ui.drawer==='profile'){S.profile[el.dataset.pdf]=j.url;renderProfile();openProfile()}else{const t=byId(ui.sel);t.data[el.dataset.pdf]=j.url;renderGrid();openTile(t.id)}save();toast('PDF uploaded')}
+  catch(err){toast('Upload failed: '+err.message)}
+  return}
  if(el.dataset.img&&el.files&&el.files[0]){
   try{const url=await readImage(el.files[0],el.dataset.img==='avatar'?600:1200);
    if(ui.drawer==='profile'){S.profile.avatar=url;renderProfile();openProfile()}else{const t=byId(ui.sel);t.data[el.dataset.img]=url;renderGrid();openTile(t.id)}save()}catch(err){toast('Upload failed: '+(err&&err.message||'not an image'))}
@@ -475,7 +489,7 @@ dbody.addEventListener('click',e=>{
  if(b.dataset.addtype){addTile(b.dataset.addtype);return}
  if(b.dataset.day!=null){const i=+b.dataset.day;S.profile.hours.days[i]=S.profile.hours.days[i]?0:1;b.setAttribute('aria-pressed',!!S.profile.hours.days[i]);renderProfile();save();return}
  if(b.dataset.size){const t=byId(ui.sel);t.size=b.dataset.size;$$('[data-size]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));renderGrid();save();return}
- if(b.dataset.clear){if(ui.drawer==='profile'){S.profile.avatar='';renderProfile();openProfile()}else{const t=byId(ui.sel);t.data[b.dataset.clear]='';renderGrid();openTile(t.id)}save();return}
+ if(b.dataset.clear){if(ui.drawer==='profile'){S.profile[b.dataset.clear]='';renderProfile();openProfile()}else{const t=byId(ui.sel);t.data[b.dataset.clear]='';renderGrid();openTile(t.id)}save();return}
  if(b.dataset.rmimg!=null){const t=byId(ui.sel);const k=T[t.type].fields.find(f=>f.t==='images').k;t.data[k].splice(+b.dataset.rmimg,1);renderGrid();openTile(t.id);save();return}
  if(b.dataset.tact==='dup'){dupTile(ui.sel);return}
  if(b.dataset.tact==='del'){delTile(ui.sel);return}

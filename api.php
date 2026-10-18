@@ -27,11 +27,11 @@ if ($action === 'track') {
     $type = is_array($in) ? (string) ($in['type'] ?? '') : '';
     $id = is_array($in) ? (string) ($in['id'] ?? '') : '';
     if ($type === 'click') {
-        if (!preg_match('/^[a-z0-9]{1,24}$/', $id)) {
+        if (!preg_match('/^[a-z0-9-]{1,24}$/', $id)) {
             out(['error' => 'Bad id.'], 400);
         }
         $ids = array_column(read_json('page.json', ['tiles' => []])['tiles'] ?? [], 'id');
-        if (!in_array($id, $ids, true)) {
+        if (!in_array($id, $ids, true) && !in_array($id, ['p-cv', 'p-phone'], true)) {
             out(['error' => 'Unknown block.'], 400);
         }
     } elseif ($type !== 'view') {
@@ -163,6 +163,27 @@ switch ($action) {
             : imagejpeg($img, UPLOAD_DIR . '/' . $name, 84);
         if (!$ok) {
             out(['error' => 'The server could not save the image.'], 500);
+        }
+        out(['url' => 'uploads/' . $name]);
+
+    case 'upload-doc':
+        $f = $_FILES['file'] ?? null;
+        if (!$f || ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file($f['tmp_name'])) {
+            out(['error' => 'The upload did not arrive.'], 400);
+        }
+        if ($f['size'] > 15 * 1024 * 1024) {
+            out(['error' => 'The PDF is larger than 15 MB.'], 400);
+        }
+        $head = (string) file_get_contents($f['tmp_name'], false, null, 0, 5);
+        if ($head !== '%PDF-') {
+            out(['error' => 'That file is not a PDF.'], 400);
+        }
+        if (!is_dir(UPLOAD_DIR)) {
+            mkdir(UPLOAD_DIR, 0755, true);
+        }
+        $name = 'doc-' . bin2hex(random_bytes(8)) . '.pdf';
+        if (!move_uploaded_file($f['tmp_name'], UPLOAD_DIR . '/' . $name)) {
+            out(['error' => 'The server could not save the PDF.'], 500);
         }
         out(['url' => 'uploads/' . $name]);
 

@@ -62,6 +62,16 @@ if (is_file(dirname(__DIR__) . '/lib.php') && is_file(dirname(__DIR__) . '/asset
                         if (isset($patch['profile']) && is_array($patch['profile'])) {
                             $page['profile'] = array_replace_recursive($page['profile'] ?? [], $patch['profile']);
                         }
+                        $existing = array_column($page['tiles'], 'id');
+                        foreach (($patch['addTiles'] ?? []) as $add) {
+                            $tile = $add['tile'] ?? null;
+                            if (!is_array($tile) || empty($tile['id']) || in_array($tile['id'], $existing, true)) {
+                                continue;
+                            }
+                            $pos = array_search($add['after'] ?? '', array_column($page['tiles'], 'id'), true);
+                            array_splice($page['tiles'], $pos === false ? count($page['tiles']) : $pos + 1, 0, [$tile]);
+                            $existing[] = $tile['id'];
+                        }
                         foreach (($patch['tiles'] ?? []) as $id => $changes) {
                             foreach ($page['tiles'] as $i => $tile) {
                                 if (($tile['id'] ?? '') === $id && is_array($changes)) {
@@ -71,6 +81,11 @@ if (is_file(dirname(__DIR__) . '/lib.php') && is_file(dirname(__DIR__) . '/asset
                         }
                     }
                     $done[] = basename($f);
+                }
+                foreach (glob(SEED_DIR . '/uploads/*') ?: [] as $file) {
+                    if (!is_file(UPLOAD_DIR . '/' . basename($file))) {
+                        @copy($file, UPLOAD_DIR . '/' . basename($file));
+                    }
                 }
                 $tmp = DATA_DIR . '/page.json.tmp' . bin2hex(random_bytes(4));
                 if (file_put_contents($tmp, json_encode($page, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)) !== false) {

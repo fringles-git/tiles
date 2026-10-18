@@ -434,3 +434,10 @@ a.btn{color:inherit;text-decoration:none}
 }
 .prof>*{flex-shrink:0}
 .fld input[type=tel],.fld input[type=time]{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:14px}
+
+.pcv{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:var(--fg);color:var(--bg);text-decoration:none;box-shadow:var(--shadow);transition:transform .2s}
+.pcv:hover{transform:translateY(-2px)}
+.pcv span{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.pcv b{font-size:15px}
+.pcv small{font-size:12px;opacity:.7}
+.doc-thumb{display:grid;place-items:center;color:var(--muted)}
