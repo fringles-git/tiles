@@ -39,6 +39,49 @@ if (is_file(dirname(__DIR__) . '/lib.php') && is_file(dirname(__DIR__) . '/asset
         }
         @file_put_contents(DATA_DIR . '/.seeded', gmdate('c'));
     }
+
+    // One-time content updates shipped with the code (seed/patches/*.json), applied once each.
+    $patches = glob(SEED_DIR . '/patches/*.json') ?: [];
+    if ($patches && is_file(DATA_DIR . '/page.json')) {
+        sort($patches);
+        $doneFile = DATA_DIR . '/patches-applied.json';
+        $done = is_file($doneFile) ? (json_decode((string) file_get_contents($doneFile), true) ?: []) : [];
+        $todo = array_values(array_filter($patches, fn($f) => !in_array(basename($f), $done, true)));
+        if ($todo) {
+            $lock = fopen(DATA_DIR . '/page.lock', 'c');
+            flock($lock, LOCK_EX);
+            $page = json_decode((string) file_get_contents(DATA_DIR . '/page.json'), true);
+            if (is_array($page)) {
+                if (!is_dir(DATA_DIR . '/backups')) {
+                    @mkdir(DATA_DIR . '/backups', 0755, true);
+                }
+                @copy(DATA_DIR . '/page.json', DATA_DIR . '/backups/page-before-patch-' . gmdate('Ymd-His') . '.json');
+                foreach ($todo as $f) {
+                    $patch = json_decode((string) file_get_contents($f), true);
+                    if (is_array($patch)) {
+                        if (isset($patch['profile']) && is_array($patch['profile'])) {
+                            $page['profile'] = array_replace_recursive($page['profile'] ?? [], $patch['profile']);
+                        }
+                        foreach (($patch['tiles'] ?? []) as $id => $changes) {
+                            foreach ($page['tiles'] as $i => $tile) {
+                                if (($tile['id'] ?? '') === $id && is_array($changes)) {
+                                    $page['tiles'][$i] = array_replace_recursive($tile, $changes);
+                                }
+                            }
+                        }
+                    }
+                    $done[] = basename($f);
+                }
+                $tmp = DATA_DIR . '/page.json.tmp' . bin2hex(random_bytes(4));
+                if (file_put_contents($tmp, json_encode($page, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)) !== false) {
+                    rename($tmp, DATA_DIR . '/page.json');
+                    file_put_contents($doneFile, json_encode($done));
+                }
+            }
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
 })();
 
 function read_json(string $file, $default)

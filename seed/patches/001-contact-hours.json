@@ -1,0 +1,35 @@
+{
+ "profile": {
+  "phone": "+33 7 69 20 78 36",
+  "email": "brandonlazarre@outlook.fr",
+  "hours": {
+   "days": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    1
+   ],
+   "allDay": true,
+   "from": "09:00",
+   "to": "18:00",
+   "note": ""
+  },
+  "showNav": true
+ },
+ "tiles": {
+  "lf8oufv": {
+   "data": {
+    "phone": "+33 7 69 20 78 36"
+   }
+  },
+  "dqbsdn1": {
+   "data": {
+    "title": "Tiles",
+    "desc": "Mon link-in-bio façon bento, qui fait tourner cette page."
+   }
+  }
+ }
+}

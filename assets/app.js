@@ -247,7 +247,10 @@ function daysLabel(d){const on=d.map(Boolean);if(!on.some(x=>x))return '';if(on.
  return runs.join(', ')}
 function parisNow(){try{const f=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=k=>(f.find(x=>x.type===k)||{}).value;
  return {d:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].indexOf(g('weekday')),m:(+g('hour'))*60+(+g('minute'))}}catch(e){const n=new Date();return {d:(n.getDay()+6)%7,m:n.getHours()*60+n.getMinutes()}}}
-function openState(h){const a=toMin(h.from),b=toMin(h.to);if(a==null||b==null||b<=a||!h.days.some(Boolean))return null;
+function openState(h){if(!h.days.some(Boolean))return null;
+ if(h.allDay){const {d}=parisNow();if(h.days[d])return {open:true,text:'Disponible maintenant'};
+  for(let k=1;k<8;k++){const dd=(d+k)%7;if(h.days[dd])return {open:false,text:'Indisponible aujourd’hui · reprend '+(k===1?'demain':DAYS_LONG[dd])}}return null}
+ const a=toMin(h.from),b=toMin(h.to);if(a==null||b==null||b<=a)return null;
  const {d,m}=parisNow();if(h.days[d]&&m>=a&&m<b)return {open:true,text:'Disponible maintenant · jusqu’à '+fmtH(h.to)};
  for(let k=0;k<8;k++){const dd=(d+k)%7;if(!h.days[dd])continue;if(k===0&&m>=a)continue;
   return {open:false,text:'Indisponible · reprend '+(k===0?'aujourd’hui':k===1?'demain':DAYS_LONG[dd])+' à '+fmtH(h.from)}}
@@ -297,7 +300,8 @@ function profileExtras(p){
  if((p.phone||'').trim())rows.push(`<div class="prow"><a href="${esc(telHref(p.phone))}" data-track-profile="phone">${ic('phone',16)}<span>${esc(p.phone)}</span></a><button type="button" class="pcopy" data-copy="${esc(p.phone)}" aria-label="Copier le numéro">Copier</button></div>`);
  if((p.email||'').trim())rows.push(`<div class="prow"><a href="mailto:${esc(p.email)}">${ic('mail',16)}<span>${esc(p.email)}</span></a><button type="button" class="pcopy" data-copy="${esc(p.email)}" aria-label="Copier l’adresse email">Copier</button></div>`);
  const hrs=p.hours||{};const dl=daysLabel(hrs.days||[]);const st=openState(hrs);
- if(dl&&fmtH(hrs.from)&&fmtH(hrs.to))rows.push(`<div class="prow hours">${ic('clock',16)}<div><b>${esc(dl)} · ${fmtH(hrs.from)}–${fmtH(hrs.to)}</b>${st?`<span class="openst ${st.open?'on':'off'}"><i></i>${esc(st.text)}</span>`:''}${hrs.note?`<small>${esc(hrs.note)}</small>`:''}</div></div>`);
+ const closed=DAYS_LONG.filter((x,i)=>!(hrs.days||[])[i]);
+ if(dl&&(hrs.allDay||(fmtH(hrs.from)&&fmtH(hrs.to))))rows.push(`<div class="prow hours">${ic('clock',16)}<div><b>${esc(dl)} · ${hrs.allDay?'24h/24':fmtH(hrs.from)+'–'+fmtH(hrs.to)}</b>${hrs.allDay&&closed.length&&closed.length<=2?`<small>Fermé le ${esc(closed.join(' et '))}</small>`:''}${st?`<span class="openst ${st.open?'on':'off'}"><i></i>${esc(st.text)}</span>`:''}${hrs.note?`<small>${esc(hrs.note)}</small>`:''}</div></div>`);
  if(rows.length)h+=`<div class="pcard">${rows.join('')}</div>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('plus',16)}Ajouter téléphone, email et horaires</button>`;
  const secs=navSections();
@@ -412,7 +416,8 @@ function openProfile(){
  <div class="grp"><h4>Coordonnées</h4>${fieldHTML(F('phone','Téléphone','tel'),p.phone,'p')}${fieldHTML(F('email','Email','email'),p.email,'p')}<span class="hint">Affichés dans la colonne de gauche avec un bouton Copier. Laisse vide pour masquer.</span></div>
  <div class="grp"><h4>Horaires de disponibilité</h4>
   <div class="fld"><span class="lb">Jours</span><div class="sizes days">${DAYS.map((d,i)=>`<button type="button" data-day="${i}" aria-pressed="${!!p.hours.days[i]}">${d}</button>`).join('')}</div></div>
-  <div class="two"><div class="fld"><label for="p-h-from">De</label><input type="time" id="p-h-from" data-hk="from" value="${esc(p.hours.from)}"></div><div class="fld"><label for="p-h-to">À</label><input type="time" id="p-h-to" data-hk="to" value="${esc(p.hours.to)}"></div></div>
+  <label class="chk"><input type="checkbox" id="p-h-allday" data-hk="allDay"${p.hours.allDay?' checked':''}>24h/24 les jours cochés</label>
+  <div class="two"${p.hours.allDay?' hidden':''} id="p-h-times"><div class="fld"><label for="p-h-from">De</label><input type="time" id="p-h-from" data-hk="from" value="${esc(p.hours.from)}"></div><div class="fld"><label for="p-h-to">À</label><input type="time" id="p-h-to" data-hk="to" value="${esc(p.hours.to)}"></div></div>
   <div class="fld"><label for="p-h-note">Note (facultatif)</label><input type="text" id="p-h-note" data-hk="note" value="${esc(p.hours.note||'')}" placeholder="Réponse sous 24 h"></div>
   <span class="hint">Le statut « Disponible maintenant » suit l’heure de Paris. Aucun jour coché = horaires masqués.</span></div>
  <div class="grp"><h4>Menu</h4><label class="chk"><input type="checkbox" id="p-showNav" data-pk="showNav"${p.showNav!==false?' checked':''}>Afficher le menu « Sur cette page »</label><span class="hint">Liste tes blocs « Section title » pour aller directement à une partie.</span></div></div>`,'profile');
@@ -446,7 +451,7 @@ dbody.addEventListener('input',async e=>{
  if(el.dataset.opt){const t=byId(ui.sel);if(!t)return;t[el.dataset.opt]=el.type==='checkbox'?el.checked:el.value;renderGrid();save();return}
  if(el.closest('#prof-form')&&el.dataset.k){S.profile[el.dataset.k]=el.value;renderProfile();save();return}
  if(el.dataset.pk){S.profile[el.dataset.pk]=el.checked;renderProfile();save();return}
- if(el.dataset.hk){S.profile.hours[el.dataset.hk]=el.value;renderProfile();save();return}
+ if(el.dataset.hk){S.profile.hours[el.dataset.hk]=el.type==='checkbox'?el.checked:el.value;if(el.dataset.hk==='allDay'){const t=document.getElementById('p-h-times');if(t)t.hidden=el.checked}renderProfile();save();return}
  if(el.id==='d-accent'){S.theme.accent=el.value;applyTheme();$$('[data-accent]',dbody).forEach(b=>b.setAttribute('aria-pressed','false'));save();return}
  if(el.id==='d-radius'){S.theme.radius=+el.value;$('#rv').textContent=el.value;applyTheme();save();return}
  if(el.id==='d-gap'){S.theme.gap=+el.value;$('#gv').textContent=el.value;applyTheme();save();return}
