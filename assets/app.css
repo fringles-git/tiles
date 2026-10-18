@@ -387,3 +387,50 @@ a.btn{color:inherit;text-decoration:none}
 @media (max-width:720px){.savestate{display:none}}
 .drawer{visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s linear .28s}
 .drawer.on{visibility:visible;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+
+/* left column: contact card, hours, section menu */
+.pcard{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.prow{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;min-width:0}
+.prow+.prow{border-top:1px solid var(--line)}
+.prow a{flex:1;min-width:0;display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;font-weight:600;font-size:14px}
+.prow a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow a:hover span{text-decoration:underline;text-underline-offset:3px}
+.prow svg{flex:none;color:var(--muted)}
+.prow.hours{align-items:flex-start;padding-block:12px}
+.prow.hours svg{margin-top:2px}
+.prow.hours div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prow.hours b{font-size:14px}
+.prow.hours small{color:var(--muted);font-size:12.5px}
+.pcopy{flex:none;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:5px 9px;font-size:12px;font-weight:600}
+.openst{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.openst i{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+.openst.on{color:var(--ok)}.openst.on i{background:var(--ok)}
+.pempty{border:1.5px dashed color-mix(in srgb,var(--fg) 20%,transparent);background:transparent;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;color:var(--muted);text-align:left}
+.pempty:hover{color:var(--fg);border-color:var(--fg)}
+.jump{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.jump ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-left:1px solid var(--line)}
+.jump a{display:flex;align-items:baseline;gap:10px;padding:6px 0 6px 14px;margin-left:-1px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;transition:color .15s,border-color .15s}
+.jump a:hover{color:var(--fg)}
+.jump a[aria-current]{color:var(--fg);border-left-color:var(--accent)}
+.jump .jn{font-family:var(--f-mono);font-size:10.5px;font-variant-numeric:tabular-nums;color:var(--muted);opacity:.8}
+.jump a[aria-current] .jn{color:var(--accent);opacity:1}
+.days button{min-width:44px;justify-content:center}
+.tile.ty-section{scroll-margin-top:24px}
+.mode-edit .tile.ty-section{scroll-margin-top:96px}
+.jumpbar{display:none}
+@media (min-width:861px){
+ .page:not([data-layout="top"]) .prof{max-height:calc(100vh - 108px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:4px 6px 8px 4px;margin:-4px -6px -8px -4px}
+ .page.mode-preview:not([data-layout="top"]) .prof{max-height:calc(100vh - 48px)}
+}
+@media (max-width:860px){
+ .jump{display:none}
+ .jumpbar:not([hidden]){display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 14px;padding:10px 16px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+ .jumpbar::-webkit-scrollbar{display:none}
+ .mode-preview .jumpbar:not([hidden]){position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+ .mode-preview .tile.ty-section{scroll-margin-top:72px}
+ .jumpbar a{flex:none;font-size:13px;font-weight:600;color:var(--fg);text-decoration:none;padding:7px 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line);white-space:nowrap}
+ .jumpbar a[aria-current]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+ .page.mode-preview[data-layout="top"] .jumpbar:not([hidden]){position:sticky;top:0}
+}
+.prof>*{flex-shrink:0}
+.fld input[type=tel],.fld input[type=time]{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:14px}
