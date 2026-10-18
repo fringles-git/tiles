@@ -472,3 +472,4 @@ a.btn{color:inherit;text-decoration:none}
 .tile.flow .ti{height:auto;min-height:100%;overflow:visible}
 @media (min-width:701px) and (max-width:1000px){.prof .pid h1{font-size:22px}.phead .avatar{width:64px;height:64px;font-size:22px}}
 .prow .ib svg,.pact svg{color:inherit}
+.prof .bio{white-space:pre-line}
