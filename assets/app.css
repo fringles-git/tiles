@@ -473,3 +473,28 @@ a.btn{color:inherit;text-decoration:none}
 @media (min-width:701px) and (max-width:1000px){.prof .pid h1{font-size:22px}.phead .avatar{width:64px;height:64px;font-size:22px}}
 .prow .ib svg,.pact svg{color:inherit}
 .prof .bio{white-space:pre-line}
+
+/* Portfolio proof and semantic, lazy-loaded images. */
+.img.ph > img,.pj-img.ph > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.project-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.project-actions button,.project-actions a{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--fg);font:inherit;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer}
+.tile.ty-project:has([data-project]) .ti{height:auto;min-height:100%;overflow:visible}
+.tile.ty-project:has([data-project]) .pj-img{min-height:100px}
+.sz-bar.ty-project:has([data-project]) .pj{height:auto}
+.sz-bar.ty-project:has([data-project]) .project-actions{margin-top:0}
+.sz-s .project-actions{flex-direction:column;align-items:stretch}
+.project-dialog{box-sizing:border-box;width:calc(100% - 32px);max-width:680px;max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:20px;padding:24px;background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.project-dialog::backdrop{background:rgba(0,0,0,.6)}
+.project-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.project-dialog-head h2{font-family:var(--f-display);font-size:clamp(22px,4vw,32px);line-height:1.15;margin:0}
+.project-dialog .icon-btn{flex:none;min-width:44px;min-height:44px}
+.project-dialog>p{margin:8px 0 20px}
+.project-dialog section{margin:20px 0}
+.project-dialog h3{font-size:16px;margin:0 0 8px}
+.project-dialog section p{white-space:pre-line;overflow-wrap:anywhere;line-height:1.6;margin:0}
+.project-dialog .btn{min-height:44px;display:inline-flex;align-items:center;gap:8px}
+.project-cover{display:block;width:100%;max-height:320px;object-fit:cover;border-radius:12px}
+.pact .ib{width:44px;height:44px}
+.lead button{min-height:44px}
+.lead button:disabled{opacity:.6;cursor:wait}
+.lead [data-lead-error]{font-size:13px;color:var(--danger);line-height:1.4}
