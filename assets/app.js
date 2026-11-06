@@ -32,6 +32,9 @@ const fmtDate=(s,o)=>{const d=new Date(s+'T12:00:00');return isNaN(d)?'':d.toLoc
 const daysTo=s=>{const d=new Date(s+'T00:00:00');if(isNaN(d))return null;const n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/864e5)};
 const plusDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 
+const hasCaseStudy=d=>['problem','solution','outcome'].some(k=>String(d[k]||'').trim());
+const photoImg=(img,alt)=>isImg(img)?`<img src="${esc(img)}" alt="${esc(alt||'')}" loading="lazy" decoding="async">`:'';
+
 /* ---------- Block registry ---------- */
 const T={
  link:{label:'Link',cat:'Essentials',hint:'Any website or page',size:'w',
@@ -55,7 +58,7 @@ const T={
  image:{label:'Photo',cat:'Essentials',hint:'Single image, optional link',size:'s',bleed:true,
   fields:[F('image','Image','image'),F('caption','Caption'),F('url','Link (optional)','url')],
   def:{image:'',caption:'',url:''},href:d=>d.url,
-  render:d=>`<div class="img ph" style="${bg(d.image,d.caption||'photo')}"></div>${d.caption?`<div class="cap"><span>${esc(d.caption)}</span></div>`:''}`},
+  render:d=>`<div class="img ph" style="${isImg(d.image)?'':bg('',d.caption||'photo')}">${photoImg(d.image,d.caption||'Photo')}</div>${d.caption?`<div class="cap"><span>${esc(d.caption)}</span></div>`:''}`},
  contact:{label:'Contact',cat:'Essentials',hint:'Email and phone with copy',size:'w',interactive:true,
   fields:[F('title','Title'),F('email','Email','email'),F('phone','Phone')],
   def:{title:'Get in touch',email:'hello@example.com',phone:''},
@@ -67,10 +70,11 @@ const T={
   render:d=>`<div class="map"><div class="river"></div></div><div class="pin"><span>${ic('pin',18)}</span></div><div class="map-lbl"><div><b>${esc(d.place)}</b><small>${esc(d.note)}</small></div></div>`},
 
  project:{label:'Project',cat:'Work',hint:'Case study with cover and tags',size:'l',bleed:true,
-  fields:[F('title','Title'),F('role','Your role'),F('year','Year'),F('desc','Summary','area'),F('tags','Tags (comma separated)'),F('image','Cover image','image'),F('url','Link','url')],
-  def:{title:'Project name',role:'Design & development',year:'2026',desc:'What it is and what you did.',tags:'Web, Design',image:'',url:''},
+  fields:[F('title','Title'),F('role','Your role'),F('year','Year'),F('desc','Summary','area'),F('tags','Tags (comma separated)'),F('image','Cover image','image'),F('url','Link','url'),F('problem','Le besoin (facultatif)','area'),F('solution','Ma contribution (facultatif)','area'),F('outcome','Résultat vérifiable (facultatif)','area')],
+  def:{title:'Project name',role:'Design & development',year:'2026',desc:'What it is and what you did.',tags:'Web, Design',image:'',url:'',problem:'',solution:'',outcome:''},
   href:d=>d.url,
-  render:d=>`<div class="pj"><div class="pj-img ph" style="${bg(d.image,d.title)}"></div><div class="pj-t"><span class="eyebrow">${esc(d.role)}${d.year?' · '+esc(d.year):''}</span><b class="t-title">${esc(d.title)}</b><p class="clamp2">${esc(d.desc)}</p><div class="tags">${list(d.tags).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div></div>`},
+  interactive:d=>hasCaseStudy(d),
+  render:(d,t)=>`<div class="pj"><div class="pj-img ph" style="${isImg(d.image)?'':bg('',d.title)}">${photoImg(d.image,d.title)}</div><div class="pj-t"><span class="eyebrow">${esc(d.role)}${d.year?' · '+esc(d.year):''}</span><b class="t-title">${esc(d.title)}</b><p class="clamp2">${esc(d.desc)}</p><div class="tags">${list(d.tags).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>${hasCaseStudy(d)?`<div class="project-actions"><button type="button" data-project="${esc(t.id)}" aria-label="Étude de cas : ${esc(d.title)}">Étude de cas ${ic('right',14)}</button>${safeUrl(d.url)?`<a href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-track aria-label="Voir le projet : ${esc(d.title)}">Voir le projet ${ic('ext',14)}</a>`:''}</div>`:''}</div></div>`},
  experience:{label:'Experience',cat:'Work',hint:'Roles as a timeline',size:'t',
   fields:[F('title','Title'),F('items','One per line: Role | Organisation | Years','area')],
   def:{title:'Experience',items:'Role | Organisation | 2024 – now'},
@@ -540,6 +544,8 @@ grid.addEventListener('click',e=>{
    return}
   openTile(id);return;
  }
+ const study=e.target.closest('[data-project]');
+ if(study){openCaseStudy(study.dataset.project);return}
  const yt=e.target.closest('.tile') && tile.querySelector('[data-yt]');
  if(yt&&!e.target.closest('[data-copy]')){e.preventDefault();count(id);const v=yt.dataset.yt;const box=tile.querySelector('.ti');box.outerHTML=`<div class="ti" style="padding:0"><iframe class="embed" style="border-radius:inherit" src="https://www.youtube-nocookie.com/embed/${v}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe></div>`;return}
  const cp=e.target.closest('[data-copy]');if(cp){copyText(cp.dataset.copy,cp.previousElementSibling);count(id);return}
@@ -550,14 +556,46 @@ grid.addEventListener('keydown',e=>{
  if(e.key==='Enter'||e.key===' '){e.preventDefault();openTile(tile.dataset.id)}
  if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();delTile(tile.dataset.id)}
 });
-grid.addEventListener('submit',e=>{
+grid.addEventListener('submit',async e=>{
  const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
  if(ui.mode==='edit')return;const inp=f.querySelector('input');const v=(inp.value||'').trim();if(!v)return;
- if(PUBLIC){api('lead',{email:v,id:f.dataset.form}).catch(()=>{})}
+ if(!PUBLIC){toast('Aperçu : aucune inscription envoyée.');return}
+ if(f.dataset.pending)return;
+ f.dataset.pending='true';
+ const button=f.querySelector('button[type="submit"]');if(button)button.disabled=true;
+ let error=f.querySelector('[data-lead-error]');
+ if(error)error.remove();
+ try{await api('lead',{email:v,id:f.dataset.form})}
+ catch(err){
+  error=document.createElement('p');error.dataset.leadError='';error.setAttribute('role','alert');
+  error.textContent='Inscription non enregistrée. Réessayez dans un instant.';
+  f.appendChild(error);delete f.dataset.pending;if(button)button.disabled=false;return;
+ }
  const ft=byId(f.dataset.form);
  f.innerHTML=`<b class="t-title">${esc(ft?ft.data.title:'')}</b><div class="thanks">${ic('check',18)}Inscription confirmée.</div>`;
 });
 function count(id){if(!id||!PUBLIC)return;beacon({type:'click',id})}
+
+
+/* Optional project proof, separate from the editor and existing external links. */
+function openCaseStudy(id){
+ const t=byId(id);
+ if(!t||t.type!=='project'||!hasCaseStudy(t.data)||!visible(t))return;
+ const d=t.data;
+ let dialog=$('#project-dialog');
+ if(!dialog){
+  dialog=document.createElement('dialog');dialog.id='project-dialog';dialog.className='project-dialog';
+  dialog.setAttribute('aria-labelledby','project-dialog-title');
+  document.body.appendChild(dialog);
+  dialog.addEventListener('click',e=>{
+   if(e.target.closest('[data-close-project]'))dialog.close();
+   if(e.target.closest('[data-project-link]'))count(dialog.dataset.project);
+  });
+ }
+ dialog.dataset.project=t.id;
+ dialog.innerHTML=`<div class="project-dialog-head"><h2 id="project-dialog-title">${esc(d.title)}</h2><button type="button" class="icon-btn" data-close-project aria-label="Fermer l’étude de cas" autofocus>${ic('x',20)}</button></div><p class="muted">${esc(d.role)}${d.year?' · '+esc(d.year):''}</p>${isImg(d.image)?`<img class="project-cover" src="${esc(d.image)}" alt="${esc(d.title)}" decoding="async">`:''}${[['problem','Le besoin'],['solution','Ma contribution'],['outcome','Le résultat']].filter(([k])=>String(d[k]||'').trim()).map(([k,label])=>`<section><h3>${label}</h3><p>${esc(d[k])}</p></section>`).join('')}${safeUrl(d.url)?`<a class="btn" href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-project-link>Voir le projet ${ic('ext',16)}</a>`:''}`;
+ dialog.showModal();
+}
 
 /* drag & drop reorder */
 let dragId=null;
