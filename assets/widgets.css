@@ -1,0 +1,37 @@
+/* Cards reveal more information with size; controls remain reachable at every size. */
+.tile.ty-radio,.tile.ty-sport,.tile.ty-atlas{--w-accent:var(--accent);min-width:0}
+.tile.ty-radio{--w-accent:#7761b3}.tile.ty-sport{--w-accent:#c4262e}.tile.ty-atlas{--w-accent:#187570}
+.tile.ty-radio .ti,.tile.ty-sport .ti,.tile.ty-atlas .ti{height:auto;min-height:100%;overflow:visible;background:linear-gradient(155deg,color-mix(in srgb,var(--w-accent) 9%,var(--surface)),var(--surface))}
+.w-card{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%;height:100%}
+.w-heading{display:flex;align-items:center;gap:10px;min-width:0}
+.w-heading>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.w-heading b{font:700 20px/1.15 var(--f-display);overflow-wrap:anywhere}
+.w-heading small{color:var(--muted);font-size:12px}
+.w-symbol{display:grid;place-items:center;flex:none;background:var(--w-accent);color:white;width:44px;height:44px;border-radius:13px;font-size:24px}
+.w-intro{color:var(--muted);font-size:13px;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.w-body{display:flex;flex-direction:column;gap:12px;margin-top:auto;min-width:0}
+.w-card button,.w-body>a{min-height:44px;display:inline-flex;justify-content:center;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 13px var(--f-body);text-decoration:none;cursor:pointer}
+.w-card button:hover{border-color:var(--w-accent)}
+.w-card button:disabled{opacity:.6;cursor:wait}
+.w-card button[aria-pressed=true]{background:var(--w-accent);color:#fff;border-color:transparent}
+.w-tabs{display:flex;flex-wrap:wrap;gap:6px}.w-tabs button{flex:1}
+.w-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.w-list li{display:flex;align-items:center;gap:10px;min-width:0;border-top:1px solid var(--line);padding-top:10px}
+.w-list li>div{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.w-list b{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.w-list small,.w-body>small{color:var(--muted);font-size:12px;line-height:1.4}
+.w-list strong{flex:none;font-size:15px}.w-rank{font:600 13px var(--f-mono);color:var(--w-accent);min-width:24px}
+.w-status{color:var(--muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin:0}
+.w-status:empty{display:none}
+.w-map{width:100%;height:300px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.w-map-actions{display:flex;flex-wrap:wrap;gap:6px}.w-map-actions button{flex:1}
+.w-map .maplibregl-ctrl button{min-height:44px;min-width:44px;padding:0;border-radius:0}
+.w-map .maplibregl-ctrl-attrib{font-size:11px;line-height:1.5}
+.w-map .maplibregl-ctrl-attrib a{color:#222;background:#fff}
+.sz-s .w-heading{align-items:flex-start}.sz-s .w-heading b{font-size:18px}
+.sz-s .w-heading small,.sz-s .w-intro,.sz-bar .w-intro,.sz-bar .w-heading small{display:none}
+.sz-s .w-tabs{flex-direction:column}.sz-s .w-map{height:220px}
+.sz-w .w-map{height:240px}.sz-t .w-map{height:380px}
+.sz-bar .w-heading b{font-size:17px}.sz-bar .w-symbol{width:36px;height:36px;font-size:20px}
+.sz-bar .w-card{gap:8px}.sz-bar .w-map{height:200px}
+@media(max-width:480px){.w-map{height:260px}.w-heading b{font-size:18px}.w-card button,.w-body>a{padding-inline:9px}.w-list li{gap:7px}}

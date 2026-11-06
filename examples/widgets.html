@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tiles · Cartes interactives</title>
+<link rel="stylesheet" href="../assets/app.css"><link rel="stylesheet" href="../assets/widgets.css">
+<style>.demo-banner{max-width:1200px;margin:24px auto 0;padding:0 24px;color:var(--muted);font:14px/1.6 system-ui}.demo-banner strong{color:var(--fg)}.demo-banner a{color:inherit}.page-in{padding-top:32px}</style></head><body>
+<p class="demo-banner"><strong>Tiles · Cartes interactives</strong><br>Aucun son, appel API ou fond de carte avant votre clic. Les tailles S / W / T / L / bandeau révèlent des niveaux de détail différents.</p>
+<div id="demo"></div>
+<script>
+window.TILES_BOOT={mode:'public',page:{v:1,sample:false,profile:{name:'Brandon Lazarre',role:'Musique, sport & exploration',bio:'Gospel et classique dans les oreilles. Un œil sur la F1. Et toujours basé à Troyes.',location:'Troyes, France',showNav:true,statusOn:false},theme:{skin:'light',accent:'#0B7A75',font:'figtree',radius:20,gap:14,layout:'top'},tiles:[]}};
+let n=0;for(const type of ['radio','sport','atlas']){
+window.TILES_BOOT.page.tiles.push({id:'section-'+type,type:'section',size:'full',data:{title:{radio:'Dans mes oreilles',sport:'Au bord de la piste',atlas:'Mon point de départ'}[type]}});
+for(const size of ['s','w','t','l','bar'])window.TILES_BOOT.page.tiles.push({id:'demo-'+(++n),type,size,data:type==='radio'?{title:'La sélection · '+size.toUpperCase(),genre:'gospel'}:type==='sport'?{title:'Formule 1 · '+size.toUpperCase()}:{place:'Troyes · '+size.toUpperCase(),lat:'48.2973',lon:'4.0744',zoom:'12',note:'Aube, Grand Est · France'}});
+}
+fetch('../assets/markup.html').then(r=>{if(!r.ok)throw Error('Markup');return r.text()}).then(html=>{
+document.getElementById('demo').innerHTML=html;
+const widgets=document.createElement('script');widgets.src='../assets/widgets.js';widgets.onload=()=>{const app=document.createElement('script');app.src='../assets/app.js';document.body.appendChild(app)};document.body.appendChild(widgets);
+}).catch(()=>{document.getElementById('demo').textContent='Ouvrez cet exemple depuis un serveur HTTP.'});
+</script></body></html>
