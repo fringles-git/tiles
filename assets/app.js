@@ -166,6 +166,7 @@ const T={
   def:{title:'Newsletter',desc:'New work, once a month.',button:'Subscribe'},
   render:(d,t)=>`<form class="lead" data-form="${t.id}"><b class="t-title">${esc(d.title)}</b><small class="muted">${esc(d.desc)}</small><div class="lead-row"><input id="lead-${t.id}" type="email" required placeholder="vous@email.fr" aria-label="Email address"><button type="submit">${esc(d.button)}</button></div></form>`}
 };
+if(typeof window!=='undefined'&&window.TilesWidgets)Object.assign(T,window.TilesWidgets.definitions(F));
 const CATS=['Essentials','Work','Creative','Personal','Earn'];
 const SIZES=[['s','Small',[1,0,0,0]],['w','Wide',[1,1,0,0]],['t','Tall',[1,0,1,0]],['l','Large',[1,1,1,1]],['bar','Strip',[1,1,0,0]]];
 
@@ -380,6 +381,7 @@ function statsHTML(){
  <small class="muted">Visites et clics de la page publique, enregistrés sur ton serveur.</small></section>`;
 }
 function renderGrid(){
+ if(window.TilesWidgets)window.TilesWidgets.dispose();
  const mode=ui.mode;
  const tiles=S.tiles.filter(t=>T[t.type]&&(mode==='edit'||visible(t)));
  document.getElementById('statsbox').innerHTML=mode==='stats'?statsHTML():'';
@@ -630,6 +632,8 @@ document.addEventListener('click',e=>{
  const a=e.target.closest('[data-act]');if(a&&!grid.contains(a))handleAct(a.dataset.act);
 });
 
+if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
 paintIcons();render();
 if(PUBLIC)beacon({type:'view'});
 })();
+
