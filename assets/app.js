@@ -73,8 +73,8 @@ const T={
   fields:[F('title','Title'),F('role','Your role'),F('year','Year'),F('desc','Summary','area'),F('tags','Tags (comma separated)'),F('image','Cover image','image'),F('url','Link','url'),F('problem','Le besoin (facultatif)','area'),F('solution','Ma contribution (facultatif)','area'),F('outcome','Résultat vérifiable (facultatif)','area')],
   def:{title:'Project name',role:'Design & development',year:'2026',desc:'What it is and what you did.',tags:'Web, Design',image:'',url:'',problem:'',solution:'',outcome:''},
   href:d=>d.url,
-  interactive:true,
-  render:(d,t)=>`<div class="pj"><div class="pj-img ph" style="${isImg(d.image)?'':bg('',d.title)}">${photoImg(d.image,d.title)}</div><div class="pj-t"><span class="eyebrow">${esc(d.role)}${d.year?' · '+esc(d.year):''}</span><b class="t-title">${esc(d.title)}</b><p class="clamp2">${esc(d.desc)}</p><div class="tags">${list(d.tags).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="project-actions"><button type="button" data-project="${esc(t.id)}" aria-label="Étude de cas : ${esc(d.title)}">Étude de cas ${ic('right',14)}</button>${safeUrl(d.url)?`<a href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-track aria-label="Voir le projet : ${esc(d.title)}">Voir le projet ${ic('ext',14)}</a>`:''}</div></div></div>`},
+  interactive:d=>hasCaseStudy(d),
+  render:(d,t)=>`<div class="pj"><div class="pj-img ph" style="${isImg(d.image)?'':bg('',d.title)}">${photoImg(d.image,d.title)}</div><div class="pj-t"><span class="eyebrow">${esc(d.role)}${d.year?' · '+esc(d.year):''}</span><b class="t-title">${esc(d.title)}</b><p class="clamp2">${esc(d.desc)}</p><div class="tags">${list(d.tags).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>${hasCaseStudy(d)?`<div class="project-actions"><button type="button" data-project="${esc(t.id)}" aria-label="Étude de cas : ${esc(d.title)}">Étude de cas ${ic('right',14)}</button>${safeUrl(d.url)?`<a href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-track aria-label="Voir le projet : ${esc(d.title)}">Voir le projet ${ic('ext',14)}</a>`:''}</div>`:''}</div></div>`},
  experience:{label:'Experience',cat:'Work',hint:'Roles as a timeline',size:'t',
   fields:[F('title','Title'),F('items','One per line: Role | Organisation | Years','area')],
   def:{title:'Experience',items:'Role | Organisation | 2024 – now'},
@@ -303,7 +303,7 @@ function renderProfile(){
  ${p.bio?`<p class="bio">${esc(p.bio)}</p>`:''}
  ${p.statusOn&&p.status&&!hasHours?`<div class="chips"><span class="chip live"><i></i>${esc(p.status)}</span></div>`:''}
  ${profileExtras(p)}
- ${ui.mode!=='edit'?'<button type="button" class="share-profile" data-share>↗ Partager mon profil</button>':''}
+ ${ui.mode!=='edit'?'<div class="profile-utilities"><button type="button" data-share>↗ Partager</button><button type="button" data-profile-qr aria-label="Afficher mon QR code">▦ QR</button><button type="button" data-contact-download>＋ Contact</button></div>':''}
  ${ui.mode==='edit'?`<div><button class="btn sm" data-act="profile">${ic('edit',14)}Edit profile</button></div>`:''}`;
  renderJumpbar();
 }
@@ -650,7 +650,7 @@ document.addEventListener('click',e=>{
 });
 
 if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
-if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer);
+if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer,()=>S.profile);
 paintIcons();render();
 if(PUBLIC)beacon({type:'view'});
 })();

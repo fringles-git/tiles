@@ -233,6 +233,7 @@ function render_shell(string $title, string $description, array $boot, string $e
 <script>window.TILES_BOOT=<?= $bootJson ?>;</script>
 <script src="assets/widgets.js?v=<?= asset_v('widgets.js') ?>"></script>
 <script src="assets/experience.js?v=<?= asset_v('experience.js') ?>"></script>
+<script src="assets/vendor/qrcode.min.js?v=<?= asset_v('vendor/qrcode.min.js') ?>"></script>
 <script src="assets/app.js?v=<?= asset_v('app.js') ?>"></script>
 </body>
 </html>

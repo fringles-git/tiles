@@ -8,6 +8,7 @@ function widget_resources(): array
     $resources = [
         'f1-calendar' => ['provider' => 'jolpica', 'ttl' => 3600, 'url' => 'https://api.jolpi.ca/ergast/f1/current.json?limit=100'],
         'f1-standings' => ['provider' => 'jolpica', 'ttl' => 3600, 'url' => 'https://api.jolpi.ca/ergast/f1/current/driverStandings.json?limit=100'],
+        'f1-results' => ['provider' => 'jolpica', 'ttl' => 3600, 'url' => 'https://api.jolpi.ca/ergast/f1/current/last/results.json?limit=100'],
     ];
     foreach (['gospel', 'classical', 'jazz'] as $genre) {
         $resources['radio-' . $genre] = ['provider' => 'radio', 'ttl' => 86400, 'url' => 'https://de1.api.radio-browser.info/json/stations/search?tag=' . $genre . '&hidebroken=true&is_https=true&codec=MP3&order=votes&reverse=true&limit=12'];
@@ -56,7 +57,19 @@ function widget_normalize(string $resource, array $raw): array
         $table = $mr['RaceTable'] ?? [];
         if (!isset($table['Races']) || !is_array($table['Races'])) { throw new RuntimeException('Invalid calendar.'); }
         foreach ($table['Races'] as $race) {
-            $items[] = ['name' => (string) ($race['raceName'] ?? ''), 'round' => (string) ($race['round'] ?? ''), 'date' => (string) ($race['date'] ?? ''), 'time' => (string) ($race['time'] ?? ''), 'circuit' => (string) ($race['Circuit']['circuitName'] ?? '')];
+            $sessions = [];
+            foreach (['FirstPractice' => 'Essais 1', 'SecondPractice' => 'Essais 2', 'ThirdPractice' => 'Essais 3', 'Qualifying' => 'Qualifications', 'SprintQualifying' => 'Qualifications sprint', 'SprintShootout' => 'Qualifications sprint', 'Sprint' => 'Sprint'] as $key => $label) {
+                if (!empty($race[$key]['date'])) { $sessions[] = ['name' => $label, 'date' => (string) $race[$key]['date'], 'time' => (string) ($race[$key]['time'] ?? '')]; }
+            }
+            $sessions[] = ['name' => 'Course', 'date' => (string) ($race['date'] ?? ''), 'time' => (string) ($race['time'] ?? '')];
+            $items[] = ['name' => (string) ($race['raceName'] ?? ''), 'round' => (string) ($race['round'] ?? ''), 'date' => (string) ($race['date'] ?? ''), 'time' => (string) ($race['time'] ?? ''), 'sessions' => $sessions, 'circuit' => (string) ($race['Circuit']['circuitName'] ?? '')];
+        }
+    } elseif ($resource === 'f1-results') {
+        $table = $mr['RaceTable'] ?? [];
+        foreach (($table['Races'] ?? []) as $race) {
+            $results = [];
+            foreach (($race['Results'] ?? []) as $result) { $results[] = ['driverId' => (string) ($result['Driver']['driverId'] ?? ''), 'name' => trim(($result['Driver']['givenName'] ?? '') . ' ' . ($result['Driver']['familyName'] ?? '')), 'position' => (string) ($result['position'] ?? ''), 'status' => (string) ($result['status'] ?? '')]; }
+            $items[] = ['name' => (string) ($race['raceName'] ?? ''), 'date' => (string) ($race['date'] ?? ''), 'results' => $results];
         }
     } else {
         $table = $mr['StandingsTable'] ?? [];
