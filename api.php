@@ -85,6 +85,16 @@ if (!hash_equals($_SESSION['csrf'], (string) ($_SERVER['HTTP_X_CSRF'] ?? ''))) {
 }
 
 switch ($action) {
+    case 'connections':
+        $usage = read_json('widget-cache/usage.json', []);
+        out(['connections' => [
+            'curl' => function_exists('curl_init'),
+            'cacheWritable' => is_writable(DATA_DIR),
+            'footballConfigured' => widget_settings()['football_token'] !== '',
+            'sports' => widget_catalogue(),
+            'limits' => ['jolpica' => 24, 'football' => 24, 'radio' => 6],
+            'usage' => array_map(static fn($value) => ['day' => (string) ($value['day'] ?? ''), 'count' => (int) ($value['count'] ?? 0)], $usage),
+        ]]);
     case 'save':
         $in = json_decode($raw, true);
         $page = is_array($in) ? ($in['page'] ?? null) : null;

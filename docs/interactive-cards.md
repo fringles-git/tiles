@@ -1,5 +1,8 @@
 # Interactive music, sport and map cards
 
+Updated 2026-11-07: see [API setup](api-setup.md) for PSG, France, private tokens,
+reusable team presets and the additional portfolio interactions.
+
 This extends the existing PHP + vanilla JS app. No Notes code, paid SDK, account,
 API secret or Node production runtime is introduced. The previous portfolio PR is
 already merged; this change starts from main at 82dbb88de5d48893954e60298b24734c8ff24909.
@@ -43,7 +46,7 @@ working demo. Its Ergast entry is outdated; Jolpica is the replacement used here
 | Radio streams | Direct third-party broadcaster streams | No autoplay or preload; one stream at a time, released on stop, pagehide, hidden tab or grid rerender |
 
 Budgets apply to upstream attempts from this deployment, not to each visitor.
-The five allowed resource keys cannot be expanded through arbitrary user queries.
+Resource keys are fixed or generated from the private team allowlist; visitors cannot expand them through arbitrary user queries.
 The gateway locks the shared state while checking freshness, reserving quota,
 fetching and caching. Successful responses are normalized before reaching the client.
 Failed fetches consume budget. There is no retry loop, alternate paid provider or
@@ -88,7 +91,7 @@ proxy, station voting or popularity click reporting are added in this slice.
 Requires PHP 8.1+ with cURL and writable **data/** (already used by Tiles).
 The existing data/.htaccess must remain installed so cached state cannot be read
 as public files. Root .htaccess also blocks direct requests to widget-cache.php.
-No secret is stored in browser code. Server fetch URLs are hardcoded; external
+Football uses a server-only token. No secret is stored in browser code. Server fetch URLs are hardcoded; external
 redirects and non-HTTPS protocols are refused; timeouts and a 1 MiB body limit apply.
 
 ## Validation

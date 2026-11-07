@@ -73,8 +73,8 @@ const T={
   fields:[F('title','Title'),F('role','Your role'),F('year','Year'),F('desc','Summary','area'),F('tags','Tags (comma separated)'),F('image','Cover image','image'),F('url','Link','url'),F('problem','Le besoin (facultatif)','area'),F('solution','Ma contribution (facultatif)','area'),F('outcome','Résultat vérifiable (facultatif)','area')],
   def:{title:'Project name',role:'Design & development',year:'2026',desc:'What it is and what you did.',tags:'Web, Design',image:'',url:'',problem:'',solution:'',outcome:''},
   href:d=>d.url,
-  interactive:d=>hasCaseStudy(d),
-  render:(d,t)=>`<div class="pj"><div class="pj-img ph" style="${isImg(d.image)?'':bg('',d.title)}">${photoImg(d.image,d.title)}</div><div class="pj-t"><span class="eyebrow">${esc(d.role)}${d.year?' · '+esc(d.year):''}</span><b class="t-title">${esc(d.title)}</b><p class="clamp2">${esc(d.desc)}</p><div class="tags">${list(d.tags).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>${hasCaseStudy(d)?`<div class="project-actions"><button type="button" data-project="${esc(t.id)}" aria-label="Étude de cas : ${esc(d.title)}">Étude de cas ${ic('right',14)}</button>${safeUrl(d.url)?`<a href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-track aria-label="Voir le projet : ${esc(d.title)}">Voir le projet ${ic('ext',14)}</a>`:''}</div>`:''}</div></div>`},
+  interactive:true,
+  render:(d,t)=>`<div class="pj"><div class="pj-img ph" style="${isImg(d.image)?'':bg('',d.title)}">${photoImg(d.image,d.title)}</div><div class="pj-t"><span class="eyebrow">${esc(d.role)}${d.year?' · '+esc(d.year):''}</span><b class="t-title">${esc(d.title)}</b><p class="clamp2">${esc(d.desc)}</p><div class="tags">${list(d.tags).slice(0,4).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="project-actions"><button type="button" data-project="${esc(t.id)}" aria-label="Étude de cas : ${esc(d.title)}">Étude de cas ${ic('right',14)}</button>${safeUrl(d.url)?`<a href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-track aria-label="Voir le projet : ${esc(d.title)}">Voir le projet ${ic('ext',14)}</a>`:''}</div></div></div>`},
  experience:{label:'Experience',cat:'Work',hint:'Roles as a timeline',size:'t',
   fields:[F('title','Title'),F('items','One per line: Role | Organisation | Years','area')],
   def:{title:'Experience',items:'Role | Organisation | 2024 – now'},
@@ -167,6 +167,7 @@ const T={
   render:(d,t)=>`<form class="lead" data-form="${t.id}"><b class="t-title">${esc(d.title)}</b><small class="muted">${esc(d.desc)}</small><div class="lead-row"><input id="lead-${t.id}" type="email" required placeholder="vous@email.fr" aria-label="Email address"><button type="submit">${esc(d.button)}</button></div></form>`}
 };
 if(typeof window!=='undefined'&&window.TilesWidgets)Object.assign(T,window.TilesWidgets.definitions(F));
+if(typeof window!=='undefined'&&window.TilesExperience)window.TilesExperience.enhance(T,F);
 const CATS=['Essentials','Work','Creative','Personal','Earn'];
 const SIZES=[['s','Small',[1,0,0,0]],['w','Wide',[1,1,0,0]],['t','Tall',[1,0,1,0]],['l','Large',[1,1,1,1]],['bar','Strip',[1,1,0,0]]];
 
@@ -238,7 +239,7 @@ const PUBLIC=BOOT.mode==='public';
 const CSRF=BOOT.csrf||'';
 let S=BOOT.page&&Array.isArray(BOOT.page.tiles)?BOOT.page:seed();
 S.stats=BOOT.stats||{sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]};
-const ui={mode:PUBLIC?'preview':'edit',sel:null,drawer:null};
+const ui={mode:PUBLIC?'preview':'edit',sel:null,drawer:null,query:'',category:'all'};
 /* profile defaults for fields added after the first version */
 (function(){const p=S.profile=S.profile||{};
  if(p.email===undefined){const ct=(S.tiles||[]).find(t=>t.type==='contact'&&t.data&&t.data.email);p.email=ct?ct.data.email:''}
@@ -265,7 +266,7 @@ function openState(h){if(!h.days.some(Boolean))return null;
   return {open:false,text:'Indisponible · reprend '+(k===0?'aujourd’hui':k===1?'demain':DAYS_LONG[dd])+' à '+fmtH(h.from)}}
  return null}
 const telHref=s=>{let n=String(s||'').replace(/[^\d+]/g,'');if(/^0\d{9}$/.test(n))n='+33'+n.slice(1);return n?'tel:'+n:''};
-function navSections(){return S.tiles.filter(t=>t.type==='section'&&(ui.mode==='edit'||visible(t))&&(t.data.title||'').trim())}
+function navSections(){return S.tiles.filter(t=>t.type==='section'&&(ui.mode==='edit'||(visible(t)&&grid.querySelector(`[data-id="${t.id}"]`)))&&(t.data.title||'').trim())}
 function api(action,body,isForm){
  const opt={method:'POST',credentials:'same-origin',headers:{'X-CSRF':CSRF}};
  if(isForm)opt.body=body;else{opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(body||{})}
@@ -302,6 +303,7 @@ function renderProfile(){
  ${p.bio?`<p class="bio">${esc(p.bio)}</p>`:''}
  ${p.statusOn&&p.status&&!hasHours?`<div class="chips"><span class="chip live"><i></i>${esc(p.status)}</span></div>`:''}
  ${profileExtras(p)}
+ ${ui.mode!=='edit'?'<button type="button" class="share-profile" data-share>↗ Partager mon profil</button>':''}
  ${ui.mode==='edit'?`<div><button class="btn sm" data-act="profile">${ic('edit',14)}Edit profile</button></div>`:''}`;
  renderJumpbar();
 }
@@ -382,8 +384,11 @@ function statsHTML(){
 }
 function renderGrid(){
  if(window.TilesWidgets)window.TilesWidgets.dispose();
+ if(window.TilesExperience)window.TilesExperience.dispose();
  const mode=ui.mode;
- const tiles=S.tiles.filter(t=>T[t.type]&&(mode==='edit'||visible(t)));
+ let tiles=S.tiles.filter(t=>T[t.type]&&(mode==='edit'||visible(t)));
+ if(mode!=='edit'&&window.TilesExperience)tiles=window.TilesExperience.filter(tiles,ui.query,ui.category);
+ const counter=$('#explore-count');if(counter)counter.textContent=tiles.filter(t=>t.type!=='section').length+' éléments';
  document.getElementById('statsbox').innerHTML=mode==='stats'?statsHTML():'';
  grid.innerHTML=tiles.map(tileHTML).join('')+(mode==='edit'?`<button class="add-tile" type="button" data-act="add">${ic('plus',22)}Add block</button>`:'')+(mode==='preview'?`<p class="footer-note">Fait avec Tiles</p>`:'');
 }
@@ -582,7 +587,7 @@ function count(id){if(!id||!PUBLIC)return;beacon({type:'click',id})}
 /* Optional project proof, separate from the editor and existing external links. */
 function openCaseStudy(id){
  const t=byId(id);
- if(!t||t.type!=='project'||!hasCaseStudy(t.data)||!visible(t))return;
+ if(!t||t.type!=='project'||!visible(t))return;
  const d=t.data;
  let dialog=$('#project-dialog');
  if(!dialog){
@@ -594,8 +599,9 @@ function openCaseStudy(id){
    if(e.target.closest('[data-project-link]'))count(dialog.dataset.project);
   });
  }
+ const theme=getComputedStyle(page);for(const key of ['--surface','--surface-2','--fg','--muted','--line','--accent'])dialog.style.setProperty(key,theme.getPropertyValue(key));
  dialog.dataset.project=t.id;
- dialog.innerHTML=`<div class="project-dialog-head"><h2 id="project-dialog-title">${esc(d.title)}</h2><button type="button" class="icon-btn" data-close-project aria-label="Fermer l’étude de cas" autofocus>${ic('x',20)}</button></div><p class="muted">${esc(d.role)}${d.year?' · '+esc(d.year):''}</p>${isImg(d.image)?`<img class="project-cover" src="${esc(d.image)}" alt="${esc(d.title)}" decoding="async">`:''}${[['problem','Le besoin'],['solution','Ma contribution'],['outcome','Le résultat']].filter(([k])=>String(d[k]||'').trim()).map(([k,label])=>`<section><h3>${label}</h3><p>${esc(d[k])}</p></section>`).join('')}${safeUrl(d.url)?`<a class="btn" href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-project-link>Voir le projet ${ic('ext',16)}</a>`:''}`;
+ dialog.innerHTML=`<div class="project-dialog-head"><h2 id="project-dialog-title">${esc(d.title)}</h2><button type="button" class="icon-btn" data-close-project aria-label="Fermer l’étude de cas" autofocus>${ic('x',20)}</button></div><p class="muted">${esc(d.role)}${d.year?' · '+esc(d.year):''}</p>${isImg(d.image)?`<img class="project-cover" src="${esc(d.image)}" alt="${esc(d.title)}" decoding="async">`:''}${d.desc?`<p>${esc(d.desc)}</p>`:''}${[['problem','Le besoin'],['solution','Ma contribution'],['outcome','Le résultat']].filter(([k])=>String(d[k]||'').trim()).map(([k,label])=>`<section><h3>${label}</h3><p>${esc(d[k])}</p></section>`).join('')}${safeUrl(d.url)?`<a class="btn" href="${esc(safeUrl(d.url))}" target="_blank" rel="noopener" data-project-link>Voir le projet ${ic('ext',16)}</a>`:''}`;
  dialog.showModal();
 }
 
@@ -616,8 +622,18 @@ function setMode(m){
  if(ui.drawer)closeDrawer();
   ui.mode=m;ui.sel=null;render();window.scrollTo({top:0});
 }
+function openConnections(){
+ openDrawer('Connexions API','<p role="status">Vérification de la configuration…</p>','connections');
+ api('connections',{}).then(({connections:c})=>{if(ui.drawer!=='connections')return;dbody.innerHTML=`<p>Formule 1, radio et cartes : aucune clé requise.</p><p>Football : ${c.footballConfigured?'token présent · validité à vérifier auprès du fournisseur':'token à ajouter sur le serveur'}.</p><p>PHP cURL : ${c.curl?'disponible':'manquant'} · stockage : ${c.cacheWritable?'accessible':'non accessible'}</p><h4>Sports configurés</h4><ul>${c.sports.map(x=>`<li>${esc(x.name)}</li>`).join('')}</ul><h4>Budgets partagés par jour</h4><ul>${Object.entries(c.limits).map(([name,n])=>`<li>${esc(name)} : ${n} requêtes maximum · ${c.usage[name]?.day||'aucune utilisation'} : ${c.usage[name]?.count||0}</li>`).join('')}</ul><p>Le token reste dans FOOTBALL_DATA_TOKEN ou config.local.php. Il ne se renseigne pas dans cet éditeur.</p>`}).catch(e=>{if(ui.drawer==='connections')dbody.textContent=e.message});
+}
+function setExplorer(query,category){
+ ui.query=query;ui.category=category;const input=$('#explore-search');if(input&&input.value!==query)input.value=query;
+ $$('[data-category]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.category===category));renderGrid();renderProfile();
+}
+$('#explore-search')?.addEventListener('input',e=>setExplorer(e.target.value,ui.category));
 function handleAct(a){
  if(a==='add')return openAdd();
+ if(a==='connections')return openConnections();
  if(a==='design')return openDesign();
  if(a==='export')return openExport();
  if(a==='profile'){if(ui.mode==='edit')openProfile();return}
@@ -628,11 +644,13 @@ function handleAct(a){
  if(a==='logout'){flush();api('logout',{}).finally(()=>{location.href='admin.php'});return}
 }
 document.addEventListener('click',e=>{
+ const category=e.target.closest('[data-category]');if(category){setExplorer(ui.query,category.dataset.category);return}
  const m=e.target.closest('[data-mode]');if(m){setMode(m.dataset.mode);return}
  const a=e.target.closest('[data-act]');if(a&&!grid.contains(a))handleAct(a.dataset.act);
 });
 
 if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
+if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer);
 paintIcons();render();
 if(PUBLIC)beacon({type:'view'});
 })();

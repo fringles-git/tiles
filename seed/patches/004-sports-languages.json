@@ -1,0 +1,10 @@
+{
+  "tiles": {
+    "4j1ho8k": {"type":"sport","size":"w","data":{"title":"Formule 1","follow":"f1","note":"Supporter de Max Verstappen · calendrier et classement"}},
+    "5h9duug": {"type":"sport","size":"w","data":{"title":"Paris Saint-Germain","follow":"psg","note":"Prochains matchs et résultats · couverture gratuite"}},
+    "lang2026a": {"type":"languages","data":{"title":"Langues","items":"Français | C2 | Bilingue · niveau déclaré\nEnglish | C2 | Bilingual · self-reported level. DCL B2+ obtenu en 2019–2020.\nEspañol | Notions | Notions de langue espagnole."}}
+  },
+  "addTiles": [
+    {"after":"5h9duug","tile":{"id":"support-france","type":"sport","size":"w","data":{"title":"Équipe de France","follow":"france","note":"Équipe première masculine · compétitions couvertes"}}}
+  ]
+}
