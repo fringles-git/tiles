@@ -33,3 +33,9 @@ try {
     $station = widget_normalize('radio-gospel', [['url_resolved' => 'http://insecure.test', 'lastcheckok' => 1], ['url_resolved' => 'https://stream.example.test/live', 'lastcheckok' => 1, 'hls' => 0]]);
     check(count($station['items']) === 1, 'only HTTPS audio retained');
 } finally { foreach (glob($dir . '/*') ?: [] as $file) { unlink($file); } if (is_dir($dir)) { rmdir($dir); } }
+
+$calendar = widget_normalize('f1-calendar', ['MRData' => ['RaceTable' => ['Races' => [['raceName'=>'Test', 'date'=>'2099-01-03', 'FirstPractice'=>['date'=>'2099-01-01', 'time'=>'09:00:00Z'], 'Qualifying'=>['date'=>'2099-01-02']]]]]]);
+check($calendar['items'][0]['sessions'][0]['name'] === 'Essais 1', 'practice sessions preserved');
+check($calendar['items'][0]['sessions'][1]['time'] === '', 'unknown qualifying time remains unknown');
+$results = widget_normalize('f1-results', ['MRData'=>['RaceTable'=>['Races'=>[['raceName'=>'Test','Results'=>[['Driver'=>['driverId'=>'max_verstappen','givenName'=>'Max','familyName'=>'Verstappen'],'position'=>'2','status'=>'Finished']]]]]]]);
+check($results['items'][0]['results'][0]['driverId'] === 'max_verstappen' && $results['items'][0]['results'][0]['position'] === '2', 'last-race driver identity and finish retained');

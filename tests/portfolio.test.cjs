@@ -8,12 +8,11 @@ const source=fs.readFileSync(path.join(__dirname,'../assets/app.js'),'utf8');
 new vm.Script(source);
 const prefix=source.slice(0,source.indexOf('const CATS'));
 const {T,hasCaseStudy}=vm.runInNewContext(prefix+'return {T,hasCaseStudy};})();',{document:{}});
-test('legacy projects keep their website alongside an interactive overview',()=>{
- assert.equal(T.project.interactive,true);
+test('legacy projects retain direct-link behavior and original spacing',()=>{
+ assert.equal(T.project.interactive({title:'Legacy'}),false);
  assert.equal(T.project.href({url:'https://example.com'}),'https://example.com');
  const html=T.project.render({title:'Legacy',url:'https://example.com',tags:''},{id:'legacy'});
- assert.match(html,/data-project="legacy"/);
- assert.match(html,/href="https:\/\/example.com"/);
+ assert.ok(!html.includes('data-project="legacy"'));
  assert.equal(hasCaseStudy({problem:'  ',outcome:''}),false);
 });
 test('proof adds separate accessible actions and escapes untrusted text',()=>{
