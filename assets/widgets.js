@@ -7,12 +7,14 @@ const coord=(v,min,max,fallback)=>v!==''&&v!=null&&Number.isFinite(+v)&&+v>=min&
 const state=new Map(),requests=new Map(),maps=new Set();
 const gateway=new URL('../widgets.php',document.currentScript?.src||location.href).href;
 let audio=null,playing=null,mapModule=null,enabled=false;
+const catalogue=window.TILES_BOOT?.sports||[{key:'f1',name:'Formule 1',url:'https://www.formula1.com/'},{key:'psg',name:'Paris Saint-Germain',url:'https://www.psg.fr/'},{key:'france',name:'France · équipe masculine',url:'https://www.fff.fr/equipe-nationale/'}];
+const followed=d=>catalogue.find(x=>x.key===(d.follow||'f1'))||catalogue[0];
 const genres=[['gospel','Gospel'],['classical','Classique'],['jazz','Jazz']];
 function get(id){if(!state.has(id))state.set(id,{view:'calendar'});return state.get(id)}
-function shell(type,d,t){return `<div class="w-card w-${type}" data-widget="${type}" data-widget-id="${esc(t.id)}" data-widget-size="${esc(t.size)}"><div class="w-heading"><span class="w-symbol" aria-hidden="true">${{radio:'♫',sport:'🏁',atlas:'◎'}[type]}</span><div><small>${{radio:'La sélection musicale',sport:'Le paddock',atlas:'Sur la carte'}[type]}</small><b>${esc(d.title||d.place||{radio:'Radio',sport:'Formule 1',atlas:'Troyes'}[type])}</b></div></div><p class="w-intro">${esc(d.note||{radio:'Gospel, classique et découvertes.',sport:'Calendrier et classement · données en cache.',atlas:'Déplacez la carte, zoomez et explorez.'}[type])}</p><div class="w-body"><button type="button" data-w-action="load">${{radio:'Choisir une radio',sport:'Explorer la saison',atlas:'Activer la carte'}[type]}</button></div><p class="w-status" role="status" aria-live="polite"></p></div>`}
+function shell(type,d,t){return `<div class="w-card w-${type}" data-widget="${type}" data-widget-id="${esc(t.id)}" data-widget-size="${esc(t.size)}"><div class="w-heading"><span class="w-symbol" aria-hidden="true">${{radio:'♫',sport:(followed(d).key==='f1'?'🏁':'⚽'),atlas:'◎'}[type]}</span><div><small>${{radio:'La sélection musicale',sport:(followed(d).key==='f1'?'Le paddock':'Mon équipe'),atlas:'Sur la carte'}[type]}</small><b>${esc(d.title||d.place||{radio:'Radio',sport:followed(d).name,atlas:'Troyes'}[type])}</b></div></div><p class="w-intro">${esc(d.note||{radio:'Gospel, classique et découvertes.',sport:(followed(d).key==='f1'?'Calendrier et classement · données en cache.':'Calendrier et résultats · compétitions couvertes.'),atlas:'Déplacez la carte, zoomez et explorez.'}[type])}</p><div class="w-body"><button type="button" data-w-action="load">${{radio:'Choisir une radio',sport:'Explorer',atlas:'Activer la carte'}[type]}</button></div><p class="w-status" role="status" aria-live="polite"></p></div>`}
 function definitions(F){return {
  radio:{label:'Radio interactive',cat:'Creative',hint:'Gospel, classique, jazz · lecture à la demande',size:'w',interactive:true,fields:[F('title','Titre'),F('genre','Sélection','select',genres),F('note','Description')],def:{title:'Dans mes oreilles',genre:'gospel',note:''},render:(d,t)=>shell('radio',d,t)},
- sport:{label:'F1 interactive',cat:'Personal',hint:'Calendrier et classement avec cache partagé',size:'w',interactive:true,fields:[F('title','Titre'),F('note','Description')],def:{title:'Formule 1',note:''},render:(d,t)=>shell('sport',d,t)},
+ sport:{label:'Sport interactif',cat:'Personal',hint:'F1, PSG, France ou équipe configurée',size:'w',interactive:true,fields:[F('follow','Supporter de','select',catalogue.map(x=>[x.key,x.name])),F('title','Titre personnalisé (facultatif)'),F('note','Description')],def:{title:'',follow:'f1',note:''},render:(d,t)=>shell('sport',d,t)},
  atlas:{label:'Carte interactive',cat:'Essentials',hint:'OpenFreeMap · zoom, déplacement, itinéraire',size:'l',interactive:true,fields:[F('place','Lieu'),F('lat','Latitude'),F('lon','Longitude'),F('zoom','Zoom (3–16)'),F('note','Description')],def:{place:'Troyes',lat:'48.2973',lon:'4.0744',zoom:'12',note:'Basé à Troyes, France'},render:(d,t)=>shell('atlas',d,t)}
 }}
 function status(card,text){const el=card.querySelector('.w-status');if(el)el.textContent=text}
@@ -31,7 +33,7 @@ async function data(key){
  })();requests.set(key,entry);return entry.promise;
 }
 function stamp(result){const when=new Date(result.updatedAt);return `${result.stale?'Cache ancien · ':''}Mis à jour ${Number.isNaN(+when)?'récemment':when.toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${result.source}`}
-function sourceLink(url,label){return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`}
+function sourceLink(url,label){return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`}
 function drawRadio(card,d,result){
  const s=get(card.dataset.widgetId);s.radio=result;
  const max=sizeCount(card.dataset.widgetSize);
@@ -39,12 +41,21 @@ function drawRadio(card,d,result){
  card.querySelector('.w-body').innerHTML=`<div class="w-tabs" role="group" aria-label="Genre musical">${genres.map(([v,l])=>`<button type="button" data-w-action="genre" data-value="${v}" aria-pressed="${(s.genre||d.genre||'gospel')===v}">${l}</button>`).join('')}</div><ol class="w-list">${items.map((x,i)=>`<li><div><b>${esc(x.name)}</b><small>${esc(x.country)}${max>1?' · '+esc(x.codec)+' · '+esc(x.bitrate)+' kb/s':''}</small></div><button type="button" data-w-action="play" data-index="${i}" aria-label="Écouter ${esc(x.name)}">▶</button></li>`).join('')}</ol>${items.length?'<button type="button" data-w-action="stop">Arrêter la lecture</button>':'<p>Aucune station HTTPS disponible dans cette sélection.</p>'}${sourceLink('https://www.radio-browser.info/','Radio Browser')}`;
  status(card,stamp(result));
 }
-function drawSport(card,result){
+function drawSport(card,result,d){
+ if(followed(d).key!=='f1')return drawFootball(card,result,d);
  const s=get(card.dataset.widgetId),max=sizeCount(card.dataset.widgetSize);
  s[s.view]=result;
  let items=result.items;
  if(s.view==='calendar')items=items.filter(x=>new Date(x.date+'T'+(x.time||'23:59:59Z'))>new Date());
  card.querySelector('.w-body').innerHTML=`<div class="w-tabs" role="group" aria-label="Vue Formule 1"><button type="button" data-w-action="view" data-value="calendar" aria-pressed="${s.view==='calendar'}">Courses</button><button type="button" data-w-action="view" data-value="standings" aria-pressed="${s.view==='standings'}">Pilotes</button></div><small>Saison ${esc(result.season)} · ${s.view==='calendar'?'Prochains Grands Prix':'Classement pilotes'}</small><ol class="w-list">${items.slice(0,max).map(x=>s.view==='calendar'?`<li><span class="w-rank">R${esc(x.round)}</span><div><b>${esc(x.name)}</b><small>${new Date(x.date+'T'+(x.time||'12:00:00Z')).toLocaleString('fr-FR',{day:'numeric',month:'short',...(max>1?{hour:'2-digit',minute:'2-digit'}:{})})}${max>1?' · '+esc(x.circuit):''}</small></div></li>`:`<li><span class="w-rank">${esc(x.position)}</span><div><b>${esc(x.name)}</b>${max>1?`<small>${esc(x.team)} · ${esc(x.wins)} victoire(s)</small>`:''}</div><strong>${esc(x.points)} <small>pts</small></strong></li>`).join('')}</ol>${items.length?'':'<p>Aucune donnée disponible pour cette vue. La saison peut être terminée.</p>'}${sourceLink('https://jolpi.ca/','Données Jolpica F1')}`;
+ status(card,stamp(result)+' · Horaires locaux');
+}
+function drawFootball(card,result,d){
+ const s=get(card.dataset.widgetId),max=sizeCount(card.dataset.widgetSize),results=s.view==='results';
+ let items=result.items.filter(x=>results?x.status==='FINISHED':['SCHEDULED','TIMED','IN_PLAY','PAUSED'].includes(x.status));
+ if(results)items=items.slice().reverse();else items=items.filter(x=>new Date(x.date)>Date.now()-6*3600000);
+ const score=x=>x.homeScore==null||x.awayScore==null?'—':x.homeScore+' – '+x.awayScore;
+ card.querySelector('.w-body').innerHTML=`<div class="w-tabs" role="group" aria-label="Matchs"><button type="button" data-w-action="view" data-value="upcoming" aria-pressed="${!results}">À venir</button><button type="button" data-w-action="view" data-value="results" aria-pressed="${results}">Résultats</button></div><ol class="w-list">${items.slice(0,max).map(x=>`<li><div><b>${esc(x.home)} / ${esc(x.away)}</b><small>${new Date(x.date).toLocaleString('fr-FR',{day:'numeric',month:'short',...(max>1?{hour:'2-digit',minute:'2-digit'}:{})})}${max>1?' · '+esc(x.competition):''}</small></div>${results?`<strong>${score(x)}</strong>`:''}</li>`).join('')}</ol>${items.length?'':'<p>Aucun match disponible dans les compétitions couvertes pour cette période.</p>'}<small>Scores différés · couverture partielle selon la compétition.</small>${sourceLink(followed(d).url,'Calendrier officiel')}${sourceLink('https://www.football-data.org/','football-data.org')}`;
  status(card,stamp(result)+' · Horaires locaux');
 }
 async function load(card,d){
@@ -54,11 +65,14 @@ async function load(card,d){
  const button=body.querySelector('button');if(button)button.disabled=true;
  status(card,'Chargement…');
  try{
-  const key=type==='radio'?'radio-'+(s.genre||d.genre||'gospel'):'f1-'+s.view;
+  const team=followed(d);
+  if(type==='sport'&&team.key!=='f1'&&!['upcoming','results'].includes(s.view))s.view='upcoming';
+  if(type==='sport'&&team.key==='f1'&&!['calendar','standings'].includes(s.view))s.view='calendar';
+  const key=type==='radio'?'radio-'+(s.genre||d.genre||'gospel'):team.key==='f1'?'f1-'+s.view:'football-'+team.key;
   const result=await data(key);
   if(!card.isConnected)return;
-  if(type==='radio')drawRadio(card,d,result);else drawSport(card,result);
- }catch(e){if(card.isConnected){status(card,'Source momentanément indisponible. Vous pouvez réessayer.');if(button)button.disabled=false}}
+  if(type==='radio')drawRadio(card,d,result);else drawSport(card,result,d);
+ }catch(e){if(card.isConnected){status(card,'Source momentanément indisponible. Vous pouvez réessayer.');if(button)button.disabled=false;if(type==='sport'&&followed(d).key!=='f1'&&!body.querySelector('a'))body.insertAdjacentHTML('beforeend',sourceLink(followed(d).url,'Calendrier officiel'))}}
  finally{delete card.dataset.busy}
 }
 function stop(){if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null}if(playing?.isConnected)status(playing,'Lecture arrêtée.');playing=null}

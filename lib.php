@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/widget-config.php';
 
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
@@ -203,6 +204,7 @@ function asset_v(string $file): string
 /** Output the full HTML document: the same markup and script power the public page and the editor. */
 function render_shell(string $title, string $description, array $boot, string $extraHead = '', string $noscript = ''): void
 {
+    $boot['sports'] = widget_catalogue();
     header('Content-Type: text/html; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -223,12 +225,14 @@ function render_shell(string $title, string $description, array $boot, string $e
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/app.css?v=<?= asset_v('app.css') ?>">
 <link rel="stylesheet" href="assets/widgets.css?v=<?= asset_v('widgets.css') ?>">
+<link rel="stylesheet" href="assets/experience.css?v=<?= asset_v('experience.css') ?>">
 </head>
 <body>
 <?php readfile(__DIR__ . '/assets/markup.html'); ?>
 <?= $noscript ?>
 <script>window.TILES_BOOT=<?= $bootJson ?>;</script>
 <script src="assets/widgets.js?v=<?= asset_v('widgets.js') ?>"></script>
+<script src="assets/experience.js?v=<?= asset_v('experience.js') ?>"></script>
 <script src="assets/app.js?v=<?= asset_v('app.js') ?>"></script>
 </body>
 </html>

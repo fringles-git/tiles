@@ -8,9 +8,12 @@ const source=fs.readFileSync(path.join(__dirname,'../assets/app.js'),'utf8');
 new vm.Script(source);
 const prefix=source.slice(0,source.indexOf('const CATS'));
 const {T,hasCaseStudy}=vm.runInNewContext(prefix+'return {T,hasCaseStudy};})();',{document:{}});
-test('legacy projects keep direct-link behavior',()=>{
- assert.equal(T.project.interactive({title:'Legacy',url:'https://example.com'}),false);
+test('legacy projects keep their website alongside an interactive overview',()=>{
+ assert.equal(T.project.interactive,true);
  assert.equal(T.project.href({url:'https://example.com'}),'https://example.com');
+ const html=T.project.render({title:'Legacy',url:'https://example.com',tags:''},{id:'legacy'});
+ assert.match(html,/data-project="legacy"/);
+ assert.match(html,/href="https:\/\/example.com"/);
  assert.equal(hasCaseStudy({problem:'  ',outcome:''}),false);
 });
 test('proof adds separate accessible actions and escapes untrusted text',()=>{
@@ -31,3 +34,4 @@ test('project and photo images have alt text and lazy loading',()=>{
  assert.match(T.image.render(data),/loading="lazy"/);
  assert.ok(!T.image.render({...data,image:'javascript:alert(1)'}).includes('<img'));
 });
+
