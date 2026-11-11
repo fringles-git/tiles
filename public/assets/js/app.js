@@ -295,15 +295,18 @@ function applyTheme(){
  const th=S.theme;page.dataset.skin=th.skin;page.dataset.font=th.font;page.dataset.layout=th.layout;
  page.style.setProperty('--accent',col(th.accent)||'#0B7A75');page.style.setProperty('--r',(+th.radius||24)+'px');page.style.setProperty('--gap',(+th.gap||14)+'px');
  document.documentElement.style.setProperty('--accent',col(th.accent)||'#0B7A75');
+ if(window.TilesPolish)window.TilesPolish.apply(page,ui.mode,th.accent,visitorStorage());
 }
+function visitorStorage(){try{return localStorage;}catch{return {getItem:()=>null};}}
 function renderProfile(){
- const p=S.profile;const ini=(p.name||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+ const p=S.profile;const visitorTheme=window.TilesPolish?.preference(visitorStorage())||'site';const ini=(p.name||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
  const tags=profileTags(p);const hasHours=!!daysLabel((p.hours||{}).days||[]);
  prof.innerHTML=`<div class="phead"><button class="avatar" type="button" data-act="profile" aria-label="Profile photo" ${ui.mode!=='edit'?'tabindex="-1"':''}>${isImg(p.avatar)?`<img src="${p.avatar}" alt="">`:esc(ini)}</button>
  <div class="pid"><h1>${esc(p.name)}</h1>${tags.length?`<div class="ptags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}${p.location?`<span class="ploc">${ic('pin',13)}${esc(p.location)}</span>`:''}</div></div>
  ${p.bio?`<p class="bio">${esc(p.bio)}</p>`:''}
  ${p.statusOn&&p.status&&!hasHours?`<div class="chips"><span class="chip live"><i></i>${esc(p.status)}</span></div>`:''}
  ${profileExtras(p)}
+ ${ui.mode!=='edit'?`<button type="button" class="profile-theme" data-visitor-theme aria-label="Thème : ${visitorTheme==='site'?'réglage du site':visitorTheme==='light'?'clair':'sombre'}. Changer le thème">${visitorTheme==='dark'?'☾':visitorTheme==='light'?'☀':'◐'} Thème : ${visitorTheme==='site'?'du site':visitorTheme==='light'?'clair':'sombre'}</button>`:''}
  ${ui.mode!=='edit'?'<div class="profile-utilities"><button type="button" data-share>↗ Partager</button><button type="button" data-profile-qr aria-label="Afficher mon QR code">▦ QR</button><button type="button" data-contact-download>＋ Contact</button></div>':''}
  ${ui.mode==='edit'?`<div><button class="btn sm" data-act="profile">${ic('edit',14)}Edit profile</button></div>`:''}`;
  renderJumpbar();
@@ -312,6 +315,7 @@ function profileTags(p){const raw=(p.tags!=null&&String(p.tags).trim()!=='')?Str
  return raw.split(/,|&|\s+et\s+/).map(x=>x.trim()).filter(Boolean).map(x=>x[0].toUpperCase()+x.slice(1))}
 function profileExtras(p){
  let h='';const edit=ui.mode==='edit';
+ const primary=window.TilesPolish?.contact(p);if(!edit&&primary)h+=`<a class="profile-primary" href="${esc(primary.href)}" data-pclick="${primary.track}">${ic('mail',18)}${esc(primary.label)}${ic('right',18)}</a>`;
  if(isDoc(p.cv))h+=`<a class="pcv" href="${esc(p.cv)}" target="_blank" rel="noopener" download="CV-${esc((p.name||'CV').replace(/\s+/g,'-'))}.pdf" data-pclick="p-cv">${ic('doc',18)}<span><b>Télécharger mon CV</b><small>PDF · ${esc(p.cvNote||'1 page')}</small></span>${ic('upload',16).replace('<path','<path transform="rotate(180 12 12)"')}</a>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('doc',16)}Ajouter mon CV (PDF)</button>`;
  const rows=[];const hrs=p.hours||{};const dl=daysLabel(hrs.days||[]);const st=openState(hrs);
@@ -392,7 +396,8 @@ function renderGrid(){
  if(mode!=='edit'&&window.TilesExperience)tiles=window.TilesExperience.filter(tiles,ui.query,ui.category);
  const counter=$('#explore-count');if(counter)counter.textContent=tiles.filter(t=>t.type!=='section').length+' éléments';
  document.getElementById('statsbox').innerHTML=mode==='stats'?statsHTML():'';
- grid.innerHTML=tiles.map(tileHTML).join('')+(mode==='edit'?`<button class="add-tile" type="button" data-act="add">${ic('plus',22)}Add block</button>`:'')+(mode==='preview'?`<p class="footer-note">Fait avec Tiles</p>`:'');
+ const empty=mode==='preview'&&!tiles.some(t=>t.type!=='section')&&!hub?.articleCount()? `<section class="portfolio-empty"><h3>Aucun résultat</h3><p>Essayez « React » ou « SaaS », ou réinitialisez les filtres.</p><button type="button" class="btn" data-reset-explorer>Tout afficher</button></section>`:'';
+ grid.innerHTML=empty+tiles.map(tileHTML).join('')+(mode==='edit'?`<button class="add-tile" type="button" data-act="add">${ic('plus',22)}Add block</button>`:'')+(mode==='preview'?`<p class="footer-note">Fait avec Tiles</p>`:'');
  if(hub)hub.update();
 }
 function render(){
@@ -650,6 +655,7 @@ function handleAct(a){
  if(a==='logout'){flush();api('logout',{}).finally(()=>{location.href='admin.php'});return}
 }
 document.addEventListener('click',e=>{
+ if(e.target.closest('[data-reset-explorer]')){hub?.reset();setExplorer('','all');return;}
  const category=e.target.closest('[data-category]');if(category){setExplorer(ui.query,category.dataset.category);return}
  const m=e.target.closest('[data-mode]');if(m){setMode(m.dataset.mode);return}
  const a=e.target.closest('[data-act]');if(a&&!grid.contains(a))handleAct(a.dataset.act);
@@ -658,6 +664,7 @@ document.addEventListener('click',e=>{
 if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
 if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer,()=>S.profile);
 if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,save,openDrawer,dbody,render,toast,visible,getQuery:()=>ui.query});
+if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
 paintIcons();render();
 if(PUBLIC)beacon({type:'view'});
 })();

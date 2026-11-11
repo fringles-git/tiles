@@ -25,8 +25,15 @@ $head = '<meta property="og:type" content="profile">'
     . '<link rel="canonical" href="' . e($base) . '">'
     . '<meta name="twitter:card" content="summary_large_image">';
 $avatar = (string) ($profile['avatar'] ?? '');
-if (preg_match('#^uploads/[A-Za-z0-9_-]+\.(jpe?g|png|webp|gif)$#', $avatar)) {
-    $head .= '<meta property="og:image" content="' . e($base . $avatar) . '">';
+$hasAvatar = preg_match('#^uploads/[A-Za-z0-9_-]+\.(jpe?g|png|webp|gif)$#', $avatar) === 1 && is_file(UPLOAD_DIR . '/' . basename($avatar));
+$shareImage = $base . ($hasAvatar ? $avatar : 'assets/images/share.png');
+$head .= '<meta property="og:image" content="' . e($shareImage) . '">'
+    . '<meta property="og:image:alt" content="' . e($name . ' · Portfolio') . '">'
+    . '<meta name="twitter:title" content="' . e($title) . '">'
+    . '<meta name="twitter:description" content="' . e($bio) . '">'
+    . '<meta name="twitter:image" content="' . e($shareImage) . '">';
+if (!$hasAvatar) {
+    $head .= '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">';
 }
 
 // Plain-HTML fallback for visitors and crawlers that do not run JavaScript.
