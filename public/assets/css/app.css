@@ -1,6 +1,6 @@
 /* Layout: profile column on the left, a 4-column bento grid of tiles on the right (2 columns on phones). Editor chrome sits above; a drawer slides in for editing. */
 :root{
-  --bg:#ECEEF1; --surface:#FFFFFF; --surface-2:#F4F5F7; --fg:#14161A; --muted:#656B75; --line:rgba(18,22,30,.09);
+  --bg:#ECEEF1; --surface:#FFFFFF; --surface-2:#F4F5F7; --fg:#14161A; --muted:#59616B; --line:rgba(18,22,30,.09);
   --shadow:0 1px 2px rgba(18,22,30,.05),0 6px 20px -12px rgba(18,22,30,.18);
   --chrome:rgba(255,255,255,.82); --ok:#1A9E55; --warn:#B7791F; --danger:#D6363F;
   --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
@@ -16,11 +16,11 @@
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.7); --chrome:rgba(23,26,31,.82); color-scheme:dark;}
 
 /* Page skins override tokens only inside the public page */
-.page[data-skin="porcelain"]{--bg:#ECEEF1;--surface:#FFFFFF;--surface-2:#F4F5F7;--fg:#14161A;--muted:#656B75;--line:rgba(18,22,30,.09);color-scheme:light}
+.page[data-skin="porcelain"]{--bg:#ECEEF1;--surface:#FFFFFF;--surface-2:#F4F5F7;--fg:#14161A;--muted:#59616B;--line:rgba(18,22,30,.09);color-scheme:light}
 .page[data-skin="graphite"]{--bg:#0E1013;--surface:#171A1F;--surface-2:#1F232A;--fg:#F0F2F5;--muted:#99A0AA;--line:rgba(255,255,255,.08);color-scheme:dark}
-.page[data-skin="sage"]{--bg:#E3EAE4;--surface:#F7FAF7;--surface-2:#EBF1EC;--fg:#16211A;--muted:#5D6B61;--line:rgba(22,33,26,.1);color-scheme:light}
+.page[data-skin="sage"]{--bg:#E3EAE4;--surface:#F7FAF7;--surface-2:#EBF1EC;--fg:#16211A;--muted:#52635A;--line:rgba(22,33,26,.1);color-scheme:light}
 .page[data-skin="midnight"]{--bg:#0B1020;--surface:#141B31;--surface-2:#1C2541;--fg:#EEF1FA;--muted:#9AA4C2;--line:rgba(255,255,255,.09);color-scheme:dark}
-.page[data-skin="paper"]{--bg:#F3F2EF;--surface:#FFFFFF;--surface-2:#F6F5F2;--fg:#1B1A18;--muted:#6E6A63;--line:rgba(27,26,24,.1);color-scheme:light}
+.page[data-skin="paper"]{--bg:#F3F2EF;--surface:#FFFFFF;--surface-2:#F6F5F2;--fg:#1B1A18;--muted:#625E58;--line:rgba(27,26,24,.1);color-scheme:light}
 .page[data-font="editorial"]{--f-display:"Instrument Serif",Georgia,"Times New Roman",serif}
 .page[data-font="mono"]{--f-display:"JetBrains Mono",ui-monospace,Menlo,monospace}
 
