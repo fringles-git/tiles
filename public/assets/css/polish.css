@@ -18,3 +18,28 @@
 .mode-preview .tile:has(a.ti):active{transform:scale(.99)}.mode-preview a.ti:focus-visible{outline:3px solid var(--accent);outline-offset:-4px}
 @media(max-width:700px){.page-in{row-gap:32px}.profile-primary{min-height:52px}.profile-utilities{gap:8px}}
 @media(prefers-reduced-motion:reduce){.profile-primary,.mode-preview .tile{transition:none;transform:none!important}}
+
+/* Outline controls and brand marks have separate, stable optical grids. */
+:root{--icon-size:20px;--ease-out:cubic-bezier(.22,1,.36,1);--dur-1:120ms;--dur-2:200ms;--dur-3:320ms}
+.ui-icon{width:var(--icon-size,20px);height:var(--icon-size,20px);flex:none;vertical-align:middle}
+.profile-utilities button,.explore-tools summary,.embed-activate{display:inline-flex;align-items:center;gap:8px}
+.ib .ui-icon{--icon-size:24px!important}.ploc .ui-icon,.pv .ui-icon{--icon-size:16px!important}
+.brand-icon{width:24px;height:24px;object-fit:contain;padding:3px;background:#fff;border-radius:4px}
+.language-icon{display:grid;place-items:center;padding:4px;background:transparent;border:0;border-radius:2px;flex:none}
+.language-icon img{width:26.667px;height:20px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px var(--line)}
+.language-level{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}.language-segments{display:flex;gap:3px}.language-segments i{width:7px;height:3px;border-radius:2px;background:var(--line)}.language-segments i.filled{background:var(--fg)}
+.employer{gap:10px;max-width:100%;padding:4px 10px 4px 4px;font-size:13px}.employer>span:not(.company-logo){overflow-wrap:anywhere}
+.company-logo{width:48px;height:48px;flex:none;display:grid;place-items:center;position:relative;isolation:isolate;border-radius:12px;background:var(--surface-2);color:var(--fg);border:1px solid var(--line);font:700 13px var(--f-body)}
+.company-logo>span{grid-area:1/1;z-index:-1}.company-logo img,.company-head .company-logo img{grid-area:1/1;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;padding:8px;border-radius:11px;background:#fff;filter:grayscale(1);transition:filter var(--dur-2) var(--ease-out)}
+.employer:hover .company-logo img,.employer:focus-visible .company-logo img,.company-head:hover .company-logo img{filter:none}
+.page .bio{max-width:65ch}.mode-preview .sec{padding-top:clamp(28px,4vw,44px)}
+.mode-preview .tile:has(a.ti),.mode-preview .tile:has(.project-actions){transition:transform var(--dur-2) var(--ease-out),box-shadow var(--dur-2) var(--ease-out)}
+@media(hover:hover){.mode-preview .tile:has(a.ti):hover,.mode-preview .tile:has(.project-actions):hover{transform:translateY(-2px);box-shadow:0 12px 24px -14px rgba(0,0,0,.3)}}
+.mode-preview .tile:has(a.ti):active{transform:scale(.98);transition-duration:80ms}
+.page :is(a,button,input,summary):focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.project-kinds,.empty-suggestions{display:flex;flex-wrap:wrap;gap:8px}.project-kinds[hidden]{display:none}.project-kinds button,.empty-suggestions button{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg);font:600 13px var(--f-body)}
+.project-kinds button[aria-pressed=true]{background:var(--cta-bg);color:var(--cta-fg)}.empty-suggestions{justify-content:center;margin-bottom:16px}
+.t-title mark{background:color-mix(in srgb,var(--accent) 18%,var(--surface));color:var(--fg);border-radius:3px;padding:0 2px}
+.mobile-contact{display:none}.mobile-contact[hidden]{display:none!important}
+@media(max-width:700px){.mobile-contact{position:fixed;z-index:30;left:16px;right:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));min-height:52px;padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--cta-bg);color:var(--cta-fg);border:1px solid var(--line);border-radius:16px;text-decoration:none;font-size:15px;font-weight:700;box-shadow:0 8px 24px -12px rgba(0,0,0,.4)}.has-mobile-contact .page-in{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.mode-preview .tile:hover,.mode-preview .tile:active{transform:none!important}}
