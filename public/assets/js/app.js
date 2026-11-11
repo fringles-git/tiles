@@ -17,7 +17,7 @@ const bg=(img,seed)=>isImg(img)?`background-image:url('${img}')`:`background-ima
 
 /* icons */
 const P={plus:'M12 5v14M5 12h14',x:'M6 6l12 12M18 6L6 18',edit:'M4 20h4L19 9l-4-4L4 16v4z',trash:'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',copy:'M9 9h11v11H9zM5 15H4V4h11v1',left:'M15 6l-6 6 6 6',right:'M9 6l6 6-6 6',ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',pin:'M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z',play:'M8 5l11 7-11 7z',cal:'M4 6h16v14H4zM4 10h16M9 3v4M15 3v4',upload:'M12 16V4M7 9l5-5 5 5M4 20h16',check:'M5 12l5 5 9-10',chart:'M4 20V10M10 20V4M16 20v-7M22 20H2',pal:'M12 3a9 9 0 100 18c1.1 0 1.5-.8 1.5-1.5 0-1.2-1-1.4-1-2.5s.9-1.5 2-1.5H17a4 4 0 004-4c0-4.7-4-8.5-9-8.5zM7.5 11.5h.01M10 7.5h.01M15 7.5h.01',code:'M8 7l-5 5 5 5M16 7l5 5-5 5',doc:'M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h4',heart:'M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z',clock:'M12 7v5l3 2M12 21a9 9 0 100-18 9 9 0 000 18z',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z',phone:'M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z',mail:'M4 6h16v12H4zM4 7l8 6 8-6'};
-const ic=(n,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n]}"/></svg>`;
+const ic=(n,s=20)=>typeof window!=='undefined'&&window.TilesExperience?.uiIcon?window.TilesExperience.uiIcon(n,s,P[n]):`<svg class="ui-icon" style="--icon-size:${s}px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${P[n]||P.code}"/></svg>`;
 function paintIcons(root=document){$$('[class^="i-"],[class*=" i-"]',root).forEach(el=>{const m=el.className.match(/i-(\w+)/);if(m&&!el.firstChild)el.innerHTML=ic(m[1],16)})}
 
 /* platforms */
@@ -239,7 +239,7 @@ const PUBLIC=BOOT.mode==='public';
 const CSRF=BOOT.csrf||'';
 let S=BOOT.page&&Array.isArray(BOOT.page.tiles)?BOOT.page:seed();
 S.stats=BOOT.stats||{sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]};
-const ui={mode:PUBLIC?'preview':'edit',sel:null,drawer:null,query:'',category:'all'};
+const ui={mode:PUBLIC?'preview':'edit',sel:null,drawer:null,query:'',category:'all',projectKind:'all'};
 let hub=null;
 /* profile defaults for fields added after the first version */
 (function(){const p=S.profile=S.profile||{};
@@ -306,10 +306,11 @@ function renderProfile(){
  ${p.bio?`<p class="bio">${esc(p.bio)}</p>`:''}
  ${p.statusOn&&p.status&&!hasHours?`<div class="chips"><span class="chip live"><i></i>${esc(p.status)}</span></div>`:''}
  ${profileExtras(p)}
- ${ui.mode!=='edit'?`<button type="button" class="profile-theme" data-visitor-theme aria-label="Thème : ${visitorTheme==='site'?'réglage du site':visitorTheme==='light'?'clair':'sombre'}. Changer le thème">${visitorTheme==='dark'?'☾':visitorTheme==='light'?'☀':'◐'} Thème : ${visitorTheme==='site'?'du site':visitorTheme==='light'?'clair':'sombre'}</button>`:''}
- ${ui.mode!=='edit'?'<div class="profile-utilities"><button type="button" data-share>↗ Partager</button><button type="button" data-profile-qr aria-label="Afficher mon QR code">▦ QR</button><button type="button" data-contact-download>＋ Contact</button></div>':''}
+ ${ui.mode!=='edit'?`<button type="button" class="profile-theme" data-visitor-theme aria-label="Thème : ${visitorTheme==='site'?'réglage du site':visitorTheme==='light'?'clair':'sombre'}. Changer le thème">${ic(visitorTheme==='dark'?'moon':visitorTheme==='light'?'sun':'monitor',20)} Thème : ${visitorTheme==='site'?'du site':visitorTheme==='light'?'clair':'sombre'}</button>`:''}
+ ${ui.mode!=='edit'?`<div class="profile-utilities"><button type="button" data-share>${ic('share',20)} Partager</button><button type="button" data-profile-qr aria-label="Afficher mon QR code">${ic('qr',20)} QR</button><button type="button" data-contact-download>${ic('download',20)} Contact</button></div>`:''}
  ${ui.mode==='edit'?`<div><button class="btn sm" data-act="profile">${ic('edit',14)}Edit profile</button></div>`:''}`;
  renderJumpbar();
+ window.TilesPolish?.refreshContact(page,ui.mode);
 }
 function profileTags(p){const raw=(p.tags!=null&&String(p.tags).trim()!=='')?String(p.tags):String(p.role||'');
  return raw.split(/,|&|\s+et\s+/).map(x=>x.trim()).filter(Boolean).map(x=>x[0].toUpperCase()+x.slice(1))}
@@ -348,7 +349,7 @@ setInterval(()=>{if(!ui.drawer||ui.drawer!=='profile')renderProfile()},60000);
 document.addEventListener('click',e=>{
  const j=e.target.closest('[data-jump]');
  if(j){e.preventDefault();const el=grid.querySelector(`[data-id="${j.dataset.jump}"]`);if(el){const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});activeId='';setTimeout(markActive,reduce?0:600)}return}
- const pc=e.target.closest('#prof [data-pclick]');if(pc&&PUBLIC)beacon({type:'click',id:pc.dataset.pclick});
+ const pc=e.target.closest('[data-pclick]');if(pc&&PUBLIC)beacon({type:'click',id:pc.dataset.pclick});
  if(e.target.closest('#prof a[href^="tel:"]')&&PUBLIC)beacon({type:'click',id:'p-phone'});
  const cp=e.target.closest('#prof [data-copy]');if(cp){e.preventDefault();copyText(cp.dataset.copy,cp.previousElementSibling&&cp.previousElementSibling.querySelector('span'));return}
 });
@@ -393,12 +394,13 @@ function renderGrid(){
  const mode=ui.mode;
  let tiles=S.tiles.filter(t=>T[t.type]&&(mode==='edit'||visible(t)));
  if(mode==='preview'&&hub)tiles=hub.filter(tiles);
- if(mode!=='edit'&&window.TilesExperience)tiles=window.TilesExperience.filter(tiles,ui.query,ui.category);
+ if(mode!=='edit'&&window.TilesExperience)tiles=window.TilesExperience.filter(tiles,ui.query,ui.category,ui.projectKind);
  const counter=$('#explore-count');if(counter)counter.textContent=tiles.filter(t=>t.type!=='section').length+' éléments';
  document.getElementById('statsbox').innerHTML=mode==='stats'?statsHTML():'';
- const empty=mode==='preview'&&!tiles.some(t=>t.type!=='section')&&!hub?.articleCount()? `<section class="portfolio-empty"><h3>Aucun résultat</h3><p>Essayez « React » ou « SaaS », ou réinitialisez les filtres.</p><button type="button" class="btn" data-reset-explorer>Tout afficher</button></section>`:'';
+ const empty=mode==='preview'&&!tiles.some(t=>t.type!=='section')&&!hub?.articleCount()? `<section class="portfolio-empty"><h3>Aucun résultat</h3><p>${ui.query?`Aucun bloc ne correspond à « ${esc(ui.query)} ». `:''}Essayez une suggestion ou réinitialisez les filtres.</p><div class="empty-suggestions"><button type="button" data-search-suggestion="React">React</button><button type="button" data-search-suggestion="SaaS">SaaS</button></div><button type="button" class="btn" data-reset-explorer>Tout afficher</button></section>`:'';
  grid.innerHTML=empty+tiles.map(tileHTML).join('')+(mode==='edit'?`<button class="add-tile" type="button" data-act="add">${ic('plus',22)}Add block</button>`:'')+(mode==='preview'?`<p class="footer-note">Fait avec Tiles</p>`:'');
  if(hub)hub.update();
+ window.TilesPolish?.highlightTitles(grid,ui.query);
 }
 function render(){
  document.body.className='mode-'+ui.mode+(PUBLIC?' is-public':'');page.className='page mode-'+ui.mode;
@@ -543,7 +545,7 @@ function delTile(id){const i=S.tiles.findIndex(t=>t.id===id);if(i<0)return;const
 function moveTile(id,dir){const i=S.tiles.findIndex(t=>t.id===id);const j=i+dir;if(i<0||j<0||j>=S.tiles.length)return;[S.tiles[i],S.tiles[j]]=[S.tiles[j],S.tiles[i]];renderGrid();save();const el=grid.querySelector(`[data-id="${id}"] [data-tb="${dir<0?'left':'right'}"]`);if(el)el.focus()}
 
 function copyText(text,fallbackEl){
- const done=()=>toast('Copié');
+ const done=()=>toast(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)?'Email copié':'Copié');
  try{navigator.clipboard.writeText(text).then(done,()=>{sel(fallbackEl)})}catch(e){sel(fallbackEl)}
  function sel(el){if(!el)return;if(el.select){el.focus();el.select()}else{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}toast('Selected. Press Ctrl+C to copy.')}
 }
@@ -636,7 +638,10 @@ function openConnections(){
  openDrawer('Connexions API','<p role="status">Vérification de la configuration…</p>','connections');
  api('connections',{}).then(({connections:c})=>{if(ui.drawer!=='connections')return;dbody.innerHTML=`<p>Formule 1, radio et cartes : aucune clé requise.</p><p>Football : ${c.footballConfigured?'token présent · validité à vérifier auprès du fournisseur':'token à ajouter sur le serveur'}.</p><p>PHP cURL : ${c.curl?'disponible':'manquant'} · stockage : ${c.cacheWritable?'accessible':'non accessible'}</p><h4>Sports configurés</h4><ul>${c.sports.map(x=>`<li>${esc(x.name)}</li>`).join('')}</ul><h4>Budgets partagés par jour</h4><ul>${Object.entries(c.limits).map(([name,n])=>`<li>${esc(name)} : ${n} requêtes maximum · ${c.usage[name]?.day||'aucune utilisation'} : ${c.usage[name]?.count||0}</li>`).join('')}</ul><p>Le token reste dans FOOTBALL_DATA_TOKEN ou config/config.php. Il ne se renseigne pas dans cet éditeur.</p>`}).catch(e=>{if(ui.drawer==='connections')dbody.textContent=e.message});
 }
-function setExplorer(query,category){
+function setExplorer(query,category,kind=ui.projectKind){
+ if(category!=='projects')kind='all';ui.projectKind=kind;
+ const kinds=$('#project-kinds');if(kinds)kinds.hidden=category!=='projects';
+ $$('[data-project-kind]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.projectKind===kind));
  ui.query=query;ui.category=category;const input=$('#explore-search');if(input&&input.value!==query)input.value=query;
  $$('[data-category]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.category===category));renderGrid();renderProfile();
 }
@@ -655,7 +660,9 @@ function handleAct(a){
  if(a==='logout'){flush();api('logout',{}).finally(()=>{location.href='admin.php'});return}
 }
 document.addEventListener('click',e=>{
- if(e.target.closest('[data-reset-explorer]')){hub?.reset();setExplorer('','all');return;}
+ if(e.target.closest('[data-reset-explorer]')){hub?.reset();setExplorer('','all','all');return;}
+ const suggestion=e.target.closest('[data-search-suggestion]');if(suggestion){hub?.reset();setExplorer(suggestion.dataset.searchSuggestion,'projects','all');return;}
+ const kind=e.target.closest('[data-project-kind]');if(kind){setExplorer(ui.query,'projects',kind.dataset.projectKind);return;}
  const category=e.target.closest('[data-category]');if(category){setExplorer(ui.query,category.dataset.category);return}
  const m=e.target.closest('[data-mode]');if(m){setMode(m.dataset.mode);return}
  const a=e.target.closest('[data-act]');if(a&&!grid.contains(a))handleAct(a.dataset.act);
