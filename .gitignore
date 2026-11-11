@@ -6,3 +6,7 @@ uploads/*
 config.local.php
 .env
 
+config/config.php
+config/auth.php
+node_modules/
+.sites-runtime/

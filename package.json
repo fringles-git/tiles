@@ -1,0 +1,13 @@
+{
+  "name": "tiles",
+  "private": true,
+  "description": "Vanilla PHP and JavaScript portfolio; Node is used only for development checks.",
+  "scripts": {
+    "check": "node scripts/check.cjs",
+    "test": "node --test tests/js/*.test.cjs && node scripts/test-php.cjs",
+    "test:js": "node --test tests/js/*.test.cjs",
+    "test:php": "node scripts/test-php.cjs",
+    "test:http": "node --test tests/js/http.test.cjs",
+    "dev": "node scripts/dev.cjs"
+  }
+}

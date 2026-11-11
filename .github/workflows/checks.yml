@@ -6,16 +6,33 @@ on:
 permissions:
   contents: read
 jobs:
-  checks:
+  javascript:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node --test tests/*.test.cjs
-      - name: PHP syntax and gateway tests
-        run: |
-          find . -name '*.php' -not -path './config.local.php' -print0 | xargs -0 -n1 php -l
-          php tests/widget-cache.test.php
-          php tests/football.test.php
+      - name: JavaScript regression tests
+        run: npm run test:js
+        env:
+          TILES_SKIP_HTTP: '1'
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, gd, fileinfo
+          coverage: none
+      - run: npm run check
+      - run: npm run test:php
+      - name: HTTP boundary, media, authentication and persistence
+        run: npm run test:http
