@@ -396,7 +396,7 @@ function renderGrid(){
  if(mode!=='edit'&&window.TilesExperience)tiles=window.TilesExperience.filter(tiles,ui.query,ui.category,ui.projectKind);
  const counter=$('#explore-count');if(counter)counter.textContent=tiles.filter(t=>t.type!=='section').length+' éléments';
  document.getElementById('statsbox').innerHTML=mode==='stats'?statsHTML():'';
- const empty=mode==='preview'&&!tiles.some(t=>t.type!=='section')&&!hub?.articleCount()? `<section class="portfolio-empty"><h3>Aucun résultat</h3><p>${ui.query?`Aucun bloc ne correspond à « ${esc(ui.query)} ». `:''}Essayez une suggestion ou réinitialisez les filtres.</p><div class="empty-suggestions"><button type="button" data-search-suggestion="React">React</button><button type="button" data-search-suggestion="SaaS">SaaS</button></div><button type="button" class="btn" data-reset-explorer>Tout afficher</button></section>`:'';
+ const empty=mode==='preview'&&!tiles.some(t=>t.type!=='section'&&t.type!=='universe')&&!hub?.articleCount()? `<section class="portfolio-empty"><h3>Aucun résultat</h3><p>${ui.query?`Aucun bloc ne correspond à « ${esc(ui.query)} ». `:''}Essayez une suggestion ou réinitialisez les filtres.</p><div class="empty-suggestions"><button type="button" data-search-suggestion="React">React</button><button type="button" data-search-suggestion="SaaS">SaaS</button></div><button type="button" class="btn" data-reset-explorer>Tout afficher</button></section>`:'';
  grid.innerHTML=empty+tiles.map(tileHTML).join('')+(mode==='edit'?`<button class="add-tile" type="button" data-act="add">${ic('plus',22)}Add block</button>`:'')+(mode==='preview'?`<p class="footer-note">Fait avec Tiles</p>`:'');
  if(hub)hub.update();
  window.TilesPolish?.highlightTitles(grid,ui.query);

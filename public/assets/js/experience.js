@@ -53,13 +53,15 @@ function employerLinks(text){
 function projectKind(d){const text=normalize([d.role,d.tags,d.title].join(' '));return /saas/.test(text)?'saas':/\bapp\b|mobile|flutter/.test(text)?'app':/site|plateforme|web/.test(text)?'site':'experiment';}
 function filter(tiles,query='',category='all',kind='all'){
  const groups={projects:['project'],photos:['image','gallery','video'],career:['experience','education','skills','languages','company','cv'],personal:['sport','team','radio','music','instrument','faith','interest','now','atlas','map']};
- const q=normalize(query),output=[];let heading=null,shown=false;
+ const q=normalize(query),output=[];let heading=null,shown=false,group=null,groupShown=false;
  for(const t of tiles){
+  if(t.type==='universe'){group=t;groupShown=false;heading=null;shown=false;continue}
   if(t.type==='section'){heading=t;shown=false;continue}
   const text=normalize(JSON.stringify(t.data||{})+' '+(/paris saint.germain/i.test(t.data.club||t.data.title||'')?'PSG ':'')+(/formule 1|formula 1/i.test(t.data.title||'')?'F1 ':''));
   if(q&&!text.includes(q))continue;
   if(kind!=='all'&&(t.type!=='project'||projectKind(t.data)!==kind))continue;
   if(category!=='all'&&!(groups[category]||[]).includes(t.type))continue;
+  if(group&&!groupShown){output.push(group);groupShown=true}
   if(heading&&!shown){output.push(heading);shown=true}output.push(t);
  }
  return output;
