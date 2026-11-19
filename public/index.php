@@ -13,6 +13,8 @@ if (!$page) {
 }
 
 $page['journal'] = array_values(array_filter($page['journal'] ?? [], static fn($entry) => is_array($entry) && !empty($entry['published'])));
+// Hidden and out-of-schedule tiles never leave the server: the public boot data is readable in the page source.
+$page['tiles'] = array_values(array_filter($page['tiles'] ?? [], static fn($tile) => is_array($tile) && seo_tile_live($tile, time())));
 
 $profile = $page['profile'] ?? [];
 $name = (string) ($profile['name'] ?? 'Tiles');
