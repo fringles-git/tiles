@@ -13,6 +13,11 @@ test('SEO endpoints and head metadata use the configured canonical origin',{skip
   const robots=await get('/robots.txt');assert.match(robots.headers.get('content-type'),/^text\/plain/);assert.match(await robots.text(),/Sitemap: https:\/\/brandonlazarre\.fr\/sitemap\.xml/);
   const sitemap=await get('/sitemap.xml');assert.match(sitemap.headers.get('content-type'),/^application\/xml/);const xml=await sitemap.text();assert(xml.includes('<loc>https://brandonlazarre.fr/</loc>'));assert(!xml.includes('evil.test'));
   const llms=await(await get('/llms.txt')).text();assert(llms.startsWith('# Jane Doe'));assert(llms.includes('Visible project'));assert(!llms.includes('Secret hidden'));
+  const parcours=await(await get('/parcours')).text(),passions=await(await get('/passions')).text();
+  assert.match(parcours,/<link rel="canonical" href="https:\/\/brandonlazarre\.fr\/parcours">/);
+  const ns=h=>h.match(/<noscript>([\s\S]*?)<\/noscript>/)[1];
+  assert(ns(parcours).includes('Visible project'));assert(!ns(passions).includes('Visible project'));assert(!ns(parcours).includes('Secret hidden'));
+  assert.match(ns(passions),/<h1>Passions · /);assert.match(ns(passions),/href="https:\/\/brandonlazarre\.fr\/parcours">Parcours</);
   const home=await(await get('/')).text();
   assert(home.includes('<link rel="canonical" href="https://brandonlazarre.fr/">'));assert(!home.includes('evil.test'));
   assert(home.includes('name="robots" content="index, follow, max-image-preview:large"'));assert(home.includes('application/ld+json'));
