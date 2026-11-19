@@ -135,10 +135,11 @@ function with_lock(string $name, callable $fn)
     }
 }
 
-function is_https(): bool
+function is_https(?array $server = null): bool
 {
-    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    $server ??= $_SERVER;
+    return (!empty($server['HTTPS']) && $server['HTTPS'] !== 'off')
+        || (($server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 }
 
 function start_session(): void

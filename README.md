@@ -52,6 +52,10 @@ The original card sizes, case studies, piano, sports illustrations, QR sharing, 
 
 Every tile with a URL has a tracked link `/go/<tile-id>` (shown in the tile editor). It counts the visit in `data/stats.json` (`clicks` and `go`), then redirects with a 302 to the tile's stored URL. The destination is never read from the request, hidden or out-of-schedule tiles return 404, only `http(s)` URLs are used, and HEAD requests, prefetches and link-preview bots are not counted. `/go/` is disallowed in `robots.txt`.
 
+## SEO
+
+`/robots.txt`, `/sitemap.xml` and `/llms.txt` are generated from the page content (`public/seo.php`). Set `site_url` in `config/config.php` (or `TILES_SITE_URL`), for example `https://brandonlazarre.fr`, so canonical links, Open Graph URLs, the sitemap and the JSON-LD (Person + WebSite) always use one public origin whatever domain serves the install. Without it, only a syntactically valid Host header is used. The home page also ships robots/author/locale meta tags and crawler-readable HTML for every visible tile; `admin.php` is `noindex`. After deployment, submit `/sitemap.xml` in Google Search Console and Bing Webmaster Tools and verify the rich results of the home page.
+
 ## Checks
 
 ```sh
