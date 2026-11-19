@@ -62,7 +62,7 @@ function seo_sitemap(string $base, ?int $lastModified, array $slugs = []): strin
     $mod = $lastModified ? '<lastmod>' . gmdate('Y-m-d', $lastModified) . '</lastmod>' : '';
     $urls = '';
     foreach (array_merge([''], $slugs) as $i => $slug) {
-        if (!is_string($slug) || ($i > 0 && !preg_match('/\A[a-z0-9-]{1,40}\z/', $slug))) { continue; }
+        if (!is_string($slug) || ($i > 0 && !preg_match('/\A[a-z0-9-]{1,120}\z/', $slug))) { continue; }
         $loc = htmlspecialchars($base . $slug, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         $urls .= '<url><loc>' . $loc . '</loc>' . $mod . '<changefreq>monthly</changefreq><priority>' . ($i === 0 ? '1.0' : '0.8') . '</priority></url>';
     }
