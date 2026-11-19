@@ -11,3 +11,13 @@ test('public sections: path slugs, legacy query, root-relative links and guiding
  assert.deepEqual(Object.values(h.universes).map(u=>u.label),['Profil','Parcours','Créations','Passions']);for(const u of Object.values(h.universes))assert.match(u.question,/\?$/);
  const g=h.grouped([{id:'a',type:'project',data:{}}]);assert.equal(g[0].type,'universe');assert.equal(g[0].data.count,1);assert.equal(g.length,2);
 });
+test('server and browser assign every tile to the same section (PHP/JS parity)',()=>{
+ const {spawnSync}=require('node:child_process');
+ const page=JSON.parse(fs.readFileSync(path.join(root,'seed/data/page.json'),'utf8'));
+ const tiles=[...page.tiles,{id:'n1',type:'sport',data:{}},{id:'n2',type:'image',universe:'pro',data:{}},{id:'n3',type:'project',data:{}},{id:'n4',type:'faith',data:{}},{id:'n5',type:'image',universe:'bogus',data:{}}];
+ const php=spawnSync(process.env.PHP_BINARY||'php',['-r','require "src/sections.php";$t=json_decode(stream_get_contents(STDIN),true);echo json_encode(array_map("tile_universe",$t));foreach(["humain","pro","crea","lifestyle"] as $k){echo "\n",json_encode(array_column(section_tiles($t,$k),"id"));}'],{cwd:root,input:JSON.stringify(tiles),encoding:'utf8'});
+ if(php.error){return;}assert.equal(php.status,0,php.stderr);
+ const [kinds,...sections]=php.stdout.trim().split('\n').map(JSON.parse);
+ assert.deepEqual(kinds,tiles.map(t=>h.universe(t)));
+ ['humain','pro','crea','lifestyle'].forEach((k,i)=>assert.deepEqual(sections[i],Array.from(h.filter(tiles,k),t=>t.id)));
+});

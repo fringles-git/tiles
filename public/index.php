@@ -51,9 +51,13 @@ if (!$hasAvatar) {
 }
 
 // Plain-HTML fallback for visitors and crawlers that do not run JavaScript.
-$items = seo_body($page, $now);
+$items = seo_body($section ? ['tiles' => section_tiles($page['tiles'] ?? [], $section['key'])] + $page : $page, $now);
 $noscript = '<noscript><main style="max-width:640px;margin:40px auto;padding:0 16px;font-family:sans-serif">'
-    . '<h1>' . e($name) . '</h1><p>' . e($role) . '</p><p>' . e($bio) . '</p>' . $items . '</main></noscript>';
+    . ($section
+        ? '<h1>' . e($section['label']) . ' · ' . e($name) . '</h1><p>' . e($section['question']) . '</p>'
+        : '<h1>' . e($name) . '</h1><p>' . e($role) . '</p><p>' . e($bio) . '</p>')
+    . $items
+    . '<nav><a href="' . e($base) . '">' . e($name) . '</a>' . implode('', array_map(static fn(string $slug, array $s): string => ' · <a href="' . e($base . $slug) . '">' . e($s['label']) . '</a>', array_keys(TILES_SECTIONS), TILES_SECTIONS)) . '</nav></main></noscript>';
 
 $head .= seo_jsonld($page, $base, $now);
 header('Cache-Control: public, max-age=60');
