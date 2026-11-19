@@ -80,5 +80,4 @@
  .page:not([data-layout="top"]) .prof{position:static;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:20px;align-items:start;grid-auto-flow:row dense}
  .page:not([data-layout="top"]) .prof>*{grid-column:1}
  .page:not([data-layout="top"]) .prof>.profile-primary,.page:not([data-layout="top"]) .prof>.pcv,.page:not([data-layout="top"]) .prof>.pcard{grid-column:2}
- .page:not([data-layout="top"]) .prof>.jump{display:none}
 }

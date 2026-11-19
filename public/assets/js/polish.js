@@ -7,11 +7,12 @@ function contrast(a,b){const x=luminance(a),y=luminance(b);return x===null||y===
 function ink(bg){return contrast(bg,'#FFFFFF')>=contrast(bg,'#000000')?'#FFFFFF':'#000000';}
 function contact(p){const email=String(p.email||'').trim();if(/^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/.test(email))return {href:'mailto:'+email+'?subject='+encodeURIComponent('Discutons de votre projet'),label:'Discutons de votre projet',track:'p-mail'};try{const u=new URL(p.booking);if(['https:','http:'].includes(u.protocol)&&!u.username&&!u.password)return {href:u.href,label:'Discutons de votre projet',track:'p-rdv'};}catch{}return null;}
 function dedupeBio(bio,location){
- const text=String(bio||''),city=String(location||'').split(',')[0].trim();if(!city)return text;
- const n=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
- const parts=text.split(/(?<=[.!?])\s+/);const last=parts[parts.length-1]||'';
- if(parts.length>1&&/^bas[ée]e?s?\s+(?:a|en|au|dans)\b/i.test(n(last))&&n(last).includes(n(city)))return parts.slice(0,-1).join(' ');
- return text;
+ const text=String(bio||''),loc=String(location||'').trim(),city=loc.split(',')[0].trim();if(!city)return text;
+ const n=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+ const parts=text.split(/(?<=[.!?])\s+/);if(parts.length<2)return text;
+ const last=n(parts[parts.length-1]).replace(/[.!?]+$/,''),places=new Set([n(city),n(loc)]);
+ const m=last.match(/^basee?s?\s+(?:a|en|au|dans)\s+(.+)$/);
+ return m&&places.has(m[1].replace(/\s*,\s*/g,', '))?parts.slice(0,-1).join(' '):text;
 }
 function contactRows(p,{esc,ic,telHref,safeUrl,canCall=true}){
  const rows=[],phone=String(p.phone||'').trim(),email=String(p.email||'').trim(),book=safeUrl(p.booking)||'';
