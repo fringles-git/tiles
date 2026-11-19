@@ -77,7 +77,17 @@ test('instruments: secondary instruments become switch tabs, from the also field
 });
 test('instrument choice survives a re-render of the grid',()=>{
  const T=definitions(),d={name:'Piano',since:'Aussi : basse'};
- api.choose('bass');assert.match(T.instrument.render(d),/data-kind="bass"/);
+ api.choose('bass');assert.match(T.instrument.render(d),/data-kind="bass"/);assert.match(T.instrument.render(d,{id:'x'}),/data-kind="piano"/);
  assert.match(T.instrument.render({name:'Sax',kind:'sax'}),/data-kind="sax"/);
  api.choose(null);assert.match(T.instrument.render(d),/data-kind="piano"/);
+});
+test('MIDI follows only the tile it was connected on, and choices are kept per tile',()=>{
+ const T=definitions();
+ api.connectMidiOwner('pianoTile','piano');
+ T.instrument.render({name:'Basse',kind:'bass',also:'Piano'},{id:'bassTile'});
+ assert.equal(api.midiState().kind,'piano');
+ api.choose('bass','pianoTile');T.instrument.render({name:'Piano',also:'Basse'},{id:'pianoTile'});
+ assert.equal(api.midiState().kind,'bass');
+ assert.match(T.instrument.render({name:'Piano',also:'Basse'},{id:'other'}),/data-kind="piano"/);
+ api.choose(null,'pianoTile');
 });
