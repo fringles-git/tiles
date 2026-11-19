@@ -323,10 +323,7 @@ function profileExtras(p){
  const canCall=!st||st.open;
  const closed=DAYS_LONG.filter((x,i)=>!(hrs.days||[])[i]);
  if(dl&&(isAllDay(hrs)||(fmtH(hrs.from)&&fmtH(hrs.to))))rows.push(`<div class="pstat ${st&&!st.open?'off':'on'}"><span class="openst ${st&&!st.open?'off':'on'}"><i></i>${esc(st?st.text:'Disponible')}</span><small>${esc(dl)} · ${isAllDay(hrs)?'24h/24':fmtH(hrs.from)+'–'+fmtH(hrs.to)}${isAllDay(hrs)&&closed.length&&closed.length<=2?' · fermé le '+esc(closed.join(' et ')):''}${hrs.note?' · '+esc(hrs.note):''}</small></div>`);
- if((p.phone||'').trim())rows.push(`<div class="prow"><span class="pv">${ic('phone',16)}<span>${esc(p.phone)}</span></span><span class="pact">${canCall?`<a class="ib pri" href="${esc(telHref(p.phone))}" aria-label="Appeler" title="Appeler">${ic('phone',16)}</a>`:''}<button type="button" class="ib" data-copy="${esc(p.phone)}" aria-label="Copier le numéro" title="Copier">${ic('copy',15)}</button></span></div>`);
- if((p.email||'').trim())rows.push(`<div class="prow"><span class="pv">${ic('mail',16)}<span>${esc(p.email)}</span></span><span class="pact"><a class="ib" href="mailto:${esc(p.email)}" data-pclick="p-mail" aria-label="Envoyer un email" title="Envoyer un email">${ic('ext',15)}</a><button type="button" class="ib" data-copy="${esc(p.email)}" aria-label="Copier l’adresse email" title="Copier">${ic('copy',15)}</button></span></div>`);
- const book=safeUrl(p.booking)||((p.email||'').trim()?'mailto:'+p.email+'?subject='+encodeURIComponent('Demande de rendez-vous'):'');
- if(rows.length&&book)rows.push(`<a class="pcta" href="${esc(book)}"${/^https?:/.test(book)?' target="_blank" rel="noopener"':''} data-pclick="p-rdv">${ic('cal',16)}Prendre rendez-vous</a>`);
+ rows.push(...window.TilesPolish.contactRows(p,{esc,ic,telHref,safeUrl,canCall}));
  if(rows.length)h+=`<div class="pcard">${rows.join('')}</div>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('plus',16)}Ajouter téléphone, email et horaires</button>`;
  const secs=navSections();
@@ -351,7 +348,7 @@ document.addEventListener('click',e=>{
  if(j){e.preventDefault();const el=grid.querySelector(`[data-id="${j.dataset.jump}"]`);if(el){const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});activeId='';setTimeout(markActive,reduce?0:600)}return}
  const pc=e.target.closest('[data-pclick]');if(pc&&PUBLIC)beacon({type:'click',id:pc.dataset.pclick});
  if(e.target.closest('#prof a[href^="tel:"]')&&PUBLIC)beacon({type:'click',id:'p-phone'});
- const cp=e.target.closest('#prof [data-copy]');if(cp){e.preventDefault();copyText(cp.dataset.copy,cp.previousElementSibling&&cp.previousElementSibling.querySelector('span'));return}
+ const cp=e.target.closest('#prof [data-copy]');if(cp){e.preventDefault();copyText(cp.dataset.copy,cp.closest('.prow')&&cp.closest('.prow').querySelector('.pv span'));return}
 });
 const FLOW=['experience','education','skills','text','now','faith','testimonial','instrument','contact'];
 function sizeIcon(cells){return `<span class="sz-ico">${cells.map(c=>`<i class="${c?'f':''}"></i>`).join('')}</span>`}
