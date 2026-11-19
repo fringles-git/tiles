@@ -31,8 +31,8 @@ function skillMark(name){
 }
 let library=[];
 let employers=[];
-function setLibrary(tiles){
- employers=organisations(tiles);
+function setLibrary(tiles,shown=tiles){
+ employers=organisations(shown);
  library=(tiles||[]).filter(t=>t&&t.data&&image(t.data.logo)&&String(t.data.logoFor||'').trim()).map(t=>({key:normalize(t.data.logoFor).trim(),name:String(t.data.logoFor).trim(),logo:t.data.logo})).sort((a,b)=>b.key.length-a.key.length);
 }
 /** Every organisation named in experience tiles, first mention first, deduplicated (accents and case ignored). */
@@ -48,7 +48,7 @@ function employerStrip(max=7){
  const logoOf=name=>{const lib=libraryLogo(name);return lib?lib.logo:Object.values(brands).find(b=>b.logo&&new RegExp('\\b(?:'+(b.match||'')+')\\b').test(normalize(name)))?.logo||'';};
  const ranked=employers.map((name,i)=>({name,logo:logoOf(name),i})).sort((a,b)=>(!a.logo)-(!b.logo)||a.i-b.i);
  const shown=ranked.slice(0,max).reverse(),rest=employers.length-shown.length;
- return `<div class="stat-logos" aria-label="Entreprises : ${esc(employers.join(', '))}">${shown.map((e,i)=>`<span class="stat-logo" style="--i:${i};--n:${shown.length}" title="${esc(e.name)}">${logoMarkup(e.name,e.logo)}</span>`).join('')}${rest>0?`<span class="stat-logo more" style="--i:${shown.length};--n:${shown.length}">+${rest}</span>`:''}</div>`;
+ return `<div class="stat-logos" style="--count:${shown.length+(rest>0?1:0)}" aria-label="Entreprises : ${esc(employers.join(', '))}">${shown.map((e,i)=>`<span class="stat-logo" style="--i:${i};--n:${shown.length}" title="${esc(e.name)}">${logoMarkup(e.name,e.logo)}</span>`).join('')}${rest>0?`<span class="stat-logo more" style="--i:${shown.length};--n:${shown.length}">+${rest}</span>`:''}</div>`;
 }
 function libraryLogo(org){const t=normalize(org);return library.find(x=>x.key&&new RegExp('(?:^|[^a-z0-9])'+x.key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:$|[^a-z0-9])').test(t))||null}
 function span(dates){
