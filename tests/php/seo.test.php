@@ -7,6 +7,7 @@ $now = strtotime('2026-11-19 12:00:00 UTC');
 putenv('TILES_SITE_URL');
 check(seo_base_url(['HTTP_HOST' => 'Example.TEST', 'HTTPS' => 'on']) === 'https://example.test/', 'host header normalised');
 check(seo_base_url(['HTTP_HOST' => 'evil.test/"><script>']) === 'http://localhost/', 'unsafe Host header never reflected');
+check(seo_base_url(['HTTP_HOST' => 'a.test', 'HTTP_X_FORWARDED_PROTO' => 'https']) === 'https://a.test/', 'forwarded HTTPS honoured behind a proxy');
 putenv('TILES_SITE_URL=https://brandonlazarre.fr/');
 check(seo_base_url(['HTTP_HOST' => 'tiles.other.test']) === 'https://brandonlazarre.fr/', 'configured canonical origin wins over Host');
 putenv('TILES_SITE_URL=http://insecure.test'); check(seo_base_url(['HTTP_HOST' => 'a.test']) === 'http://a.test/', 'non-https site_url ignored');

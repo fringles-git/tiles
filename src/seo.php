@@ -10,8 +10,7 @@ function seo_base_url(?array $server = null): string
     if ($configured !== '') { return $configured . '/'; }
     $host = strtolower((string) ($server['HTTP_HOST'] ?? ''));
     if (!preg_match('/^[a-z0-9.-]{1,253}(:\d{1,5})?$/', $host)) { $host = 'localhost'; }
-    $https = !empty($server['HTTPS']) && $server['HTTPS'] !== 'off';
-    return ($https ? 'https://' : 'http://') . $host . '/';
+    return (is_https($server) ? 'https://' : 'http://') . $host . '/';
 }
 
 /** Hidden or out-of-schedule tiles are neither indexed nor listed (UTC day boundaries). */

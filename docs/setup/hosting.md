@@ -42,6 +42,12 @@ location ~ ^/(?:index|admin|api|widgets|media)\.php$ {
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     fastcgi_pass unix:/run/php/php8.4-fpm.sock;
 }
+location ~ ^/(robots\.txt|sitemap\.xml|llms\.txt)$ {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root/seo.php;
+    fastcgi_param QUERY_STRING f=$1;
+    fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+}
 location ~ \.php$ { return 404; }
 location ~ /\. { deny all; }
 add_header X-Content-Type-Options nosniff always;
