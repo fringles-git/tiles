@@ -6,6 +6,13 @@ function luminance(hex){const c=rgb(hex);if(!c)return null;const v=c.map(x=>{x/=
 function contrast(a,b){const x=luminance(a),y=luminance(b);return x===null||y===null?0:(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
 function ink(bg){return contrast(bg,'#FFFFFF')>=contrast(bg,'#000000')?'#FFFFFF':'#000000';}
 function contact(p){const email=String(p.email||'').trim();if(/^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/.test(email))return {href:'mailto:'+email+'?subject='+encodeURIComponent('Discutons de votre projet'),label:'Discutons de votre projet',track:'p-mail'};try{const u=new URL(p.booking);if(['https:','http:'].includes(u.protocol)&&!u.username&&!u.password)return {href:u.href,label:'Discutons de votre projet',track:'p-rdv'};}catch{}return null;}
+function contactRows(p,{esc,ic,telHref,safeUrl,canCall=true}){
+ const rows=[],phone=String(p.phone||'').trim(),email=String(p.email||'').trim(),book=safeUrl(p.booking)||'';
+ if(phone)rows.push(`<div class="prow k-phone"><span class="pv">${ic('phone',18)}<span>${esc(phone)}</span></span><span class="pact">${canCall?`<a class="act pri" href="${esc(telHref(phone))}">${ic('phone',16)}Appeler</a>`:''}<button type="button" class="act" data-copy="${esc(phone)}">${ic('copy',16)}Copier</button></span></div>`);
+ if(email)rows.push(`<div class="prow k-mail"><span class="pv">${ic('mail',18)}<span>${esc(email)}</span></span><span class="pact"><button type="button" class="act" data-copy="${esc(email)}">${ic('copy',16)}Copier</button></span></div>`);
+ if(rows.length&&/^https?:/.test(book))rows.push(`<a class="pcta k-cal" href="${esc(book)}" target="_blank" rel="noopener" data-pclick="p-rdv">${ic('cal',18)}Prendre rendez-vous</a>`);
+ return rows;
+}
 function preference(storage){try{const v=storage.getItem(KEY);return ['light','dark'].includes(v)?v:'site';}catch{return 'site';}}
 function apply(page,mode,accent,storage){const v=mode==='preview'?preference(storage):'site';if(v!=='site'){page.dataset.skin=v==='dark'?'graphite':'porcelain';document.documentElement.dataset.theme=v;}else delete document.documentElement.dataset.theme;const bg=rgb(accent)?accent:'#0B7A75';page.style.setProperty('--cta-bg',bg);page.style.setProperty('--cta-fg',ink(bg));return v;}
 const escapeText=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -26,5 +33,5 @@ function refreshContact(page,mode){
  contactObserver=new IntersectionObserver(update,{threshold:[0,1]});contactObserver.observe(primary);contacts.forEach(el=>contactObserver.observe(el));update();
 }
 function bind({render,applyTheme}){document.addEventListener('click',e=>{const button=e.target.closest('[data-visitor-theme]');if(!button)return;let next;try{const value=preference(localStorage);next=value==='site'?'light':value==='light'?'dark':'site';if(next==='site')localStorage.removeItem(KEY);else localStorage.setItem(KEY,next);}catch{next='site';}render();});window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null){applyTheme();render();}});}
-window.TilesPolish={rgb,contrast,ink,contact,preference,apply,bind,KEY,marked,highlightTitles,refreshContact};
+window.TilesPolish={contactRows,rgb,contrast,ink,contact,preference,apply,bind,KEY,marked,highlightTitles,refreshContact};
 })();
