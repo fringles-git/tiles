@@ -49,3 +49,12 @@ assert.ok(!idle.some(r=>r[0]==='●'));
 const live=api.f1Rows({view:'calendar',items,live:{items:[{name:'FP1',state:'in'}],updatedAt:'2099-01-01T09:00:00Z'}},3);
 assert.equal(live[0][0],'●');assert.ok(live[0][1].includes('FP1'));
 });
+
+test('stale or old ESPN snapshots never produce an in-progress row',()=>{
+const items=[{name:'GP',sessions:[{name:'Essais 1',date:'2099-01-01',time:'09:00:00Z'}]}];
+const rows=live=>api.f1Rows({view:'calendar',items,live},3).some(r=>r[0]==='●');
+assert.equal(rows({items:[{name:'FP1',state:'in'}],updatedAt:'2099-01-01T09:00:00Z'}),true);
+assert.equal(rows({stale:true,items:[{name:'FP1',state:'in'}],updatedAt:'2099-01-01T09:00:00Z'}),false);
+assert.equal(rows({items:[{name:'FP1',state:'in'}],updatedAt:'2020-01-01T09:00:00Z'}),false);
+assert.equal(rows({items:[{name:'FP1',state:'in'}],updatedAt:'not a date'}),false);
+});
