@@ -100,3 +100,8 @@ test('employer logos under a big number come from the experience tiles, deduplic
  assert.doesNotMatch(T.stat.render({value:'19',label:'missions'}),/stat-logos/);
  api.setLibrary([]);assert.doesNotMatch(T.stat.render({value:'1',logos:'employers'}),/stat-logos/);
 });
+test('employer strip: hidden or scheduled experiences are excluded, item count is exposed for sizing',()=>{
+ const vis={id:'a',type:'experience',data:{items:'R | Action | 2022'}},hid={id:'b',type:'experience',data:{items:'R | Secret Corp | 2022'}};
+ api.setLibrary([vis,hid],[vis]);const html=api.employerStrip();
+ assert.doesNotMatch(html,/Secret Corp/);assert.match(html,/--count:1/);api.setLibrary([]);
+});
