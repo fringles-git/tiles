@@ -7,7 +7,7 @@ const listeners={},players=[],fetches=[],dialogs=new Map();
 const window={addEventListener(){}},document={currentScript:{src:'https://example.test/assets/js/widgets.js'},addEventListener:(name,fn)=>listeners[name]=fn,hidden:false,getElementById:id=>dialogs.get(id)||null,createElement:()=>({style:{setProperty(){}},setAttribute(){},addEventListener(){},showModal(){this.open=true},close(){this.open=false}}),body:{appendChild:d=>dialogs.set(d.id,d)}};
 class Audio{constructor(){players.push(this)}async play(){this.started=true}pause(){this.paused=true}removeAttribute(){this.src=''}load(){this.released=true}addEventListener(){}}
 const items=Array.from({length:12},(_,i)=>({name:'Station '+i,url:'https://example.test/'+i,country:'FR',codec:'MP3',bitrate:128}));
-vm.runInNewContext(source,{window,document,URL,Map,Audio,AbortController,setTimeout,clearTimeout,location:{href:'https://example.test/'},fetch:async url=>{fetches.push(url);return {ok:!fail,json:async()=>fail?{ok:false,retryAfter:3600}:{ok:true,items:url.includes('football-')?[{home:'Paris Saint-Germain',away:'Autre équipe',status:'SCHEDULED',date:'2099-01-01T20:00:00Z',homeScore:null,awayScore:null,competition:'Ligue 1'},{home:'France',away:'Autre équipe',status:'FINISHED',date:'2000-01-01T20:00:00Z',homeScore:null,awayScore:null,competition:'Coupe du monde'}]:items,source:'Fixture',updatedAt:'2026-11-06T12:00:00Z'}}}});
+vm.runInNewContext(source,{window,document,URL,Map,Audio,AbortController,setTimeout,clearTimeout,location:{href:'https://example.test/'},fetch:async url=>{fetches.push(url);return {ok:!fail,json:async()=>fail?{ok:false,retryAfter:3600}:{ok:true,items:url.includes('f1-standings')?[{id:'a',code:'AAA',name:'A A',position:'1',points:'10',wins:'1',team:'T',teamId:'t'}]:url.includes('football-')?[{home:'Paris Saint-Germain',away:'Autre équipe',status:'SCHEDULED',date:'2099-01-01T20:00:00Z',homeScore:null,awayScore:null,competition:'Ligue 1'},{home:'France',away:'Autre équipe',status:'FINISHED',date:'2000-01-01T20:00:00Z',homeScore:null,awayScore:null,competition:'Coupe du monde'}]:items,source:'Fixture',updatedAt:'2026-11-06T12:00:00Z'}}}});
 const cards=new Map();
 window.TilesWidgets.bind(id=>cards.get(id).tile,()=>true);
 function card(id,size='s',type='radio',follow='f1'){
@@ -38,4 +38,14 @@ test('PSG views reuse the same snapshot, preserve null scores and label delay',a
 const h=harness(),a=h.card('psg','w','sport','psg');await h.click(a,'load');assert.ok(h.fetches[0].includes('resource=football-psg'));assert.ok(a.body.innerHTML.includes('Paris Saint-Germain'));assert.ok(h.dialogs.get('sports-dialog').innerHTML.includes('Scores différés'));
 await h.click(a,'view',null,'results');assert.equal(h.fetches.length,1);assert.ok(h.dialogs.get('sports-dialog').innerHTML.includes('<b>—</b>'));assert.ok(!a.body.innerHTML.includes('sports-summary'));
 const b=h.card('france','w','sport','france');await h.click(b,'load');assert.ok(h.fetches[1].includes('resource=football-france'));
+});
+
+test('F1 views: one gateway resource per view, follow reuses standings, no ESPN outside a race weekend',async()=>{
+const h=harness(),a=h.card('f','l','sport','f1');a.tile.data.view='standings';
+await h.click(a,'load');
+assert.ok(h.fetches[0].includes('resource=f1-standings'));assert.ok(a.body.innerHTML.includes('sports-glance'));
+await h.click(a,'view',null,'follow');
+assert.equal(h.fetches.filter(u=>u.includes('f1-standings')).length,1);assert.ok(h.fetches.some(u=>u.includes('f1-results')));
+await h.click(a,'view',null,'calendar');
+assert.ok(!h.fetches.some(u=>u.includes('f1-live')));
 });

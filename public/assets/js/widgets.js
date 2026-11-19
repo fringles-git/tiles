@@ -14,7 +14,7 @@ function get(id){if(!state.has(id))state.set(id,{view:'calendar'});return state.
 function shell(type,d,t){if(type==='sport')return sportsFace(d,t);return `<div class="w-card w-${type}" data-widget="${type}" data-widget-id="${esc(t.id)}" data-widget-size="${esc(t.size)}"><div class="w-heading"><span class="w-symbol" aria-hidden="true">${{radio:'♫',sport:(followed(d).key==='f1'?'🏁':'⚽'),atlas:'◎'}[type]}</span><div><small>${{radio:'La sélection musicale',sport:(followed(d).key==='f1'?'Le paddock':'Mon équipe'),atlas:'Sur la carte'}[type]}</small><b>${esc(d.title||d.place||{radio:'Radio',sport:followed(d).name,atlas:'Troyes'}[type])}</b></div></div><p class="w-intro">${esc(d.note||{radio:'Gospel, classique et découvertes.',sport:(followed(d).key==='f1'?'Calendrier et classement · données en cache.':'Calendrier et résultats · compétitions couvertes.'),atlas:'Déplacez la carte, zoomez et explorez.'}[type])}</p><div class="w-body"><button type="button" data-w-action="load">${{radio:'Choisir une radio',sport:'Explorer',atlas:'Activer la carte'}[type]}</button></div><p class="w-status" role="status" aria-live="polite"></p></div>`}
 function definitions(F){return {
  radio:{label:'Radio interactive',cat:'Creative',hint:'Gospel, classique, jazz · lecture à la demande',size:'w',interactive:true,fields:[F('title','Titre'),F('genre','Sélection','select',genres),F('note','Description')],def:{title:'Dans mes oreilles',genre:'gospel',note:''},render:(d,t)=>shell('radio',d,t)},
- sport:{label:'Sport interactif',cat:'Personal',hint:'F1, PSG, France ou équipe configurée',size:'w',bleed:true,interactive:true,fields:[F('follow','Supporter de','select',catalogue.map(x=>[x.key,x.name])),F('title','Titre personnalisé (facultatif)'),F('note','Description')],def:{title:'',follow:'f1',note:''},render:(d,t)=>shell('sport',d,t)},
+ sport:{label:'Sport interactif',cat:'Personal',hint:'F1, PSG, France ou équipe configurée',size:'w',bleed:true,interactive:true,fields:[F('follow','Supporter de','select',catalogue.map(x=>[x.key,x.name])),F('view','F1 · vue initiale','select',F1_VIEWS),F('f1follow','F1 · pilote ou écurie suivi (driver:id ou team:id)'),F('title','Titre personnalisé (facultatif)'),F('note','Description')],def:{title:'',follow:'f1',view:'calendar',f1follow:'driver:max_verstappen',note:''},render:(d,t)=>shell('sport',d,t)},
  atlas:{label:'Carte interactive',cat:'Essentials',hint:'OpenFreeMap · zoom, déplacement, itinéraire',size:'l',interactive:true,fields:[F('place','Lieu'),F('lat','Latitude'),F('lon','Longitude'),F('zoom','Zoom (3–16)'),F('note','Description')],def:{place:'Troyes',lat:'48.2973',lon:'4.0744',zoom:'12',note:'Basé à Troyes, France'},render:(d,t)=>shell('atlas',d,t)}
 }}
 function status(card,text){const el=card.querySelector('.w-status');if(el)el.textContent=text}
@@ -41,16 +41,63 @@ function drawRadio(card,d,result){
  card.querySelector('.w-body').innerHTML=`<div class="w-tabs" role="group" aria-label="Genre musical">${genres.map(([v,l])=>`<button type="button" data-w-action="genre" data-value="${v}" aria-pressed="${(s.genre||d.genre||'gospel')===v}">${l}</button>`).join('')}</div><ol class="w-list">${items.map((x,i)=>`<li><div><b>${esc(x.name)}</b><small>${esc(x.country)}${max>1?' · '+esc(x.codec)+' · '+esc(x.bitrate)+' kb/s':''}</small></div><button type="button" data-w-action="play" data-index="${i}" aria-label="Écouter ${esc(x.name)}">▶</button></li>`).join('')}</ol>${items.length?'<button type="button" data-w-action="stop">Arrêter la lecture</button>':'<p>Aucune station HTTPS disponible dans cette sélection.</p>'}${sourceLink('https://www.radio-browser.info/','Radio Browser')}`;
  status(card,stamp(result));
 }
-function nextSession(items,now=Date.now()){
- return items.flatMap(r=>(r.sessions||[{name:'Course',date:r.date,time:r.time}]).map(x=>({...x,race:r.name,at:Date.parse(x.date+'T'+(x.time||'23:59:59Z'))}))).filter(x=>Number.isFinite(x.at)&&x.at>now).sort((a,b)=>a.at-b.at)[0]||null;
+function sessionAt(x){return Date.parse(x.date+'T'+(x.time||'23:59:59Z'))}
+function upcomingSessions(items,now=Date.now()){
+ return items.flatMap(r=>(r.sessions||[{name:'Course',date:r.date,time:r.time}]).map(x=>({...x,race:r.name,at:sessionAt(x)}))).filter(x=>Number.isFinite(x.at)&&x.at>now).sort((a,b)=>a.at-b.at);
+}
+function nextSession(items,now=Date.now()){return upcomingSessions(items,now)[0]||null}
+const F1_VIEWS=[['calendar','Calendrier'],['standings','Pilotes'],['teams','Écuries'],['follow','Suivi'],['results','Dernier GP']];
+const F1_KEY={calendar:'f1-calendar',results:'f1-results',standings:'f1-standings',teams:'f1-constructors'};
+const f1View=v=>F1_VIEWS.some(x=>x[0]===v)?v:'calendar';
+function parseFollow(v){const m=/^(driver|team):([a-z0-9_]{1,40})$/.exec(String(v||'').trim());return m?{type:m[1],id:m[2]}:{type:'driver',id:'max_verstappen'}}
+/** Race weekend window: 2h before the first session to 3h after the last one. Outside it ESPN is never requested. */
+function f1Weekend(items,now=Date.now()){
+ for(const r of items){
+  const at=(r.sessions||[{date:r.date,time:r.time}]).map(sessionAt).filter(Number.isFinite);
+  if(at.length&&now>=Math.min(...at)-7200000&&now<=Math.max(...at)+10800000)return r;
+ }
+ return null;
+}
+async function f1Load(s,d){
+ const view=s.view;
+ if(view==='follow'){
+  const follow=parseFollow(d.f1follow);
+  const [board,last]=await Promise.all([data(follow.type==='team'?'f1-constructors':'f1-standings'),data('f1-results').catch(()=>null)]);
+  return {...board,view,follow,last};
+ }
+ const result=await data(F1_KEY[view]);
+ if(view==='calendar'&&f1Weekend(result.items)){const live=await data('f1-live').catch(()=>null);return {...result,view,live}}
+ return {...result,view};
+}
+const whenText=(at,timed)=>new Date(at).toLocaleString('fr-FR',{day:'numeric',month:'short',...(timed?{hour:'2-digit',minute:'2-digit'}:{})});
+const rowsHtml=list=>`<ol class="sports-glance">${list.map(([a,b,c])=>`<li><span>${esc(a)}</span><b>${esc(b)}</b><em>${esc(c)}</em></li>`).join('')}</ol>`;
+const gapText=n=>n>0?'−'+n:'0';
+/** Rows for a face/dialog; n is the size-dependent row count. Pure: all text is escaped here. */
+function f1Rows(result,n){
+ const items=result.items||[];
+ if(result.view==='standings')return items.slice(0,n).map(x=>['P'+x.position,x.code||x.name,x.points+' pts']);
+ if(result.view==='teams')return items.slice(0,n).map(x=>['P'+x.position,x.name,x.points+' pts']);
+ if(result.view==='results')return (items[0]?.results||[]).slice(0,n).map(x=>['P'+x.position,x.name,x.points?x.points+' pts':x.status]);
+ if(result.view==='follow'){
+  const f=result.follow,i=items.findIndex(x=>x.id===f.id),e=items[i];
+  if(!e)return [['','Suivi introuvable',f.id]];
+  const lead=+items[0].points,pts=+e.points,ahead=items[i-1],lastGp=result.last?.items?.[0]?.results?.find(x=>x.driverId===f.id);
+  const list=[['P'+e.position,f.type==='driver'?(e.code||e.name):e.name,e.points+' pts'],['','Victoires',e.wins],['','Écart leader',gapText(lead-pts)],['','Devant',ahead?gapText(+ahead.points-pts):'—']];
+  if(f.type==='driver')list.push(['','Dernier GP',lastGp?'P'+lastGp.position:'—'],['','Écurie',e.team]);
+  return list.slice(0,n);
+ }
+ const live=(result.live?.items||[]).find(x=>x.state==='in');
+ const rows=upcomingSessions(items).slice(0,n).map(x=>[whenText(x.at,!!x.time),x.name,x.race.replace(/ Grand Prix$/,'')]);
+ if(live){const at=Date.parse(result.live.updatedAt);rows.unshift(['●',live.name+' en cours','état de '+(Number.isNaN(at)?'—':new Date(at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}))])}
+ return rows.slice(0,n);
 }
 function sportsFace(d,t){
  const team=followed(d),f1=team.key==='f1',fr=team.key==='france';
  return `<div class="w-card sports-card ${f1?'sports-f1':fr?'sports-france':'sports-psg'}" data-widget="sport" data-widget-id="${esc(t.id)}" data-widget-size="${esc(t.size)}"><div class="sports-decoration" aria-hidden="true">${f1?'<span class="racing-stripe"></span><span class="racing-checks"></span>':'<span class="club-circle"></span><span class="club-stripe"></span>'}</div><div class="sports-heading"><span class="sports-eyebrow">${f1?'FORMULE 1':fr?'LES BLEUS':'LIGUE 1 & UEFA'}</span><button class="sports-info" type="button" data-w-action="load" aria-label="Informations ${esc(team.name)}">⇄ Infos</button></div><div class="sports-title"><b>${esc(d.title||(f1?'Max Verstappen':team.name))}</b><small>${esc(f1?'Supporter de Max Verstappen':fr?'Équipe de France masculine':'Supporter Rouge & Bleu')}</small></div><div class="w-body"><p class="sports-motto">${f1?'La passion de la course.':fr?'Allez les Bleus.':'Ici, c’est Paris.'}</p></div><p class="w-status" role="status" aria-live="polite"></p></div>`;
 }
 function sportsBox(label,main,detail){return `<div class="sports-summary"><small>${label}</small><b>${esc(main)}</b>${detail?`<span>${esc(detail)}</span>`:''}</div>`}
-function sportsDetails(card,d,html,result,brief){
- card.querySelector('.w-body').innerHTML=`<p class="sports-motto">${esc(brief)}</p>`;
+function sportsDetails(card,d,html,result,brief,glance){
+ card.querySelector('.w-body').innerHTML=glance||`<p class="sports-motto">${esc(brief)}</p>`;
  let dialog=document.getElementById('sports-dialog');
  if(!dialog){dialog=document.createElement('dialog');dialog.id='sports-dialog';dialog.className='sports-dialog';dialog.setAttribute('aria-labelledby','sports-dialog-title');document.body.appendChild(dialog);dialog.addEventListener('click',e=>{if(e.target.closest('[data-close-sports]'))dialog.close()})}
  const page=document.getElementById('page');if(page){const theme=getComputedStyle(page);for(const key of ['--surface','--surface-2','--fg','--muted','--line','--accent'])dialog.style.setProperty(key,theme.getPropertyValue(key))}
@@ -60,15 +107,12 @@ function sportsDetails(card,d,html,result,brief){
 function drawSport(card,result,d){
  if(followed(d).key!=='f1')return drawFootball(card,result,d);
  const s=get(card.dataset.widgetId);s[s.view]=result;
- let content='';
- if(s.view==='results'){
-  const race=result.items[0],favorite=race?.results?.find(x=>x.driverId==='max_verstappen'),winner=race?.results?.find(x=>x.position==='1');
-  content=sportsBox('DERNIER GRAND PRIX',race?.name||'Résultat indisponible',favorite?'Verstappen · P'+favorite.position+(winner?' · Vainqueur : '+winner.name:''):winner?'Vainqueur : '+winner.name:'');
- }else{
-  const next=nextSession(result.items);
-  content=sportsBox('PROCHAINE SESSION',next?next.name:'Calendrier à venir',next?next.race+' · '+new Date(next.at).toLocaleString('fr-FR',{day:'numeric',month:'short',...(next.time?{hour:'2-digit',minute:'2-digit'}:{})})+(next.time?'':' · horaire à confirmer'):'Aucune session future publiée dans ce calendrier.');
- }
- sportsDetails(card,d,content+`<div class="sports-links"><button type="button" data-w-action="view" data-value="calendar">Prochaine session</button><button type="button" data-w-action="view" data-value="results">Dernier GP</button></div>`,result,s.view==='results'?(result.items[0]?.name||'Dernier GP'):((nextSession(result.items)?.name||'À venir')+' · horaires locaux'));
+ const empty='<p class="sports-motto">Aucune donnée publiée pour cette vue.</p>';
+ const rows=n=>{const r=f1Rows(result,n);return r.length?rowsHtml(r):empty};
+ const nav=`<div class="sports-links">${F1_VIEWS.map(([v,l])=>`<button type="button" data-w-action="view" data-value="${v}" aria-pressed="${v===s.view}">${esc(l)}</button>`).join('')}</div>`;
+ const title={calendar:'PROCHAINES SESSIONS',standings:'CLASSEMENT PILOTES',teams:'CLASSEMENT ÉCURIES',follow:'SUIVI',results:'DERNIER GRAND PRIX'}[s.view];
+ const face=`<div class="sports-face"><small>${title}</small>${rows(sizeCount(card.dataset.widgetSize))}</div>`;
+ sportsDetails(card,d,`<div class="sports-summary"><small>${title}</small>${rows(8)}</div>`+nav,result,'',face);
  status(card,stamp(result));
 }
 function drawFootball(card,result,d){
@@ -89,9 +133,9 @@ async function load(card,d){
  try{
   const team=followed(d);
   if(type==='sport'&&team.key!=='f1'&&!['upcoming','results'].includes(s.view))s.view='upcoming';
-  if(type==='sport'&&team.key==='f1'&&!['calendar','results'].includes(s.view))s.view='calendar';
+  if(type==='sport'&&team.key==='f1'){if(!s.init){s.view=d.view;s.init=true}s.view=f1View(s.view)}
   const key=type==='radio'?'radio-'+(s.genre||d.genre||'gospel'):team.key==='f1'?'f1-'+s.view:'football-'+team.key;
-  const result=await data(key);
+  const result=type==='sport'&&team.key==='f1'?await f1Load(s,d):await data(key);
   if(!card.isConnected)return;
   if(type==='radio')drawRadio(card,d,result);else drawSport(card,result,d);
  }catch(e){if(card.isConnected){status(card,type==='sport'?'Données indisponibles pour le moment.':'Source momentanément indisponible. Vous pouvez réessayer.');if(button)button.disabled=false;if(type==='sport'&&followed(d).key!=='f1'&&!body.querySelector('a'))body.insertAdjacentHTML('beforeend',sourceLink(followed(d).url,'Calendrier officiel'))}}
@@ -158,5 +202,5 @@ function bind(lookup,isInteractive){
  document.addEventListener('visibilitychange',()=>{if(document.hidden)dispose()});
  window.addEventListener('pagehide',dispose);
 }
-window.TilesWidgets={definitions,bind,dispose,sizeCount,coord,https,nextSession};
+window.TilesWidgets={definitions,bind,dispose,sizeCount,coord,https,nextSession,upcomingSessions,f1Weekend,f1Rows,parseFollow};
 })();
