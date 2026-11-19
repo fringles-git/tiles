@@ -387,7 +387,7 @@ function statsHTML(){
 }
 function renderGrid(){
  if(window.TilesWidgets)window.TilesWidgets.dispose();
- if(window.TilesExperience)window.TilesExperience.dispose();
+ if(window.TilesExperience){window.TilesExperience.dispose();window.TilesExperience.setLibrary?.(S.tiles)}
  const mode=ui.mode;
  let tiles=S.tiles.filter(t=>T[t.type]&&(mode==='edit'||visible(t)));
  if(mode==='preview'&&hub)tiles=hub.filter(tiles);
