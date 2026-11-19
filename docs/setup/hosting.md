@@ -54,6 +54,11 @@ location ~ ^/(profil|parcours|creations|passions)$ {
     fastcgi_param QUERY_STRING section=$1;
     fastcgi_pass unix:/run/php/php8.5-fpm.sock;
 }
+location = /version.json {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root/version.php;
+    fastcgi_pass unix:/run/php/php8.5-fpm.sock;
+}
 location ~ ^/(robots\.txt|sitemap\.xml|llms\.txt)$ {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root/seo.php;
@@ -73,3 +78,12 @@ Use the PHP-FPM socket installed on the host and configure TLS in its virtual ho
 The path constants derive from the checkout root, not the server cwd/document root. Tests can isolate state with `TILES_DATA_DIR` and `TILES_UPLOAD_DIR`; ordinary deployments should leave them unset. Seed JSON now lives in `seed/data/` and seed media in `seed/uploads/`. Existing `.seeded` and `patches-applied.json` files retain their meanings and existing patch basenames are unchanged.
 
 Before a code rollback, restore the previous web-root setting or use the entry points expected by that commit. Preserve the newer runtime page/journal JSON, uploads and credentials; do not overwrite live data with seeds. Take a separate data backup before any manual restore. No automatic Hostinger configuration or deployment is performed by this repository update.
+
+## Vérifier un déploiement
+
+`https://<site>/version.json` renvoie le commit servi (lu dans `.git`, ou `TILES_COMMIT`), la version de PHP (majeure.mineure) et l'identifiant git de chaque fichier CSS/JS. Comparer avec le dépôt :
+
+```sh
+git rev-parse --short=12 origin/main
+git hash-object public/assets/js/app.js | cut -c1-12
+```

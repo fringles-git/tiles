@@ -16,5 +16,6 @@ Options -Indexes
   RewriteRule ^(profil|parcours|creations|passions)$ index.php?section=$1 [L,QSA]
   RewriteRule ^journal-([a-z0-9-]{1,100})$ index.php?article=$1 [L,QSA]
   RewriteRule ^(robots\.txt|sitemap\.xml|llms\.txt)$ seo.php?f=$1 [L,QSA]
+  RewriteRule ^version\.json$ version.php [L]
   RewriteRule ^uploads(?:/|$) - [R=404,L]
 </IfModule>
