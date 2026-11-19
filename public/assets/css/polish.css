@@ -112,3 +112,22 @@
 .prof[data-header=cover] .pbanner+.phead{flex-direction:column;align-items:flex-start;margin-top:-48px;padding-left:12px}
 .prof[data-header=cover] .pbanner+.phead .avatar{border:4px solid var(--bg);box-shadow:var(--shadow)}
 .prof[data-header=minimal] .phead .avatar{display:none}
+
+/* Hauteur guidée par le contenu : les cartes de texte prennent une demi-hauteur et grandissent si besoin. */
+.tile.sz-w:is(.ty-link,.ty-social,.ty-faith,.ty-text,.ty-contact,.ty-cv,.ty-testimonial,.ty-booking){grid-row:span 2}
+.tile.sz-w:is(.ty-link,.ty-social,.ty-faith,.ty-text,.ty-contact,.ty-cv,.ty-testimonial,.ty-booking) .ti{height:auto;min-height:100%}
+/* Projets : visuel 38 %, texte calé en haut, hauteur selon le texte. */
+.tile.ty-project:is(.sz-w,.sz-l){grid-row:span 3}
+.tile.ty-project:is(.sz-w,.sz-l) .ti{height:auto;min-height:100%}
+.tile.ty-project:is(.sz-w,.sz-l) .pj{flex-direction:row;flex:1 1 auto;height:auto;min-height:0}
+.tile.ty-project:is(.sz-w,.sz-l) .pj-img{flex:0 0 38%;min-height:120px}
+.tile.ty-project:is(.sz-w,.sz-l) .pj-t{flex:1;width:auto;justify-content:flex-start;padding:16px 18px}
+/* Hiérarchie : titre de section proche des onglets et proportionné aux cartes. */
+.hub-universes{margin-bottom:12px}
+.uni-head{padding:20px 0 2px}.uni-head h2{font-size:clamp(22px,2vw,26px);letter-spacing:-.02em}.uni-head p{font-size:14px;margin-top:4px}
+/* Barre latérale : actions sur une grille régulière, chevron du CV discret, contact plus aéré. */
+.profile-theme{width:100%;justify-content:center}
+.profile-utilities{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.profile-utilities button,.profile-theme{min-height:44px;justify-content:center;padding-inline:10px;min-width:0}
+.pcv>svg:last-child{width:16px;height:16px;opacity:.55}
+.prow{padding:12px 12px 12px 16px;gap:12px}.pstat{padding:14px 16px}
