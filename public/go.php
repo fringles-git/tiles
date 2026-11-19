@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__) . '/src/lib.php';
 require dirname(__DIR__) . '/src/leap.php';
+require dirname(__DIR__) . '/src/stats.php';
 
 header('Cache-Control: no-store');
 header('X-Robots-Tag: noindex, nofollow');
@@ -18,9 +19,7 @@ if ($target === null || !in_array($_SERVER['REQUEST_METHOD'] ?? '', ['GET', 'HEA
 if (leap_countable((string) $_SERVER['REQUEST_METHOD'], $_SERVER)) {
     with_lock('stats', static function () use ($id): void {
         $st = read_json('stats.json', ['views' => 0, 'days' => [], 'clicks' => []]);
-        $st['clicks'][$id] = (int) ($st['clicks'][$id] ?? 0) + 1;
-        $st['go'][$id] = (int) ($st['go'][$id] ?? 0) + 1;
-        write_json('stats.json', $st);
+        write_json('stats.json', stats_record($st, 'click', $id, time(), true));
     });
 }
 header('Location: ' . $target, true, 302);

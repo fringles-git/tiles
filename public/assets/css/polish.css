@@ -93,3 +93,11 @@
  .explore-tools:not([open]) summary{padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 }
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* Statistiques : période, répartition par canal, tableau par lien. */
+.stats-head .seg.sm button{min-height:32px;padding:0 10px;font-size:12.5px}
+.stats-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:24px}.stats-cols .tops{margin-top:8px}
+.stats-table{width:100%;margin-top:8px;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.stats-table th{text-align:left;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line)}
+.stats-table td{padding:7px 8px;border-bottom:1px solid var(--line)}.stats-table td:first-child{max-width:0;width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stats-table th:not(:first-child),.stats-table td:not(:first-child){text-align:right}
+@media(max-width:700px){.stats-cols{grid-template-columns:minmax(0,1fr)}}

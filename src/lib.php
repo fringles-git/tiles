@@ -167,18 +167,17 @@ function is_admin(): bool
 /** Convert stored stats into the shape the editor's Stats view expects. */
 function stats_for_editor(): array
 {
+    require_once __DIR__ . '/stats.php';
     $st = read_json('stats.json', []);
-    $days = [];
-    for ($i = 13; $i >= 0; $i--) {
-        $key = gmdate('Y-m-d', time() - $i * 86400);
-        $days[] = (int) ($st['days'][$key] ?? 0);
-    }
+    $window = stats_window($st, time(), 30);
     $leads = array_map(fn($l) => (string) ($l['email'] ?? ''), read_json('leads.json', []));
     return [
         'sample' => false,
         'views' => (int) ($st['views'] ?? 0),
-        'days' => $days,
+        'days' => $window['days'],
+        'clickDays' => $window['clickDays'],
         'clicks' => (object) ($st['clicks'] ?? []),
+        'go' => (object) ($st['go'] ?? []),
         'leads' => array_values($leads),
     ];
 }
