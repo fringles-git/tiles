@@ -19,3 +19,10 @@ test('contact block: clickable text, small copy buttons, booking only with a rea
  assert.match(p.contactRows({email:'a"<b>@x.fr'},env).join(''),/a&quot;&lt;b>@x\.fr/);
  assert.deepEqual([...p.contactRows({},env)],[]);
 });
+test('bio drops a closing "Basé à <ville>" sentence already shown by the location chip',()=>{
+ assert.equal(p.dedupeBio('Je crée des sites. Basé à Troyes.','Troyes, France'),'Je crée des sites.');
+ assert.equal(p.dedupeBio('Je crée des sites. Basée en Champagne, à Troyes.','Troyes'),'Je crée des sites.');
+ assert.equal(p.dedupeBio('Je crée des sites. Basé à Paris.','Troyes, France'),'Je crée des sites. Basé à Paris.');
+ assert.equal(p.dedupeBio('Basé à Troyes.','Troyes'),'Basé à Troyes.');
+ assert.equal(p.dedupeBio('Je crée des sites. Basé à Troyes.',''),'Je crée des sites. Basé à Troyes.');
+});

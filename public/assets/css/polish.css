@@ -73,3 +73,12 @@
 .sz-s,.sz-w,.add-tile{grid-row:span 4}.sz-t,.sz-l{grid-row:span 8}.sz-bar{grid-row:span 2}.sz-full{grid-row:span 1}
 .tile.ty-project.sz-l,.tile.ty-project.sz-t,.tile.ty-skills.sz-t{grid-row:span 4}
 .tile.ty-section .ti{padding-inline:0;padding-block:0}.mode-preview .sec{padding-top:18px;padding-bottom:2px}
+
+/* Tablette (701–1000 px) : profil au-dessus, grille pleine largeur, marges réduites. */
+@media(min-width:701px) and (max-width:1000px){
+ .page:not([data-layout="top"]) .page-in{grid-template-columns:minmax(0,1fr);gap:20px;padding-block:16px 32px;padding-inline:16px}
+ .page:not([data-layout="top"]) .prof{position:static;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:20px;align-items:start;grid-auto-flow:row dense}
+ .page:not([data-layout="top"]) .prof>*{grid-column:1}
+ .page:not([data-layout="top"]) .prof>.profile-primary,.page:not([data-layout="top"]) .prof>.pcv,.page:not([data-layout="top"]) .prof>.pcard{grid-column:2}
+ .page:not([data-layout="top"]) .prof>.jump{display:none}
+}
