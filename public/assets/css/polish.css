@@ -102,3 +102,13 @@
 .stats-table td{padding:7px 8px;border-bottom:1px solid var(--line)}.stats-table td:first-child{max-width:0;width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stats-table th:not(:first-child),.stats-table td:not(:first-child){text-align:right}
 @media(max-width:700px){.stats-cols{grid-template-columns:minmax(0,1fr)}}
+/* En-tête du profil : bannière (animée ou non) et quatre mises en page. */
+.pbanner{display:block;margin:0 0 4px;border-radius:calc(var(--r) - 4px);overflow:hidden;aspect-ratio:3/1;background:var(--surface-2)}
+.pbanner img{display:block;width:100%;height:100%;object-fit:cover}
+.prof[data-header=centered] .phead{flex-direction:column;align-items:center;text-align:center}
+.prof[data-header=centered] .ptags,.prof[data-header=centered] .ploc{justify-content:center}
+.prof[data-header=centered] .bio{text-align:center;margin-inline:auto}
+.prof[data-header=cover] .pbanner{margin-bottom:0}
+.prof[data-header=cover] .pbanner+.phead{flex-direction:column;align-items:flex-start;margin-top:-48px;padding-left:12px}
+.prof[data-header=cover] .pbanner+.phead .avatar{border:4px solid var(--bg);box-shadow:var(--shadow)}
+.prof[data-header=minimal] .phead .avatar{display:none}

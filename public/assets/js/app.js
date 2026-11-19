@@ -303,7 +303,8 @@ function visitorStorage(){try{return localStorage;}catch{return {getItem:()=>nul
 function renderProfile(){
  const p=S.profile;const visitorTheme=window.TilesPolish?.preference(visitorStorage())||'site';const ini=(p.name||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
  const tags=profileTags(p);const hasHours=!!daysLabel((p.hours||{}).days||[]);
- prof.innerHTML=`<div class="phead"><button class="avatar" type="button" data-act="profile" aria-label="Profile photo" ${ui.mode!=='edit'?'tabindex="-1"':''}>${isImg(p.avatar)?`<img src="${p.avatar}" alt="">`:esc(ini)}</button>
+ prof.dataset.header=HEADERS.some(([k])=>k===p.header)?p.header:'classic';
+ prof.innerHTML=`${bannerHTML(p)}<div class="phead"><button class="avatar" type="button" data-act="profile" aria-label="Profile photo" ${ui.mode!=='edit'?'tabindex="-1"':''}>${isImg(p.avatar)?`<img src="${p.avatar}" alt="">`:esc(ini)}</button>
  <div class="pid"><h1>${esc(p.name)}</h1>${tags.length?`<div class="ptags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}${p.location?`<span class="ploc">${ic('pin',13)}${esc(p.location)}</span>`:''}</div></div>
  ${p.bio?`<p class="bio">${esc(ui.mode==='edit'?p.bio:(window.TilesPolish?.dedupeBio?.(p.bio,p.location)??p.bio))}</p>`:''}
  ${p.statusOn&&p.status&&!hasHours?`<div class="chips"><span class="chip live"><i></i>${esc(p.status)}</span></div>`:''}
@@ -314,6 +315,8 @@ function renderProfile(){
  renderJumpbar();
  window.TilesPolish?.refreshContact(page,ui.mode);
 }
+const HEADERS=[['classic','Photo à gauche du nom'],['centered','Centrée'],['cover','Bannière avec photo superposée'],['minimal','Sans photo']];
+function bannerHTML(p){if(!isImg(p.banner)||p.header==='minimal')return '';const still=isImg(p.bannerStill)?p.bannerStill:p.banner;return `<picture class="pbanner">${still!==p.banner?`<source srcset="${esc(still)}" media="(prefers-reduced-motion: reduce)">`:''}<img src="${esc(p.banner)}" alt="" decoding="async" fetchpriority="high"></picture>`}
 function profileTags(p){const raw=(p.tags!=null&&String(p.tags).trim()!=='')?String(p.tags):String(p.role||'');
  return raw.split(/,|&|\s+et\s+/).map(x=>x.trim()).filter(Boolean).map(x=>x[0].toUpperCase()+x.slice(1))}
 function profileExtras(p){
@@ -454,7 +457,7 @@ function openAdd(){
 }
 function openProfile(){
  const p=S.profile;
- openDrawer('Profile',`<div id="prof-form" style="display:flex;flex-direction:column;gap:14px">${fieldHTML(F('avatar','Photo','image'),p.avatar,'p')}${[F('name','Name'),F('role','Headline (titre de la page)'),F('tags','Tags à côté de la photo (séparés par des virgules)'),F('bio','Bio','area'),F('location','Location'),F('status','Status (affiché seulement sans horaires)')].map(f=>fieldHTML(f,f.k==='tags'?(p.tags!=null?p.tags:profileTags(p).join(', ')):p[f.k],'p')).join('')}<label class="chk"><input type="checkbox" id="p-statusOn" data-pk="statusOn"${p.statusOn?' checked':''}>Show status badge</label>
+ openDrawer('Profile',`<div id="prof-form" style="display:flex;flex-direction:column;gap:14px">${fieldHTML(F('avatar','Photo','image'),p.avatar,'p')}<div class="grp"><h4>En-tête</h4>${fieldHTML(F('header','Mise en page','select',HEADERS),p.header||'classic','p')}<div class="fld"><span class="lb">Bannière (GIF ou WebP animé accepté)</span><div class="drop-img"><div class="thumb" style="${isImg(p.bannerStill||p.banner)?`background-image:url('${esc(p.bannerStill||p.banner)}')`:''}"></div><span class="btn sm file-btn">${ic('upload',14)}Téléverser<input id="p-banner" type="file" accept="image/gif,image/webp,image/png,image/jpeg" data-banner aria-label="Bannière"></span>${isImg(p.banner)?'<button type="button" class="btn sm ghost" data-clear-banner>Retirer</button>':''}</div><span class="hint">8 Mo max. L’animation est remplacée par une image fixe si le visiteur a demandé moins d’animations.</span></div></div>${[F('name','Name'),F('role','Headline (titre de la page)'),F('tags','Tags à côté de la photo (séparés par des virgules)'),F('bio','Bio','area'),F('location','Location'),F('status','Status (affiché seulement sans horaires)')].map(f=>fieldHTML(f,f.k==='tags'?(p.tags!=null?p.tags:profileTags(p).join(', ')):p[f.k],'p')).join('')}<label class="chk"><input type="checkbox" id="p-statusOn" data-pk="statusOn"${p.statusOn?' checked':''}>Show status badge</label>
  <div class="grp"><h4>CV</h4>${fieldHTML(F('cv','CV (PDF)','pdf'),p.cv,'p')}${fieldHTML(F('cvNote','Détail sous le bouton'),p.cvNote||'1 page','p')}</div>
  <div class="grp"><h4>Coordonnées</h4>${fieldHTML(F('phone','Téléphone','tel'),p.phone,'p')}${fieldHTML(F('email','Email','email'),p.email,'p')}${fieldHTML(F('booking','Lien de prise de rendez-vous (Calendly, Cal.com…)','url'),p.booking||'','p')}<span class="hint">Le bouton Appeler n’apparaît que pendant tes horaires. Sans lien de rendez-vous, « Prendre rendez-vous » ouvre un email.</span></div>
  <div class="grp"><h4>Horaires de disponibilité</h4>
@@ -506,6 +509,10 @@ dbody.addEventListener('change',async e=>{
   try{const j=await api('upload-doc',fd,true);if(ui.drawer==='profile'){S.profile[el.dataset.pdf]=j.url;renderProfile();openProfile()}else{const t=byId(ui.sel);t.data[el.dataset.pdf]=j.url;renderGrid();openTile(t.id)}save();toast('PDF uploaded')}
   catch(err){toast('Upload failed: '+err.message)}
   return}
+ if(el.hasAttribute('data-banner')&&el.files&&el.files[0]){
+  const fd=new FormData();fd.append('file',el.files[0]);toast('Envoi de la bannière…');
+  try{const j=await api('upload-banner',fd,true);S.profile.banner=j.url;S.profile.bannerStill=j.poster;renderProfile();openProfile();save();toast(j.animated?'Bannière animée ajoutée':'Bannière ajoutée')}catch(err){toast('Échec : '+err.message)}
+  return}
  if(el.dataset.img&&el.files&&el.files[0]){
   try{const url=await readImage(el.files[0],el.dataset.img==='avatar'?600:1200);
    if(ui.drawer==='profile'){S.profile.avatar=url;renderProfile();openProfile()}else{const t=byId(ui.sel);t.data[el.dataset.img]=url;renderGrid();openTile(t.id)}save()}catch(err){toast('Upload failed: '+(err&&err.message||'not an image'))}
@@ -522,6 +529,7 @@ dbody.addEventListener('click',e=>{
  if(b.dataset.addtype){addTile(b.dataset.addtype);return}
  if(b.dataset.day!=null){const i=+b.dataset.day;S.profile.hours.days[i]=S.profile.hours.days[i]?0:1;b.setAttribute('aria-pressed',!!S.profile.hours.days[i]);renderProfile();save();return}
  if(b.dataset.size){const t=byId(ui.sel);t.size=b.dataset.size;$$('[data-size]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));renderGrid();save();return}
+ if(b.hasAttribute('data-clear-banner')){S.profile.banner='';S.profile.bannerStill='';renderProfile();openProfile();save();return}
  if(b.dataset.clear){if(ui.drawer==='profile'){S.profile[b.dataset.clear]='';renderProfile();openProfile()}else{const t=byId(ui.sel);t.data[b.dataset.clear]='';renderGrid();openTile(t.id)}save();return}
  if(b.dataset.rmimg!=null){const t=byId(ui.sel);const k=T[t.type].fields.find(f=>f.t==='images').k;t.data[k].splice(+b.dataset.rmimg,1);renderGrid();openTile(t.id);save();return}
  if(b.dataset.tact==='dup'){dupTile(ui.sel);return}
