@@ -30,7 +30,13 @@ function widget_settings(): array
         if (!filter_var($url, FILTER_VALIDATE_URL) || !str_starts_with($url, 'https://')) { $url = 'https://www.football-data.org/'; }
         $teams[$slug] = ['id' => $id, 'name' => substr($team['name'], 0, 100), 'url' => $url];
     }
-    return ['football_token' => $token, 'teams' => $teams];
+    // Canonical public origin (https only, no path). Falls back to the validated Host header when empty.
+    $site = rtrim(trim((string) (getenv('TILES_SITE_URL') ?: ($private['site_url'] ?? ''))), '/');
+    $parts = $site === '' ? false : parse_url($site);
+    if (!is_array($parts) || ($parts['scheme'] ?? '') !== 'https' || empty($parts['host']) || isset($parts['user']) || isset($parts['path']) || isset($parts['query'])
+        || !preg_match('/^[a-z0-9.-]{1,253}$/i', $parts['host'])) { $site = ''; }
+    else { $site = 'https://' . strtolower($parts['host']) . (isset($parts['port']) ? ':' . (int) $parts['port'] : ''); }
+    return ['football_token' => $token, 'teams' => $teams, 'site_url' => $site];
 }
 
 function widget_catalogue(): array

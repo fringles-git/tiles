@@ -6,7 +6,10 @@ $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
 if (preg_match('#\A/uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))\z#i', $path, $m)) {
     $_GET['file'] = $m[1]; require $public . '/media.php'; return true;
 }
-if (in_array($path, ['/', '/index.php', '/admin.php', '/api.php', '/widgets.php', '/media.php', '/robots.txt'], true)) { return false; }
+if (in_array($path, ['/robots.txt', '/sitemap.xml', '/llms.txt'], true)) {
+    $_GET['f'] = ltrim($path, '/'); require $public . '/seo.php'; return true;
+}
+if (in_array($path, ['/', '/index.php', '/admin.php', '/api.php', '/widgets.php', '/media.php'], true)) { return false; }
 if (str_starts_with($path, '/assets/')) {
     $file = realpath($public . $path);
     if ($file !== false && str_starts_with($file, realpath($public . '/assets') . DIRECTORY_SEPARATOR) && is_file($file)

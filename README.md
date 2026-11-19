@@ -48,6 +48,10 @@ Read [hosting and migration](docs/setup/hosting.md) for Apache/Nginx examples, H
 
 The original card sizes, case studies, piano, sports illustrations, QR sharing, vCard, languages, logos, maps and cached widgets are retained. Four optional universes (Humain, Pro, Créa, Lifestyle) filter the existing page without moving its tiles. The editor can assign a tile's universe and create a Markdown journal with autosaved drafts, explicit publication, reading time and delete/undo. Visitor responses exclude draft article content. JSON exports include the journal; imports preserve the current server revision to retain conflict protection.
 
+## SEO
+
+`/robots.txt`, `/sitemap.xml` and `/llms.txt` are generated from the page content (`public/seo.php`). Set `site_url` in `config/config.php` (or `TILES_SITE_URL`), for example `https://brandonlazarre.fr`, so canonical links, Open Graph URLs, the sitemap and the JSON-LD (Person + WebSite) always use one public origin whatever domain serves the install. Without it, only a syntactically valid Host header is used. The home page also ships robots/author/locale meta tags and crawler-readable HTML for every visible tile; `admin.php` is `noindex`. After deployment, submit `/sitemap.xml` in Google Search Console and Bing Webmaster Tools and verify the rich results of the home page.
+
 ## Checks
 
 ```sh

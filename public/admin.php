@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__) . '/src/lib.php';
+header('X-Robots-Tag: noindex, nofollow');
 
 start_session();
 header('X-Frame-Options: DENY');

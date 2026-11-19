@@ -7,11 +7,11 @@ Options -Indexes
   RewriteRule ^(index|admin|api|widgets|media)\.php$ public/$1.php [L,QSA]
   RewriteRule ^uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))$ public/media.php?file=$1 [L,QSA,NC]
   RewriteRule ^assets/(.+)$ public/assets/$1 [L]
-  RewriteRule ^robots\.txt$ public/robots.txt [L]
+  RewriteRule ^(robots\.txt|sitemap\.xml|llms\.txt)$ public/seo.php?f=$1 [L,QSA]
   # Permit internal rewrites into public/; its own rules apply afterwards.
   RewriteRule ^public/(?:index|admin|api|widgets|media)\.php$ - [L]
   RewriteRule ^public/assets/ - [L]
-  RewriteRule ^public/robots\.txt$ - [L]
+  RewriteRule ^public/seo\.php$ - [L]
   RewriteRule ^ - [R=404,L]
 </IfModule>
 <IfModule !mod_rewrite.c>

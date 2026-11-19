@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__) . '/src/lib.php';
+require dirname(__DIR__) . '/src/seo.php';
 
 $page = read_json('page.json', null);
 if (!$page) {
@@ -17,8 +18,13 @@ $role = (string) ($profile['role'] ?? '');
 $bio = (string) ($profile['bio'] ?? '');
 $title = $role !== '' ? "$name · $role" : $name;
 
-$base = (is_https() ? 'https://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? 'tiles.brandonlazarre.fr') . '/';
-$head = '<meta property="og:type" content="profile">'
+$base = seo_base_url();
+$now = time();
+$head = '<meta name="robots" content="index, follow, max-image-preview:large">'
+    . '<meta name="author" content="' . e($name) . '">'
+    . '<meta property="og:locale" content="fr_FR">'
+    . '<meta property="og:site_name" content="' . e($name) . '">'
+    . '<meta property="og:type" content="profile">'
     . '<meta property="og:title" content="' . e($title) . '">'
     . '<meta property="og:description" content="' . e($bio) . '">'
     . '<meta property="og:url" content="' . e($base) . '">'
@@ -37,27 +43,10 @@ if (!$hasAvatar) {
 }
 
 // Plain-HTML fallback for visitors and crawlers that do not run JavaScript.
-$items = '';
-foreach (($page['tiles'] ?? []) as $tile) {
-    if (!empty($tile['hidden'])) {
-        continue;
-    }
-    $d = $tile['data'] ?? [];
-    $label = (string) ($d['title'] ?? $d['name'] ?? $d['caption'] ?? $d['club'] ?? '');
-    $url = (string) ($d['url'] ?? '');
-    if ($label === '') {
-        continue;
-    }
-    if (($tile['type'] ?? '') === 'section') {
-        $items .= '<h2>' . e($label) . '</h2>';
-    } elseif (preg_match('#^https?://#i', $url)) {
-        $items .= '<p><a href="' . e($url) . '">' . e($label) . '</a></p>';
-    } else {
-        $items .= '<p>' . e($label) . '</p>';
-    }
-}
+$items = seo_body($page, $now);
 $noscript = '<noscript><main style="max-width:640px;margin:40px auto;padding:0 16px;font-family:sans-serif">'
     . '<h1>' . e($name) . '</h1><p>' . e($role) . '</p><p>' . e($bio) . '</p>' . $items . '</main></noscript>';
 
+$head .= seo_jsonld($page, $base, $now);
 header('Cache-Control: public, max-age=60');
 render_shell($title, $bio, ['mode' => 'public', 'page' => $page], $head, $noscript);
