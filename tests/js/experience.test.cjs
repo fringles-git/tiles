@@ -59,3 +59,19 @@ test('search keeps a section header only when its group still has matching tiles
  assert.equal(api.filter(tiles,'concretement').length,0);
  assert.deepEqual(Array.from(api.filter(tiles,'psg'),t=>t.id),['u-passions','t']);
 });
+test('instruments: explicit kind or legacy name, playable pads per kind, other kinds silent',()=>{
+ const T=definitions();
+ assert.equal(api.instrumentKind('Basse électrique'),'bass');assert.equal(api.instrumentKind('Saxophone alto'),'sax');assert.equal(api.instrumentKind('Chant gospel'),'voice');assert.equal(api.instrumentKind('Batterie'),'other');assert.equal(api.instrumentKind('bass'),'bass');
+ const bass=T.instrument.render({name:'Ma basse',kind:'bass'});assert.equal((bass.match(/data-note=/g)||[]).length,20);assert.match(bass,/data-note="41.2"/);assert.match(bass,/data-kind="bass"/);
+ const sax=T.instrument.render({name:'Sax',kind:'sax'});assert.equal((sax.match(/data-note=/g)||[]).length,8);assert.match(sax,/>Si♭</);assert.match(sax,/>Mi♭</);assert.match(sax,/Maintenez/);
+ assert.equal((T.instrument.render({name:'Batterie'}).match(/data-note=/g)||[]).length,0);
+ assert.match(T.instrument.render({name:'<b>x</b>',kind:'voice'}),/&lt;b&gt;x/);
+});
+test('instruments: secondary instruments become switch tabs, from the also field or legacy text',()=>{
+ const T=definitions();
+ const legacy=T.instrument.render({name:'Piano',since:'Aussi : chant, basse et saxophone'});
+ assert.deepEqual([...legacy.matchAll(/data-instrument-switch="(\w+)"/g)].map(m=>m[1]),['piano','bass','sax','voice']);
+ const explicit=T.instrument.render({name:'Piano',kind:'piano',also:'Basse'});assert.equal((explicit.match(/data-instrument-switch/g)||[]).length,2);
+ assert.equal((T.instrument.render({name:'Piano'}).match(/data-instrument-switch/g)||[]).length,0);
+ const panel=api.instrumentPanel('bass',['piano','bass']);assert.match(panel,/aria-pressed="true">Basse/);
+});
