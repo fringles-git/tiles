@@ -323,7 +323,7 @@ function profileExtras(p){
  const canCall=!st||st.open;
  const closed=DAYS_LONG.filter((x,i)=>!(hrs.days||[])[i]);
  if(dl&&(isAllDay(hrs)||(fmtH(hrs.from)&&fmtH(hrs.to))))rows.push(`<div class="pstat ${st&&!st.open?'off':'on'}"><span class="openst ${st&&!st.open?'off':'on'}"><i></i>${esc(st?st.text:'Disponible')}</span><small>${esc(dl)} · ${isAllDay(hrs)?'24h/24':fmtH(hrs.from)+'–'+fmtH(hrs.to)}${isAllDay(hrs)&&closed.length&&closed.length<=2?' · fermé le '+esc(closed.join(' et ')):''}${hrs.note?' · '+esc(hrs.note):''}</small></div>`);
- rows.push(...window.TilesPolish.contactRows(p,{esc,ic,telHref,safeUrl,canCall}));
+ rows.push(...(window.TilesPolish?.contactRows?.(p,{esc,ic,telHref,safeUrl,canCall})||[]));
  if(rows.length)h+=`<div class="pcard">${rows.join('')}</div>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('plus',16)}Ajouter téléphone, email et horaires</button>`;
  const secs=navSections();
