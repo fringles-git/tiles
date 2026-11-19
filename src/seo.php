@@ -57,11 +57,16 @@ function seo_jsonld(array $page, string $base, int $now): string
     return '<script type="application/ld+json">' . json_encode($graph, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
 }
 
-function seo_sitemap(string $base, ?int $lastModified): string
+function seo_sitemap(string $base, ?int $lastModified, array $slugs = []): string
 {
-    $loc = htmlspecialchars($base, ENT_XML1 | ENT_QUOTES, 'UTF-8');
     $mod = $lastModified ? '<lastmod>' . gmdate('Y-m-d', $lastModified) . '</lastmod>' : '';
-    return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>' . $loc . '</loc>' . $mod . '<changefreq>monthly</changefreq><priority>1.0</priority></url></urlset>' . "\n";
+    $urls = '';
+    foreach (array_merge([''], $slugs) as $i => $slug) {
+        if (!is_string($slug) || ($i > 0 && !preg_match('/\A[a-z0-9-]{1,40}\z/', $slug))) { continue; }
+        $loc = htmlspecialchars($base . $slug, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $urls .= '<url><loc>' . $loc . '</loc>' . $mod . '<changefreq>monthly</changefreq><priority>' . ($i === 0 ? '1.0' : '0.8') . '</priority></url>';
+    }
+    return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . $urls . '</urlset>' . "\n";
 }
 
 function seo_robots(string $base): string

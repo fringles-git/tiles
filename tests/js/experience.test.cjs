@@ -53,3 +53,9 @@ test('HTML5 and CSS keep their official colours; the logo files carry no scripts
  assert.match(html,/class="skill-img" src="[^"]*brands\/html5-color.svg"/);assert.match(html,/brands\/css-color.svg/);assert.match(html,/--mark:#777BB4/);
  for(const f of ['html5-color.svg','css-color.svg']){const svg=fs.readFileSync(path.join(root,'public/assets/images/brands',f),'utf8');assert.ok(!/<script|href=|onload|https?:\/\/(?!www\.w3\.org)/i.test(svg),f);}
 });
+test('search keeps a section header only when its group still has matching tiles',()=>{
+ const tiles=[{id:'u-parcours',type:'universe',data:{title:'Parcours',question:'Quel est son cheminement concrètement ?'}},{id:'s',type:'section',data:{title:'Projets'}},{id:'p',type:'project',data:{title:'EventFlow'}},{id:'u-passions',type:'universe',data:{title:'Passions',question:'Qu’est-ce qui l’anime ?'}},{id:'t',type:'team',data:{club:'PSG'}}];
+ assert.deepEqual(Array.from(api.filter(tiles,'eventflow'),t=>t.id),['u-parcours','s','p']);
+ assert.equal(api.filter(tiles,'concretement').length,0);
+ assert.deepEqual(Array.from(api.filter(tiles,'psg'),t=>t.id),['u-passions','t']);
+});

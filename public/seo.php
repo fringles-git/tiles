@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__) . '/src/lib.php';
 require dirname(__DIR__) . '/src/seo.php';
+require dirname(__DIR__) . '/src/sections.php';
 
 $file = (string) ($_GET['f'] ?? '');
 $base = seo_base_url();
@@ -13,7 +14,7 @@ switch ($file) {
     case 'robots.txt':
         $type = 'text/plain'; $body = seo_robots($base); break;
     case 'sitemap.xml':
-        $type = 'application/xml'; $body = seo_sitemap($base, is_file($pagePath) ? (int) filemtime($pagePath) : null); break;
+        $type = 'application/xml'; $body = seo_sitemap($base, is_file($pagePath) ? (int) filemtime($pagePath) : null, array_keys(TILES_SECTIONS)); break;
     case 'llms.txt':
         $type = 'text/plain'; $body = seo_llms($page, $base, $now); break;
     default:
