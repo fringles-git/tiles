@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 function stats_record(array $st, string $type, string $id, int $now, bool $viaGo = false): array
 {
-    foreach (['days', 'clicks', 'clickDays', 'go'] as $key) {
+    foreach (['days', 'clicks', 'clickDays', 'go', 'goDays'] as $key) {
         if (!is_array($st[$key] ?? null)) { $st[$key] = []; }
     }
     $day = gmdate('Y-m-d', $now);
@@ -23,20 +23,35 @@ function stats_record(array $st, string $type, string $id, int $now, bool $viaGo
     if (!is_array($st['clickDays'][$day] ?? null)) { $st['clickDays'][$day] = []; }
     $st['clickDays'][$day][$id] = (int) ($st['clickDays'][$day][$id] ?? 0) + 1;
     $st['clickDays'] = $keep($st['clickDays']);
-    if ($viaGo) { $st['go'][$id] = (int) ($st['go'][$id] ?? 0) + 1; }
+    if ($viaGo) {
+        $st['go'][$id] = (int) ($st['go'][$id] ?? 0) + 1;
+        if (!is_array($st['goDays'][$day] ?? null)) { $st['goDays'][$day] = []; }
+        $st['goDays'][$day][$id] = (int) ($st['goDays'][$day][$id] ?? 0) + 1;
+        $st['goDays'] = $keep($st['goDays']);
+    }
     return $st;
 }
 
-/** Last $n days (oldest first) of views and of clicks per block, for the editor. */
+/**
+ * Last $n days (oldest first) of views, clicks and /go/ visits per block, for the editor.
+ * clickDays and goDays are null when no daily click series exists yet (data recorded before
+ * per-day clicks), so the editor falls back to all-time totals and says so.
+ */
 function stats_window(array $st, int $now, int $n = 30): array
 {
+    $series = static function (mixed $src) use ($now, $n): ?array {
+        if (!is_array($src) || $src === []) { return null; }
+        $out = [];
+        for ($i = $n - 1; $i >= 0; $i--) {
+            $row = $src[gmdate('Y-m-d', $now - $i * 86400)] ?? [];
+            $out[] = (object) (is_array($row) ? array_map('intval', $row) : []);
+        }
+        return $out;
+    };
     $days = [];
-    $clickDays = [];
     for ($i = $n - 1; $i >= 0; $i--) {
-        $key = gmdate('Y-m-d', $now - $i * 86400);
-        $days[] = (int) ($st['days'][$key] ?? 0);
-        $row = $st['clickDays'][$key] ?? [];
-        $clickDays[] = (object) (is_array($row) ? array_map('intval', $row) : []);
+        $days[] = (int) ($st['days'][gmdate('Y-m-d', $now - $i * 86400)] ?? 0);
     }
-    return ['days' => $days, 'clickDays' => $clickDays];
+    $clickDays = $series($st['clickDays'] ?? null);
+    return ['days' => $days, 'clickDays' => $clickDays, 'goDays' => $clickDays === null ? null : ($series($st['goDays'] ?? null) ?? array_fill(0, $n, new stdClass()))];
 }

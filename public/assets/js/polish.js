@@ -11,12 +11,13 @@ function statsSummary(st,tiles,n){
  const days=(st.days||[]).slice(-n),views=days.reduce((a,b)=>a+(+b||0),0);
  const series=Array.isArray(st.clickDays)&&st.clickDays.length?st.clickDays.slice(-n):null;
  const clicks={};if(series)for(const d of series)for(const [id,v] of Object.entries(d||{}))clicks[id]=(clicks[id]||0)+(+v||0);else Object.assign(clicks,st.clicks||{});
- const total=Object.values(clicks).reduce((a,b)=>a+b,0);
+ const total=Object.values(clicks).reduce((a,b)=>a+b,0),go={};
+ if(series){for(const d of (Array.isArray(st.goDays)?st.goDays.slice(-n):[]))for(const [id,v] of Object.entries(d||{}))go[id]=(go[id]||0)+(+v||0);}else Object.assign(go,st.go||{});
  const profile={'p-phone':['Téléphone','phone'],'p-mail':['Email','email'],'p-rdv':['Rendez-vous','booking'],'p-cv':['CV','cv']};
  const byId=new Map((tiles||[]).map(t=>[t.id,t]));
  const rows=Object.entries(clicks).filter(([,v])=>v>0).map(([id,v])=>{const t=byId.get(id),p=profile[id];
   const channel=p?p[1]:t?.type==='social'?String(t.data?.platform||'social'):t?(t.type==='link'?'link':t.type):'deleted';
-  return {id,clicks:v,share:total?Math.round(v/total*100):0,go:+((st.go||{})[id])||0,channel,label:p?p[0]:null,tile:t||null};}).sort((a,b)=>b.clicks-a.clicks);
+  return {id,clicks:v,share:total?Math.round(v/total*100):0,go:+go[id]||0,channel,label:p?p[0]:null,tile:t||null};}).sort((a,b)=>b.clicks-a.clicks);
  const channels={};for(const r of rows)channels[r.channel]=(channels[r.channel]||0)+r.clicks;
  return {days,views,clicks:total,ctr:views?Math.round(total/views*100):0,cv:clicks['p-cv']||0,rows,channels:Object.entries(channels).sort((a,b)=>b[1]-a[1]),exact:!!series};
 }

@@ -14,7 +14,12 @@ check(!isset($old['clickDays']['2026-01-01']) && isset($old['days']['2026-01-01'
 check(!isset(stats_record(['clickDays' => 'bad'], 'click', 'a', $now)['clickDays']['bad']), 'malformed series is replaced');
 $w = stats_window($st, $now, 30);
 check(count($w['days']) === 30 && $w['days'][29] === 1 && ((array) $w['clickDays'][28])['p-cv'] === 1 && ((array) $w['clickDays'][29])['abc'] === 2, 'window returns 30 aligned days, oldest first');
-check(json_encode(stats_window([], $now, 2)['clickDays']) === '[{},{}]', 'empty days encode as objects, not arrays');
+check(json_encode(stats_window(['clickDays' => ['2026-11-19' => []]], $now, 2)['clickDays']) === '[{},{}]', 'empty days encode as objects, not arrays');
+$legacy = stats_window(['clicks' => ['a' => 5], 'days' => []], $now, 7);
+check($legacy['clickDays'] === null && $legacy['goDays'] === null && count($legacy['days']) === 7, 'no daily click series yet: window says so instead of returning empty days');
+$gw = stats_window(stats_record([], 'click', 'g', $now, true), $now, 3);
+check(((array) $gw['goDays'][2])['g'] === 1 && count($gw['goDays']) === 3, '/go/ visits have their own daily series');
+check(count(stats_window(stats_record([], 'click', 'g', $now), $now, 3)['goDays']) === 3, 'goDays defaults to empty days when clicks exist but no /go/ yet');
 $bad = stats_record(['views' => 'x', 'days' => 'x', 'clicks' => 3, 'clickDays' => ['2026-11-19' => 'x'], 'go' => null], 'click', 'a', $now, true);
 check($bad['clicks']['a'] === 1 && $bad['clickDays']['2026-11-19']['a'] === 1 && $bad['go']['a'] === 1, 'corrupted stats file never breaks recording');
 check(stats_record(['days' => 'x'], 'view', '', $now)['days']['2026-11-19'] === 1, 'corrupted view series is reset');
