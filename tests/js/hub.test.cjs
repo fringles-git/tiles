@@ -23,7 +23,7 @@ test('server and browser assign every tile to the same section (PHP/JS parity)',
 });
 test('journal slugs and Markdown are identical in PHP and JS',()=>{
  const {spawnSync}=require('node:child_process');
- const titles=['Souveraineté & flat-file : l’œuvre','Même titre','Même titre','Ça marche ? Oui!','***','Straße Æsir','x'.repeat(120)];
+ const titles=['Souveraineté & flat-file : l’œuvre','Même titre','Même titre','Même titre','Même titre id1abcdef','Ça marche ? Oui!','***','Straße Æsir','x'.repeat(120)];
  const journal=titles.map((t,i)=>({id:'id'+i+'abcdef',title:t,content:'# T\n**b** *i* `c`\n- l\n> q\n<b>x</b>',published:true,date:'2026-11-0'+(i%9+1),universe:'pro',excerpt:''}));
  const php=spawnSync(process.env.PHP_BINARY||'php',['-r','require "src/journal.php";$j=json_decode(stream_get_contents(STDIN),true);echo json_encode([array_column(journal_published(["journal"=>$j]),"slug"),journal_markdown($j[0]["content"])],JSON_UNESCAPED_UNICODE);'],{cwd:root,input:JSON.stringify(journal),encoding:'utf8'});
  if(php.error)return;assert.equal(php.status,0,php.stderr);const [slugs,md]=JSON.parse(php.stdout);

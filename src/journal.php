@@ -24,6 +24,7 @@ function journal_published(array $page): array
         $slug = journal_slug((string) $entry['title']);
         $id = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', (string) ($entry['id'] ?? '')));
         if ($slug === '' || isset($used[$slug])) { $slug = trim($slug . '-' . substr($id, 0, 6), '-'); }
+        for ($base = $slug, $n = 2; $slug === '' || isset($used[$slug]); $n++) { $slug = trim($base . '-' . $n, '-'); }
         $used[$slug] = true;
         $out[] = $entry + ['slug' => $slug];
     }
