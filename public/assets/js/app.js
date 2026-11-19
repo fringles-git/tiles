@@ -346,6 +346,7 @@ let scrollRaf=0;window.addEventListener('scroll',()=>{if(scrollRaf)return;scroll
 window.addEventListener('resize',()=>requestAnimationFrame(markActive));
 setInterval(()=>{if(!ui.drawer||ui.drawer!=='profile')renderProfile()},60000);
 document.addEventListener('click',e=>{
+ const sd=e.target.closest('[data-stats-days]');if(sd){ui.statsDays=+sd.dataset.statsDays;render();return}
  const j=e.target.closest('[data-jump]');
  if(j){e.preventDefault();const el=grid.querySelector(`[data-id="${j.dataset.jump}"]`);if(el){const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});activeId='';setTimeout(markActive,reduce?0:600)}return}
  const pc=e.target.closest('[data-pclick]');if(pc&&PUBLIC)beacon({type:'click',id:pc.dataset.pclick});
@@ -371,19 +372,21 @@ function tileHTML(t){
  return `<article class="${cls}" data-id="${esc(t.id)}"${mode==='edit'?' draggable="true" tabindex="0"':''}${tint?` style="--tint:${tint}"`:''}><${tag} class="ti"${asLink?` href="${esc(href)}" target="_blank" rel="noopener" data-track`:''}>${def.render(t.data,t)}</${tag}>${flag&&mode==='edit'?`<span class="flag">${flag}</span>`:''}${mode==='stats'&&t.type!=='section'?`<span class="cnt">${c} clics</span>`:''}${mode==='edit'?toolbar(t):''}</article>`;
 }
 function statsHTML(){
- const st=S.stats;const days=st.days.slice(-14);const max=Math.max(...days,1);
+ const st=S.stats,n=ui.statsDays||14,sum=window.TilesPolish.statsSummary(st,S.tiles,n),days=sum.days.length>1?sum.days:[0,0];const max=Math.max(...days,1);
  const W=600,H=90,pad=4;const pts=days.map((v,i)=>[pad+i*(W-2*pad)/(days.length-1),H-14-(v/max)*(H-24)]);
  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
  const area=path+` L${pts[pts.length-1][0].toFixed(1)} ${H-14} L${pts[0][0].toFixed(1)} ${H-14} Z`;
- const last=pts[pts.length-1];
- const totalClicks=Object.values(st.clicks).reduce((a,b)=>a+b,0);
- const ctr=st.views?Math.round(totalClicks/st.views*100):0;
- const tops=S.tiles.filter(t=>t.type!=='section').map(t=>[t,st.clicks[t.id]||0]).concat([[{type:'x',data:{title:'Téléphone (appel)'}},st.clicks['p-phone']||0]]).sort((a,b)=>b[1]-a[1]).slice(0,6);
- const tmax=Math.max(1,...tops.map(x=>x[1]));
- return `<section class="stats" aria-label="Page statistics"><div class="stats-head"><h2>14 derniers jours</h2>${st.sample?'<span class="samp">Inclut des chiffres d’exemple</span>':''}<button class="btn sm" data-act="reset-stats">Réinitialiser</button></div>
- <div class="kpis"><div class="kpi"><small>Vues</small><b>${st.views.toLocaleString('en-GB')}</b></div><div class="kpi"><small>Clics</small><b>${totalClicks.toLocaleString('en-GB')}</b></div><div class="kpi"><small>Taux de clic</small><b>${ctr}%</b></div><div class="kpi"><small>CV téléchargé</small><b>${(st.clicks['p-cv']||0).toLocaleString('fr-FR')}</b></div></div>
- <svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Vues par jour, 14 derniers jours"><line class="gd" x1="0" x2="${W}" y1="${H-14}" y2="${H-14}"/><path class="ar" d="${area}"/><path class="ln" d="${path}" vector-effect="non-scaling-stroke"/><circle class="dt" cx="${last[0]}" cy="${last[1]}" r="4" vector-effect="non-scaling-stroke"/></svg>
- <div class="tops">${tops.map(([t,v])=>`<div class="top"><span>${esc(tileName(t))}</span><span class="barx"><i style="width:${(v/tmax*100).toFixed(1)}%"></i></span><b>${v}</b></div>`).join('')}</div>
+ const last=pts[pts.length-1],fr=v=>v.toLocaleString('fr-FR');
+ const chName=c=>({phone:'Téléphone',email:'Email',booking:'Rendez-vous',cv:'CV',link:'Liens',project:'Projets',deleted:'Blocs supprimés'}[c]||(PLAT[c]||[])[0]||(T[c]||{}).label||c);
+ const chColor=c=>(PLAT[c]||[])[1]||'var(--accent)';
+ const rowName=r=>r.label||(r.tile?tileName(r.tile):'Bloc supprimé');
+ const cmax=Math.max(1,...sum.channels.map(x=>x[1]));
+ return `<section class="stats" aria-label="Statistiques de la page"><div class="stats-head"><h2>${n} derniers jours</h2><div class="seg sm" role="group" aria-label="Période">${[7,14,30].map(d=>`<button type="button" data-stats-days="${d}" aria-pressed="${d===n}">${d} j</button>`).join('')}</div>${st.sample?'<span class="samp">Inclut des chiffres d’exemple</span>':''}<button class="btn sm" data-act="reset-stats">Réinitialiser</button></div>
+ <div class="kpis"><div class="kpi"><small>Vues</small><b>${fr(sum.views)}</b></div><div class="kpi"><small>Clics</small><b>${fr(sum.clicks)}</b></div><div class="kpi"><small>Taux de clic</small><b>${sum.ctr}%</b></div><div class="kpi"><small>CV téléchargé</small><b>${fr(sum.cv)}</b></div></div>
+ <svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Vues par jour, ${n} derniers jours"><line class="gd" x1="0" x2="${W}" y1="${H-14}" y2="${H-14}"/><path class="ar" d="${area}"/><path class="ln" d="${path}" vector-effect="non-scaling-stroke"/><circle class="dt" cx="${last[0]}" cy="${last[1]}" r="4" vector-effect="non-scaling-stroke"/></svg>
+ ${sum.exact?'':'<p class="hint">Clics par jour enregistrés à partir de maintenant : les clics ci-dessous sont les totaux depuis le début.</p>'}
+ <div class="stats-cols"><div><span class="eyebrow">Par canal</span><div class="tops">${sum.channels.length?sum.channels.map(([c,v])=>`<div class="top"><span>${esc(chName(c))}</span><span class="barx"><i style="width:${(v/cmax*100).toFixed(1)}%;background:${chColor(c)}"></i></span><b>${fr(v)}</b></div>`).join(''):'<p class="muted">Aucun clic sur la période.</p>'}</div></div>
+ <div><span class="eyebrow">Par lien</span><table class="stats-table"><thead><tr><th scope="col">Bloc</th><th scope="col">Clics</th><th scope="col">Part</th><th scope="col" title="Visites passées par le lien court /go/">/go/</th></tr></thead><tbody>${sum.rows.map(r=>`<tr><td>${esc(rowName(r))}</td><td>${fr(r.clicks)}</td><td>${r.share}%</td><td>${r.go?fr(r.go):'–'}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">Aucun clic sur la période.</td></tr>'}</tbody></table></div></div>
  ${st.leads.length?`<div><span class="eyebrow">Inscriptions</span><div class="leads" style="margin-top:6px">${st.leads.slice(-12).map(l=>`<span>${esc(l)}</span>`).join('')}</div></div>`:''}
  <small class="muted">Visites et clics de la page publique, enregistrés sur ton serveur.</small></section>`;
 }
@@ -656,7 +659,7 @@ function handleAct(a){
  if(a==='close')return closeDrawer();
  if(a==='hide-banner'){S.sample=false;save();render();return}
  if(a==='empty'){const old=JSON.parse(JSON.stringify(S));S.tiles=[];S.sample=false;S.stats={sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]};save();render();toast('Page cleared',()=>{S=old;save();render()});return}
- if(a==='reset-stats'){api('reset-stats',{}).then(()=>{S.stats={sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:S.stats.leads||[]};render();toast('Chiffres réinitialisés')}).catch(e=>toast(e.message));return}
+ if(a==='reset-stats'){api('reset-stats',{}).then(()=>{S.stats={sample:false,views:0,days:Array(30).fill(0),clickDays:[],clicks:{},go:{},leads:S.stats.leads||[]};render();toast('Chiffres réinitialisés')}).catch(e=>toast(e.message));return}
  if(a==='logout'){flush();api('logout',{}).finally(()=>{location.href='admin.php'});return}
 }
 document.addEventListener('click',e=>{

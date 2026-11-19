@@ -6,6 +6,20 @@ function luminance(hex){const c=rgb(hex);if(!c)return null;const v=c.map(x=>{x/=
 function contrast(a,b){const x=luminance(a),y=luminance(b);return x===null||y===null?0:(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
 function ink(bg){return contrast(bg,'#FFFFFF')>=contrast(bg,'#000000')?'#FFFFFF':'#000000';}
 function contact(p){const email=String(p.email||'').trim();if(/^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/.test(email))return {href:'mailto:'+email+'?subject='+encodeURIComponent('Discutons de votre projet'),label:'Discutons de votre projet',track:'p-mail'};try{const u=new URL(p.booking);if(['https:','http:'].includes(u.protocol)&&!u.username&&!u.password)return {href:u.href,label:'Discutons de votre projet',track:'p-rdv'};}catch{}return null;}
+/** Pure summary of the stats for a period of n days: KPIs, every block that was clicked, and clicks per channel. */
+function statsSummary(st,tiles,n){
+ const days=(st.days||[]).slice(-n),views=days.reduce((a,b)=>a+(+b||0),0);
+ const series=Array.isArray(st.clickDays)&&st.clickDays.length?st.clickDays.slice(-n):null;
+ const clicks={};if(series)for(const d of series)for(const [id,v] of Object.entries(d||{}))clicks[id]=(clicks[id]||0)+(+v||0);else Object.assign(clicks,st.clicks||{});
+ const total=Object.values(clicks).reduce((a,b)=>a+b,0);
+ const profile={'p-phone':['Téléphone','phone'],'p-mail':['Email','email'],'p-rdv':['Rendez-vous','booking'],'p-cv':['CV','cv']};
+ const byId=new Map((tiles||[]).map(t=>[t.id,t]));
+ const rows=Object.entries(clicks).filter(([,v])=>v>0).map(([id,v])=>{const t=byId.get(id),p=profile[id];
+  const channel=p?p[1]:t?.type==='social'?String(t.data?.platform||'social'):t?(t.type==='link'?'link':t.type):'deleted';
+  return {id,clicks:v,share:total?Math.round(v/total*100):0,go:+((st.go||{})[id])||0,channel,label:p?p[0]:null,tile:t||null};}).sort((a,b)=>b.clicks-a.clicks);
+ const channels={};for(const r of rows)channels[r.channel]=(channels[r.channel]||0)+r.clicks;
+ return {days,views,clicks:total,ctr:views?Math.round(total/views*100):0,cv:clicks['p-cv']||0,rows,channels:Object.entries(channels).sort((a,b)=>b[1]-a[1]),exact:!!series};
+}
 function dedupeBio(bio,location){
  const text=String(bio||''),loc=String(location||'').trim(),city=loc.split(',')[0].trim();if(!city)return text;
  const n=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
@@ -42,5 +56,5 @@ function refreshContact(page,mode){
  contactObserver=new IntersectionObserver(update,{threshold:[0,1]});contactObserver.observe(primary);contacts.forEach(el=>contactObserver.observe(el));update();
 }
 function bind({render,applyTheme}){document.addEventListener('click',e=>{const button=e.target.closest('[data-visitor-theme]');if(!button)return;let next;try{const value=preference(localStorage);next=value==='site'?'light':value==='light'?'dark':'site';if(next==='site')localStorage.removeItem(KEY);else localStorage.setItem(KEY,next);}catch{next='site';}render();});window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null){applyTheme();render();}});}
-window.TilesPolish={dedupeBio,contactRows,rgb,contrast,ink,contact,preference,apply,bind,KEY,marked,highlightTitles,refreshContact};
+window.TilesPolish={statsSummary,dedupeBio,contactRows,rgb,contrast,ink,contact,preference,apply,bind,KEY,marked,highlightTitles,refreshContact};
 })();

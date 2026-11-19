@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__) . '/src/lib.php';
 require dirname(__DIR__) . '/src/page-validation.php';
+require dirname(__DIR__) . '/src/stats.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -40,16 +41,7 @@ if ($action === 'track') {
     }
     with_lock('stats', function () use ($type, $id) {
         $st = read_json('stats.json', ['views' => 0, 'days' => [], 'clicks' => []]);
-        if ($type === 'view') {
-            $day = gmdate('Y-m-d');
-            $st['views'] = (int) ($st['views'] ?? 0) + 1;
-            $st['days'][$day] = (int) ($st['days'][$day] ?? 0) + 1;
-            $cut = gmdate('Y-m-d', time() - 120 * 86400);
-            $st['days'] = array_filter($st['days'], fn($k) => $k >= $cut, ARRAY_FILTER_USE_KEY);
-        } else {
-            $st['clicks'][$id] = (int) ($st['clicks'][$id] ?? 0) + 1;
-        }
-        write_json('stats.json', $st);
+        write_json('stats.json', stats_record($st, $type, $id, time()));
     });
     out([]);
 }
