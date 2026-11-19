@@ -4,6 +4,7 @@ require dirname(__DIR__) . '/src/lib.php';
 require dirname(__DIR__) . '/src/seo.php';
 require dirname(__DIR__) . '/src/sections.php';
 require dirname(__DIR__) . '/src/journal.php';
+redirect_public_to_site();
 
 $page = read_json('page.json', null);
 if (!$page) {

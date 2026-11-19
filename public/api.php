@@ -69,6 +69,10 @@ if ($action === 'lead') {
 
 /* ---------- Admin only ---------- */
 
+if (TILES_MODE === 'public') {
+    out(['error' => 'Not found.'], 404);
+}
+
 start_session();
 if (!is_admin()) {
     out(['error' => 'You are logged out. Reload the page and log in again.'], 401);

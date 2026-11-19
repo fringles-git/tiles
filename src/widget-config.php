@@ -6,16 +6,7 @@ require_once __DIR__ . '/paths.php';
 /** Private configuration is never included in the browser boot payload. */
 function widget_settings(): array
 {
-    $file = getenv('TILES_CONFIG_FILE') ?: (is_file(ROOT_DIR . '/config/config.php')
-        ? ROOT_DIR . '/config/config.php' : ROOT_DIR . '/config.local.php');
-    $private = [];
-    if (is_file($file)) {
-        ob_start();
-        try { $private = require $file; }
-        catch (Throwable $e) { $private = []; }
-        finally { ob_end_clean(); }
-    }
-    if (!is_array($private)) { $private = []; }
+    $private = tiles_private_config();
     $token = trim((string) (getenv('FOOTBALL_DATA_TOKEN') ?: ($private['football_token'] ?? '')));
     if (!preg_match('/^[A-Za-z0-9]{16,128}$/', $token)) { $token = ''; }
     $teams = [

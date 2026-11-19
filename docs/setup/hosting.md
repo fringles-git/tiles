@@ -73,3 +73,24 @@ Use the PHP-FPM socket installed on the host and configure TLS in its virtual ho
 The path constants derive from the checkout root, not the server cwd/document root. Tests can isolate state with `TILES_DATA_DIR` and `TILES_UPLOAD_DIR`; ordinary deployments should leave them unset. Seed JSON now lives in `seed/data/` and seed media in `seed/uploads/`. Existing `.seeded` and `patches-applied.json` files retain their meanings and existing patch basenames are unchanged.
 
 Before a code rollback, restore the previous web-root setting or use the entry points expected by that commit. Preserve the newer runtime page/journal JSON, uploads and credentials; do not overwrite live data with seeds. Take a separate data backup before any manual restore. No automatic Hostinger configuration or deployment is performed by this repository update.
+
+## Séparer la page publique et l'admin (deux domaines, mêmes données)
+
+But : `brandonlazarre.fr` sert la page, `tiles.brandonlazarre.fr` sert l'admin. Une seule source de données.
+
+1. **Admin** (installation existante sur `tiles.brandonlazarre.fr`) : dans `config/config.php`
+   ```php
+   'mode' => 'admin',
+   'site_url' => 'https://brandonlazarre.fr',
+   ```
+   Les pages publiques de ce domaine renvoient alors en 301 vers `brandonlazarre.fr` (même chemin), `robots.txt` interdit l'indexation, `admin.php` et `/go/` restent en place.
+2. **Public** : déployer le même dépôt sur `brandonlazarre.fr` (Git de hPanel), racine web sur `public/`, puis `config/config.php` :
+   ```php
+   'mode' => 'public',
+   'site_url' => 'https://brandonlazarre.fr',
+   'data_dir' => '/home/uXXXX/…/tiles.brandonlazarre.fr/…/data',
+   'upload_dir' => '/home/uXXXX/…/tiles.brandonlazarre.fr/…/uploads',
+   ```
+   Chemins absolus de l'installation admin (même compte Hostinger : `pwd` dans son dossier via SSH). `admin.php` et les actions d'édition de l'API y répondent 404 ; visites, clics et inscriptions s'écrivent dans les données partagées.
+3. Ordre sans coupure : déployer et vérifier le public d'abord (`https://brandonlazarre.fr/version.json`), puis seulement passer l'admin en `mode => 'admin'`.
+4. Retour arrière : retirer `mode` de la configuration de l'admin.

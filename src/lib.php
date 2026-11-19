@@ -236,3 +236,20 @@ function render_shell(string $title, string $description, array $boot, string $e
 <?php
 }
 
+
+/**
+ * In "admin" mode the public pages live on site_url: send visitors there with the same path (301).
+ * Only a validated path is reused (never the Host or a full URL from the request), so this cannot become an open redirect.
+ */
+function redirect_public_to_site(): void
+{
+    if (TILES_MODE !== 'admin') { return; }
+    $site = widget_settings()['site_url'];
+    if ($site === '') { return; }
+    $path = (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
+    if (!preg_match('#\A/[A-Za-z0-9._~/-]{0,200}\z#', $path) || str_contains($path, '//') || str_contains($path, '..')) { $path = '/'; }
+    if ($path === '/index.php') { $path = '/'; }
+    header('Location: ' . $site . $path, true, 301);
+    header('Cache-Control: public, max-age=3600');
+    exit;
+}
