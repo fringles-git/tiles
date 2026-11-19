@@ -89,7 +89,7 @@ proxy, station voting or popularity click reporting are added in this slice.
 - lib.php: loads the optional module before the main application.
 - public/assets/js/app.js: registers block types and disposes media/maps before grid changes.
 
-Requires PHP 8.1+ with cURL and writable **data/** (already used by Tiles).
+Requires PHP 8.5+ with cURL and writable **data/** (already used by Tiles).
 The existing data/.htaccess must remain installed so cached state cannot be read
 as public files. Root .htaccess also blocks direct requests to widget-cache.php.
 Football uses a server-only token. No secret is stored in browser code. Server fetch URLs are hardcoded; external

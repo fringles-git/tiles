@@ -93,7 +93,7 @@ PHP + vanilla JS remain; no Notes app features are added.
 
 ## Verification
 
-Run the current suites with PHP 8.3+ (cURL, GD, fileinfo) and Node 24:
+Run the current suites with PHP 8.5+ (cURL, GD, fileinfo) and Node 24:
 
 ```sh
 npm run check

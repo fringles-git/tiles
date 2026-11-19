@@ -28,8 +28,7 @@ function seo_tile_live(array $tile, int $now): bool
 
 function seo_http_url(string $url): string
 {
-    $url = trim($url);
-    return strlen($url) <= 2048 && preg_match('#^https?://[^\s\x00-\x1f\x7f]+$#i', $url) ? $url : '';
+    return url_safe($url);
 }
 
 function seo_jsonld(array $page, string $base, int $now): string
