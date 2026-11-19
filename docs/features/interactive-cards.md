@@ -12,7 +12,7 @@ already merged; this change starts from main at 82dbb88de5d48893954e60298b24734c
 Open the authenticated editor, choose **Add block**, then:
 
 - **Radio interactive**: choose gospel, classical or jazz.
-- **F1 interactive**: choose Courses or Pilotes in preview/public mode.
+- **F1 interactive**: choose Calendrier, Pilotes, Écuries, Suivi or Dernier GP in preview/public mode. The editor sets the initial view and the followed driver or team (`driver:<id>` / `team:<id>`, Jolpica ids; default `driver:max_verstappen`). The face shows 1 / 3 / 5 / 8 rows for S / W / T / L; the dialog always shows 8.
 - **Carte interactive**: set a place label, latitude, longitude and zoom.
 
 All five sizes are supported. `S` and strip show one record, `W` three,
@@ -41,6 +41,7 @@ working demo. Its Ergast entry is outdated; Jolpica is the replacement used here
 | Provider | Published access checked 2026-11-06 | Application rule |
 | --- | --- | --- |
 | Jolpica F1 | Unauthenticated, 4 requests/s and 500/hour; limits may decrease | At most 24 attempts/day across both resources, at least 2s apart; 1h cache per resource |
+| ESPN F1 scoreboard (unofficial, undocumented) | No published limits or terms; may change or disappear | Own provider budget: at most 480 attempts/day, 120s cache. Requested only inside a race-weekend window (2h before the first session to 3h after the last) and only from the Calendrier view |
 | Radio Browser | Free, no numeric guaranteed allowance or uptime published | At most 6 attempts/day across all genres, at least 2s apart; 24h cache per genre |
 | OpenFreeMap | Public instance free, no map-view/request limits, no key | Only activate on click; no background prefetch or offline region downloads |
 | Radio streams | Direct third-party broadcaster streams | No autoplay or preload; one stream at a time, released on stop, pagehide, hidden tab or grid rerender |
@@ -57,7 +58,7 @@ off after failure. No setInterval or polling is used.
 
 On quota exhaustion/failure, use a cached result up to 7 days old, explicitly
 labelled **Cache ancien**, with its original timestamp. Beyond that, stop and
-show an unavailable message. Results are never labelled live; F1 standings and
+show an unavailable message. Results are never labelled live. The only exception is the in-progress session row from ESPN, shown as `<session> en cours · état de HH:MM` with the cache time, never as a real-time feed; F1 standings and
 calendar are snapshots, not real-time timing. Race dates use the visitor's local
 timezone, and past scheduled starts are filtered out of the upcoming list.
 
