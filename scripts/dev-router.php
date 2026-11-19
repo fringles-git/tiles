@@ -6,6 +6,9 @@ $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
 if (preg_match('#\A/uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))\z#i', $path, $m)) {
     $_GET['file'] = $m[1]; require $public . '/media.php'; return true;
 }
+if (preg_match('#\A/go/([a-z0-9-]{1,24})/?\z#', $path, $m)) {
+    $_GET['id'] = $m[1]; require $public . '/go.php'; return true;
+}
 if (in_array($path, ['/', '/index.php', '/admin.php', '/api.php', '/widgets.php', '/media.php', '/robots.txt'], true)) { return false; }
 if (str_starts_with($path, '/assets/')) {
     $file = realpath($public . $path);
