@@ -37,3 +37,4 @@
 .skill-buttons .skill-mark,.skill-buttons .skill-mono{width:20px;height:20px;padding:0;border:0;font-size:10px}
 .skill-buttons .skill-mark{border-radius:0;background:var(--mark)}
 .skill-buttons .skill-mono{border-radius:6px;background:hsl(var(--h) 55% 42%);color:#fff}
+.skill-buttons .skill-img{width:20px;height:20px;padding:0;border:0;border-radius:0;background:none;object-fit:contain;flex:none}

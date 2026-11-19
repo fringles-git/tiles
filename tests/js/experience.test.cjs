@@ -32,10 +32,24 @@ test('timeline: dates, duration, place, logo or initials for any organisation, e
  assert.match(html,/2022 – 2024 · 2 ans/);assert.match(html,/Hugo Boss Retail · Troyes/);assert.match(html,/<span>HB<\/span>/);
  assert.match(html,/<span>M&amp;<\/span>|<span>MC<\/span>/);assert.match(html,/Stagiaire &lt;b&gt;/);assert.doesNotMatch(html,/<b>Stagiaire <b>/);
 });
-test('skills: brand colour from local SVG mask, deterministic monogram for unknown skills',()=>{
+test('skills: brand colour via CSS mask for other brands, deterministic monogram for unknown skills',()=>{
  const html=definitions().skills.render({title:'Outils',items:'HTML, CSS, PHP, Adobe Suite, SQL'});
- assert.match(html,/--mark:#E34F26/);assert.match(html,/--mark:#1572B6/);assert.match(html,/--mark:#777BB4/);
+ assert.match(html,/--mark:#777BB4/);
  assert.equal((html.match(/skill-mono/g)||[]).length,2);assert.equal(api.skillMark('SQL'),api.skillMark('SQL'));
  assert.doesNotMatch(html,/<img class="brand-icon/);
 });
 test('duration is not recomputed when the dates field already states one',()=>{assert.equal(api.span('2017 – 2025 · 4 mois'),'');assert.equal(api.span('2024 – 2025 · 1 semaine'),'');assert.equal(api.span('2022 – 2024 (6 mois)'),'');});
+test('logo library: one upload is reused for every line of the same organisation',()=>{
+ api.setLibrary([{id:'a',type:'experience',data:{logoFor:'Hugo Boss',logo:'uploads/hb_1.png'}},{id:'b',type:'education',data:{logoFor:'Lycée Chrestien',logo:'uploads/lyc-2.jpg'}},{id:'c',type:'experience',data:{logoFor:'X',logo:'https://evil.test/x.png'}},{id:'d',type:'experience',data:{logoFor:'',logo:'uploads/none.png'}}]);
+ assert.equal(api.libraryLogo('Hugo Boss Retail').logo,'uploads/hb_1.png');assert.equal(api.libraryLogo('hugo  boss')?.logo,undefined);assert.equal(api.libraryLogo('Boss Hugo'),null);
+ assert.equal(api.libraryLogo('Lycée Chrestien de Troyes').logo,'uploads/lyc-2.jpg');assert.equal(api.libraryLogo('X'),null);assert.equal(api.libraryLogo('Xavier'),null);
+ const html=api.timeline({title:'Parcours',items:'Agent | Hugo Boss Retail | 2022 | Troyes\nCaissier | Hugo Boss | 2026'});
+ assert.equal((html.match(/src="uploads\/hb_1.png"/g)||[]).length,2);
+ api.setLibrary([]);assert.doesNotMatch(api.timeline({title:'P',items:'Agent | Hugo Boss | 2022'}),/uploads\/hb_1/);
+});
+test('library keys with regex characters cannot break matching',()=>{api.setLibrary([{id:'a',type:'experience',data:{logoFor:'A+B (C)',logo:'uploads/ab.png'}}]);assert.equal(api.libraryLogo('Agence A+B (C) SARL').logo,'uploads/ab.png');assert.equal(api.libraryLogo('AAB C'),null);api.setLibrary([]);});
+test('HTML5 and CSS keep their official colours; the logo files carry no scripts',()=>{
+ const html=definitions().skills.render({title:'Outils',items:'HTML, CSS, PHP'});
+ assert.match(html,/class="skill-img" src="[^"]*brands\/html5-color.svg"/);assert.match(html,/brands\/css-color.svg/);assert.match(html,/--mark:#777BB4/);
+ for(const f of ['html5-color.svg','css-color.svg']){const svg=fs.readFileSync(path.join(root,'public/assets/images/brands',f),'utf8');assert.ok(!/<script|href=|onload|https?:\/\/(?!www\.w3\.org)/i.test(svg),f);}
+});
