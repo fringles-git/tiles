@@ -56,3 +56,11 @@
 .note-pads button.on,.note-pads button:active{background:var(--accent);color:#fff;border-color:transparent}
 .sz-s .instrument-tabs,.sz-s .midi-btn,.sz-s .piano-hint{display:none}.sz-s .note-pads{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(prefers-reduced-motion:reduce){.bass-neck button,.note-pads button,.piano-keys .key{transition:none}}
+/* Logos des entreprises sous un grand chiffre : diagonale montante, du plus discret au plus net. */
+.stat-logos{display:flex;align-items:flex-end;margin-top:8px;padding-bottom:4px;pointer-events:none}
+.stat-logo{flex:none;margin-left:-8px;transform:translateY(calc((var(--n) - var(--i)) * 3px));opacity:calc(.35 + .65 * (var(--i) + 1) / (var(--n) + 1))}
+.stat-logo:first-child{margin-left:0}
+.stat-logo .company-logo{width:34px;height:34px;border-radius:10px;font-size:10px;box-shadow:0 0 0 2px var(--surface)}
+.stat-logo.more{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--fg);color:var(--bg);font:800 11px var(--f-body);opacity:1}
+.tile.ty-stat:has(.stat-logos) .bottom{margin-top:6px}
+@media(prefers-reduced-motion:reduce){.stat-logo{transition:none}}

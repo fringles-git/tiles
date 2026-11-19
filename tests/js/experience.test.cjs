@@ -91,3 +91,12 @@ test('MIDI follows only the tile it was connected on, and choices are kept per t
  assert.match(T.instrument.render({name:'Piano',also:'Basse'},{id:'other'}),/data-kind="piano"/);
  api.choose(null,'pianoTile');
 });
+test('employer logos under a big number come from the experience tiles, deduplicated, capped with +N',()=>{
+ const tiles=[{id:'e',type:'experience',data:{items:'Logistique | SOLODI, Mondial Relay, STEF, Déménageurs Aubois & Bretons | 2017\nCommerce | Thiriet, Action, Hugo Boss, STEF | 2022\nAccueil | 3Media (support EDF), Basic-Fit | 2020\nDev | Indépendant | 2024\nPhoto | Événements et portraits | 2023'}},{id:'x',type:'education',data:{items:'BTS | Lycée | 2015'}}];
+ assert.deepEqual([...api.organisations(tiles)],['SOLODI','Mondial Relay','STEF','Déménageurs Aubois & Bretons','Thiriet','Action','Hugo Boss','3Media','Basic-Fit']);
+ api.setLibrary(tiles);const T=definitions();
+ const html=T.stat.render({value:'19',label:'missions',logos:'employers'});
+ assert.equal((html.match(/class="stat-logo"/g)||[]).length,7);assert.match(html,/>\+2</);assert.match(html,/brands\/action\.svg/);assert.ok(html.indexOf('action.svg')>html.indexOf('title="SOLODI"'),'organisations with a real logo sit at the visible end');
+ assert.doesNotMatch(T.stat.render({value:'19',label:'missions'}),/stat-logos/);
+ api.setLibrary([]);assert.doesNotMatch(T.stat.render({value:'1',logos:'employers'}),/stat-logos/);
+});
