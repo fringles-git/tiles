@@ -177,6 +177,15 @@ switch ($action) {
         }
         out(['url' => 'uploads/' . $name]);
 
+    case 'upload-banner':
+        require_once dirname(__DIR__) . '/src/banner.php';
+        $f = $_FILES['file'] ?? null;
+        if (!$f || ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file($f['tmp_name'])) {
+            out(['error' => 'The upload did not arrive.'], 400);
+        }
+        $r = banner_store($f['tmp_name'], (int) $f['size'], UPLOAD_DIR);
+        out($r, isset($r['error']) ? 400 : 200);
+
     case 'upload-doc':
         $f = $_FILES['file'] ?? null;
         if (!$f || ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file($f['tmp_name'])) {
