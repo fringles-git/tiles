@@ -39,3 +39,16 @@ check($calendar['items'][0]['sessions'][0]['name'] === 'Essais 1', 'practice ses
 check($calendar['items'][0]['sessions'][1]['time'] === '', 'unknown qualifying time remains unknown');
 $results = widget_normalize('f1-results', ['MRData'=>['RaceTable'=>['Races'=>[['raceName'=>'Test','Results'=>[['Driver'=>['driverId'=>'max_verstappen','givenName'=>'Max','familyName'=>'Verstappen'],'position'=>'2','status'=>'Finished']]]]]]]);
 check($results['items'][0]['results'][0]['driverId'] === 'max_verstappen' && $results['items'][0]['results'][0]['position'] === '2', 'last-race driver identity and finish retained');
+
+$constructors = widget_normalize('f1-constructors', ['MRData' => ['StandingsTable' => ['season' => '2026', 'StandingsLists' => [['ConstructorStandings' => [['position' => '1', 'points' => '652', 'wins' => '12', 'Constructor' => ['constructorId' => 'mercedes', 'name' => 'Mercedes']]]]]]]]);
+check($constructors['items'][0]['id'] === 'mercedes' && $constructors['items'][0]['points'] === '652', 'constructor standings normalized');
+$drivers = widget_normalize('f1-standings', ['MRData' => ['StandingsTable' => ['StandingsLists' => [['DriverStandings' => [['position' => '1', 'points' => '390', 'wins' => '9', 'Driver' => ['driverId' => 'antonelli', 'code' => 'ANT', 'givenName' => 'Kimi', 'familyName' => 'Antonelli'], 'Constructors' => [['constructorId' => 'rb', 'name' => 'RB'], ['constructorId' => 'mercedes', 'name' => 'Mercedes']]]]]]]]]);
+check($drivers['items'][0]['id'] === 'antonelli' && $drivers['items'][0]['teamId'] === 'mercedes', 'driver id kept and current team is the last listed');
+$live = widget_normalize('f1-live', ['events' => [['name' => 'GP', 'competitions' => [['type' => ['abbreviation' => 'FP1'], 'date' => '2026-11-20T00:30Z', 'status' => ['type' => ['state' => 'in']]], ['type' => ['abbreviation' => 'FP2'], 'status' => ['type' => ['state' => '<script>']]]]]]]);
+check($live['items'][0]['state'] === 'in' && $live['items'][1]['state'] === 'pre' && $live['source'] === 'ESPN', 'ESPN session states whitelisted');
+$threw = false; try { widget_normalize('f1-live', ['nope' => 1]); } catch (RuntimeException $e) { $threw = true; }
+check($threw, 'invalid ESPN payload rejected');
+$state = []; $granted = 0;
+for ($i = 0; $i < 600; $i++) { $r = widget_reserve($state, 'espn', $now + $i * 3); if ($r['allowed']) { $granted++; $state = $r['state']; } }
+check($granted === 480, 'ESPN has its own daily hard stop');
+check(widget_reserve([], 'jolpica', $now)['allowed'], 'ESPN budget does not consume Jolpica quota');

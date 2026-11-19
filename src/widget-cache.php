@@ -9,6 +9,9 @@ function widget_resources(): array
         'f1-calendar' => ['provider' => 'jolpica', 'ttl' => 3600, 'url' => 'https://api.jolpi.ca/ergast/f1/current.json?limit=100'],
         'f1-standings' => ['provider' => 'jolpica', 'ttl' => 3600, 'url' => 'https://api.jolpi.ca/ergast/f1/current/driverStandings.json?limit=100'],
         'f1-results' => ['provider' => 'jolpica', 'ttl' => 3600, 'url' => 'https://api.jolpi.ca/ergast/f1/current/last/results.json?limit=100'],
+        'f1-constructors' => ['provider' => 'jolpica', 'ttl' => 3600, 'url' => 'https://api.jolpi.ca/ergast/f1/current/constructorStandings.json?limit=100'],
+        // Unofficial ESPN scoreboard: session state only. Own provider budget, short TTL.
+        'f1-live' => ['provider' => 'espn', 'ttl' => 120, 'url' => 'https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard'],
     ];
     foreach (['gospel', 'classical', 'jazz'] as $genre) {
         $resources['radio-' . $genre] = ['provider' => 'radio', 'ttl' => 86400, 'url' => 'https://de1.api.radio-browser.info/json/stations/search?tag=' . $genre . '&hidebroken=true&is_https=true&codec=MP3&order=votes&reverse=true&limit=12'];
@@ -23,6 +26,12 @@ function widget_https(string $url): string
 {
     $parts = parse_url($url);
     return is_array($parts) && ($parts['scheme'] ?? '') === 'https' && !empty($parts['host']) && !isset($parts['user']) ? $url : '';
+}
+
+/** Current team of a driver: Jolpica lists mid-season transfers chronologically. */
+function widget_last(mixed $list): array
+{
+    return is_array($list) && $list !== [] && is_array($last = end($list)) ? $last : [];
 }
 
 function widget_normalize(string $resource, array $raw): array
@@ -50,6 +59,16 @@ function widget_normalize(string $resource, array $raw): array
         }
         return ['items' => $items, 'source' => 'Radio Browser'];
     }
+    if ($resource === 'f1-live') {
+        if (!isset($raw['events']) || !is_array($raw['events'])) { throw new RuntimeException('Invalid scoreboard.'); }
+        $event = is_array($raw['events'][0] ?? null) ? $raw['events'][0] : [];
+        $items = [];
+        foreach (($event['competitions'] ?? []) as $competition) {
+            $state = (string) ($competition['status']['type']['state'] ?? 'pre');
+            $items[] = ['name' => substr((string) ($competition['type']['abbreviation'] ?? ''), 0, 12), 'date' => (string) ($competition['date'] ?? ''), 'state' => in_array($state, ['pre', 'in', 'post'], true) ? $state : 'pre'];
+        }
+        return ['items' => $items, 'event' => substr((string) ($event['name'] ?? ''), 0, 100), 'source' => 'ESPN'];
+    }
     $mr = $raw['MRData'] ?? null;
     if (!is_array($mr)) { throw new RuntimeException('Unexpected sports response.'); }
     $items = [];
@@ -68,14 +87,20 @@ function widget_normalize(string $resource, array $raw): array
         $table = $mr['RaceTable'] ?? [];
         foreach (($table['Races'] ?? []) as $race) {
             $results = [];
-            foreach (($race['Results'] ?? []) as $result) { $results[] = ['driverId' => (string) ($result['Driver']['driverId'] ?? ''), 'name' => trim(($result['Driver']['givenName'] ?? '') . ' ' . ($result['Driver']['familyName'] ?? '')), 'position' => (string) ($result['position'] ?? ''), 'status' => (string) ($result['status'] ?? '')]; }
+            foreach (($race['Results'] ?? []) as $result) { $results[] = ['driverId' => (string) ($result['Driver']['driverId'] ?? ''), 'name' => trim(($result['Driver']['givenName'] ?? '') . ' ' . ($result['Driver']['familyName'] ?? '')), 'position' => (string) ($result['position'] ?? ''), 'points' => (string) ($result['points'] ?? ''), 'status' => (string) ($result['status'] ?? '')]; }
             $items[] = ['name' => (string) ($race['raceName'] ?? ''), 'date' => (string) ($race['date'] ?? ''), 'results' => $results];
         }
     } else {
         $table = $mr['StandingsTable'] ?? [];
         if (!isset($table['StandingsLists']) || !is_array($table['StandingsLists'])) { throw new RuntimeException('Invalid standings.'); }
-        foreach (($table['StandingsLists'][0]['DriverStandings'] ?? []) as $driver) {
-            $items[] = ['name' => trim(($driver['Driver']['givenName'] ?? '') . ' ' . ($driver['Driver']['familyName'] ?? '')), 'position' => (string) ($driver['position'] ?? ''), 'points' => (string) ($driver['points'] ?? ''), 'wins' => (string) ($driver['wins'] ?? ''), 'team' => (string) ($driver['Constructors'][0]['name'] ?? '')];
+        if ($resource === 'f1-constructors') {
+            foreach (($table['StandingsLists'][0]['ConstructorStandings'] ?? []) as $team) {
+                $items[] = ['id' => (string) ($team['Constructor']['constructorId'] ?? ''), 'name' => (string) ($team['Constructor']['name'] ?? ''), 'position' => (string) ($team['position'] ?? ''), 'points' => (string) ($team['points'] ?? ''), 'wins' => (string) ($team['wins'] ?? '')];
+            }
+        } else {
+            foreach (($table['StandingsLists'][0]['DriverStandings'] ?? []) as $driver) {
+                $items[] = ['id' => (string) ($driver['Driver']['driverId'] ?? ''), 'code' => (string) ($driver['Driver']['code'] ?? ''), 'name' => trim(($driver['Driver']['givenName'] ?? '') . ' ' . ($driver['Driver']['familyName'] ?? '')), 'position' => (string) ($driver['position'] ?? ''), 'points' => (string) ($driver['points'] ?? ''), 'wins' => (string) ($driver['wins'] ?? ''), 'team' => (string) (widget_last($driver['Constructors'] ?? [])['name'] ?? ''), 'teamId' => (string) (widget_last($driver['Constructors'] ?? [])['constructorId'] ?? '')];
+            }
         }
     }
     return ['items' => $items, 'season' => (string) ($table['season'] ?? ''), 'source' => 'Jolpica F1'];
@@ -84,7 +109,7 @@ function widget_normalize(string $resource, array $raw): array
 /** Fail closed: a request is reserved on disk BEFORE any network activity, even on errors. */
 function widget_reserve(array $state, string $provider, int $now): array
 {
-    $budget = $provider === 'radio' ? 6 : 24;
+    $budget = $provider === 'radio' ? 6 : ($provider === 'espn' ? 480 : 24);
     $day = gmdate('Y-m-d', $now);
     $usage = $state[$provider] ?? [];
     if (($usage['day'] ?? '') !== $day) { $usage = ['day' => $day, 'count' => 0, 'next' => $usage['next'] ?? 0]; }
