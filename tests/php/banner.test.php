@@ -25,4 +25,16 @@ check(isset(banner_store($tmp, 9 * 1024 * 1024, $dir)['error']), 'over 8 MB is r
 $jpg = imagecreatetruecolor(600, 200); imagejpeg($jpg, $tmp);
 $j = banner_store($tmp, (int) filesize($tmp), $dir);
 check(str_ends_with($j['url'], '.jpg') && $j['poster'] === $j['url'] && $j['animated'] === false, 'JPEG is re-encoded and is its own poster');
+$png = imagecreatetruecolor(600, 200); imagealphablending($png, false); imagesavealpha($png, true); imagefill($png, 0, 0, imagecolorallocatealpha($png, 0, 0, 0, 127)); imagepng($png, $tmp);
+$pr = banner_store($tmp, (int) filesize($tmp), $dir); $back = imagecreatefrompng($dir . '/' . basename($pr['url']));
+check(((imagecolorat($back, 10, 10) >> 24) & 0x7F) === 127, 'transparent PNG keeps its alpha channel');
+if (function_exists('exif_read_data')) {
+    // Minimal JPEG with an EXIF APP1 Orientation=6 segment inserted after SOI.
+    $raw = imagecreatetruecolor(600, 200); ob_start(); imagejpeg($raw); $jb = (string) ob_get_clean();
+    $tiff = "MM\x00\x2A\x00\x00\x00\x08\x00\x01\x01\x12\x00\x03\x00\x00\x00\x01\x00\x06\x00\x00\x00\x00\x00\x00";
+    $app1 = "Exif\x00\x00" . $tiff;
+    file_put_contents($tmp, substr($jb, 0, 2) . "\xFF\xE1" . pack('n', strlen($app1) + 2) . $app1 . substr($jb, 2));
+    $or = banner_store($tmp, (int) filesize($tmp), $dir); [$ow, $oh] = getimagesize($dir . '/' . basename($or['url']));
+    check($ow === 200 && $oh === 600, 'JPEG EXIF orientation is applied before re-encoding');
+}
 array_map('unlink', glob("$dir/*")); rmdir($dir); unlink($tmp);
