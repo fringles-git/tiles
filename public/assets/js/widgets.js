@@ -62,7 +62,11 @@ async function f1Load(s,d){
  const view=s.view;
  if(view==='follow'){
   const follow=parseFollow(d.f1follow);
-  const [board,last]=await Promise.all([data(follow.type==='team'?'f1-constructors':'f1-standings'),data('f1-results').catch(()=>null)]);
+  const board=await data(follow.type==='team'?'f1-constructors':'f1-standings');
+  // Jolpica enforces 2s between upstream requests: wait out the cooldown only when the board was just fetched.
+  const wait=2100-(Date.now()-Date.parse(board.updatedAt));
+  if(wait>0)await new Promise(r=>setTimeout(r,wait));
+  const last=await data('f1-results').catch(()=>null);
   return {...board,view,follow,last};
  }
  const result=await data(F1_KEY[view]);
@@ -86,7 +90,8 @@ function f1Rows(result,n){
   if(f.type==='driver')list.push(['','Dernier GP',lastGp?'P'+lastGp.position:'—'],['','Écurie',e.team]);
   return list.slice(0,n);
  }
- const live=(result.live?.items||[]).find(x=>x.state==='in');
+ const lv=result.live,fresh=lv&&!lv.stale&&Date.now()-Date.parse(lv.updatedAt)<=600000;
+ const live=fresh?(lv.items||[]).find(x=>x.state==='in'):null;
  const rows=upcomingSessions(items).slice(0,n).map(x=>[whenText(x.at,!!x.time),x.name,x.race.replace(/ Grand Prix$/,'')]);
  if(live){const at=Date.parse(result.live.updatedAt);rows.unshift(['●',live.name+' en cours','état de '+(Number.isNaN(at)?'—':new Date(at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}))])}
  return rows.slice(0,n);
@@ -96,8 +101,10 @@ function sportsFace(d,t){
  return `<div class="w-card sports-card ${f1?'sports-f1':fr?'sports-france':'sports-psg'}" data-widget="sport" data-widget-id="${esc(t.id)}" data-widget-size="${esc(t.size)}"><div class="sports-decoration" aria-hidden="true">${f1?'<span class="racing-stripe"></span><span class="racing-checks"></span>':'<span class="club-circle"></span><span class="club-stripe"></span>'}</div><div class="sports-heading"><span class="sports-eyebrow">${f1?'FORMULE 1':fr?'LES BLEUS':'LIGUE 1 & UEFA'}</span><button class="sports-info" type="button" data-w-action="load" aria-label="Informations ${esc(team.name)}">⇄ Infos</button></div><div class="sports-title"><b>${esc(d.title||(f1?'Max Verstappen':team.name))}</b><small>${esc(f1?'Supporter de Max Verstappen':fr?'Équipe de France masculine':'Supporter Rouge & Bleu')}</small></div><div class="w-body"><p class="sports-motto">${f1?'La passion de la course.':fr?'Allez les Bleus.':'Ici, c’est Paris.'}</p></div><p class="w-status" role="status" aria-live="polite"></p></div>`;
 }
 function sportsBox(label,main,detail){return `<div class="sports-summary"><small>${label}</small><b>${esc(main)}</b>${detail?`<span>${esc(detail)}</span>`:''}</div>`}
+/** The tile face, even when the click came from the dialog's nested copy of the widget. */
+function faceOf(card){const q=document.querySelector?.('.sports-card[data-widget-id="'+String(card.dataset.widgetId).replace(/["\\]/g,'')+'"]');return q||card}
 function sportsDetails(card,d,html,result,brief,glance){
- card.querySelector('.w-body').innerHTML=glance||`<p class="sports-motto">${esc(brief)}</p>`;
+ faceOf(card).querySelector('.w-body').innerHTML=glance||`<p class="sports-motto">${esc(brief)}</p>`;
  let dialog=document.getElementById('sports-dialog');
  if(!dialog){dialog=document.createElement('dialog');dialog.id='sports-dialog';dialog.className='sports-dialog';dialog.setAttribute('aria-labelledby','sports-dialog-title');document.body.appendChild(dialog);dialog.addEventListener('click',e=>{if(e.target.closest('[data-close-sports]'))dialog.close()})}
  const page=document.getElementById('page');if(page){const theme=getComputedStyle(page);for(const key of ['--surface','--surface-2','--fg','--muted','--line','--accent'])dialog.style.setProperty(key,theme.getPropertyValue(key))}
@@ -111,9 +118,9 @@ function drawSport(card,result,d){
  const rows=n=>{const r=f1Rows(result,n);return r.length?rowsHtml(r):empty};
  const nav=`<div class="sports-links">${F1_VIEWS.map(([v,l])=>`<button type="button" data-w-action="view" data-value="${v}" aria-pressed="${v===s.view}">${esc(l)}</button>`).join('')}</div>`;
  const title={calendar:'PROCHAINES SESSIONS',standings:'CLASSEMENT PILOTES',teams:'CLASSEMENT ÉCURIES',follow:'SUIVI',results:'DERNIER GRAND PRIX'}[s.view];
- const face=`<div class="sports-face"><small>${title}</small>${rows(sizeCount(card.dataset.widgetSize))}</div>`;
+ const home=faceOf(card),face=`<div class="sports-face"><small>${title}</small>${rows(sizeCount(home.dataset.widgetSize))}</div>`;
  sportsDetails(card,d,`<div class="sports-summary"><small>${title}</small>${rows(8)}</div>`+nav,result,'',face);
- status(card,stamp(result));
+ status(card,stamp(result));if(home!==card)status(home,stamp(result));
 }
 function drawFootball(card,result,d){
  const last=result.items.filter(x=>x.status==='FINISHED').slice().sort((a,b)=>Date.parse(b.date)-Date.parse(a.date))[0];

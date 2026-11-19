@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../../public/assets/js/widgets.js'),'utf8');
 function harness(fail=false){
 const listeners={},players=[],fetches=[],dialogs=new Map();
-const window={addEventListener(){}},document={currentScript:{src:'https://example.test/assets/js/widgets.js'},addEventListener:(name,fn)=>listeners[name]=fn,hidden:false,getElementById:id=>dialogs.get(id)||null,createElement:()=>({style:{setProperty(){}},setAttribute(){},addEventListener(){},showModal(){this.open=true},close(){this.open=false}}),body:{appendChild:d=>dialogs.set(d.id,d)}};
+const window={addEventListener(){}},document={currentScript:{src:'https://example.test/assets/js/widgets.js'},addEventListener:(name,fn)=>listeners[name]=fn,hidden:false,getElementById:id=>dialogs.get(id)||null,querySelector:sel=>{const m=/data-widget-id="([^"]+)"/.exec(sel);return m&&cards.get(m[1])?cards.get(m[1]).c:null},createElement:()=>({style:{setProperty(){}},setAttribute(){},addEventListener(){},showModal(){this.open=true},close(){this.open=false}}),body:{appendChild:d=>dialogs.set(d.id,d)}};
 class Audio{constructor(){players.push(this)}async play(){this.started=true}pause(){this.paused=true}removeAttribute(){this.src=''}load(){this.released=true}addEventListener(){}}
 const items=Array.from({length:12},(_,i)=>({name:'Station '+i,url:'https://example.test/'+i,country:'FR',codec:'MP3',bitrate:128}));
 vm.runInNewContext(source,{window,document,URL,Map,Audio,AbortController,setTimeout,clearTimeout,location:{href:'https://example.test/'},fetch:async url=>{fetches.push(url);return {ok:!fail,json:async()=>fail?{ok:false,retryAfter:3600}:{ok:true,items:url.includes('f1-standings')?[{id:'a',code:'AAA',name:'A A',position:'1',points:'10',wins:'1',team:'T',teamId:'t'}]:url.includes('football-')?[{home:'Paris Saint-Germain',away:'Autre équipe',status:'SCHEDULED',date:'2099-01-01T20:00:00Z',homeScore:null,awayScore:null,competition:'Ligue 1'},{home:'France',away:'Autre équipe',status:'FINISHED',date:'2000-01-01T20:00:00Z',homeScore:null,awayScore:null,competition:'Coupe du monde'}]:items,source:'Fixture',updatedAt:'2026-11-06T12:00:00Z'}}}});
@@ -48,4 +48,18 @@ await h.click(a,'view',null,'follow');
 assert.equal(h.fetches.filter(u=>u.includes('f1-standings')).length,1);assert.ok(h.fetches.some(u=>u.includes('f1-results')));
 await h.click(a,'view',null,'calendar');
 assert.ok(!h.fetches.some(u=>u.includes('f1-live')));
+});
+
+test('switching views in the dialog refreshes the original tile face and uses its own size',async()=>{
+const h=harness(),home=h.card('f','t','sport','f1');home.tile.data.view='standings';
+await h.click(home,'load');const before=home.body.innerHTML;assert.ok(before.includes('CLASSEMENT PILOTES'));
+const dialogCopy={isConnected:true,dataset:{widget:'sport',widgetId:'f',widgetSize:'l'},querySelector:q=>q==='.w-body'?{innerHTML:'',querySelector:()=>null}:{textContent:''}};
+await h.click({c:dialogCopy},'view',null,'teams');
+assert.ok(home.body.innerHTML.includes('CLASSEMENT ÉCURIES'));assert.notEqual(home.body.innerHTML,before);
+});
+test('follow view waits out the shared Jolpica cooldown instead of racing the second request',async()=>{
+const h=harness(),a=h.card('w','l','sport','f1');a.tile.data.view='follow';
+await h.click(a,'load');
+const order=h.fetches.map(u=>u.match(/resource=([a-z0-9-]+)/)[1]);
+assert.deepEqual(order.slice(0,2),['f1-standings','f1-results']);
 });
