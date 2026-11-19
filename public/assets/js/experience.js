@@ -79,19 +79,19 @@ function pads(kind){
   return `<div class="note-pads" role="group" aria-label="${kind==='sax'?'Saxophone':'Chant'} : notes">${steps.map(st=>`<button type="button" data-note="${hz(base,st)}">${NAMES[(start+st)%12]}</button>`).join('')}</div>`;}
  return '';
 }
-function instrumentPanel(kind,kinds){
+function instrumentPanel(kind,kinds,tile=''){
  const playable=kinds.filter(k=>k!=='other');
  const tabs=playable.length>1?`<div class="instrument-tabs" role="group" aria-label="Choisir l’instrument">${playable.map(k=>`<button type="button" data-instrument-switch="${k}" aria-pressed="${k===kind}">${esc(KINDS[k].label.split(' /')[0])}</button>`).join('')}</div>`:'';
  const body=pads(kind);
  const hint=body?`<small class="piano-hint">${kind==='sax'||kind==='voice'?'Maintenez une note pour la tenir':'Touchez pour jouer'} · clavier : A W S E D F…</small>${typeof navigator!=='undefined'&&navigator.requestMIDIAccess?`<button type="button" class="midi-btn" data-midi aria-pressed="${midiCount>0}">${midiLabel()}</button>`:''}`:'';
- return `<div class="instrument" data-kind="${kind}" data-kinds="${esc(kinds.join(','))}" tabindex="-1">${tabs}${body}${hint}</div>`;
+ return `<div class="instrument" data-kind="${kind}" data-kinds="${esc(kinds.join(','))}" data-tile="${esc(tile)}" tabindex="-1">${tabs}${body}${hint}</div>`;
 }
-function instrumentCard(d){
+function instrumentCard(d,tile=''){
  const base=KINDS[d.kind]?d.kind:instrumentKind(d.name);
  const extra=String(d.also||'').trim()?String(d.also).split(',').map(x=>x.trim()).filter(Boolean).map(instrumentKind):['piano','bass','sax','voice'].filter(k=>k!==base&&instrumentKind(normalize(d.since+' '+d.note).match({piano:/piano|clavier/,bass:/bass/,sax:/sax/,voice:/chant|voix/}[k])?.[0]||'')===k);
- const kinds=[...new Set([base,...extra])],main=chosen&&kinds.includes(chosen)?chosen:base;
- if(midiCount&&kinds.includes(midiKind))midiKind=main;
- return `<span class="eyebrow">Je joue</span><b class="t-title">${esc(d.name)}</b>${d.since?`<small class="muted">${esc(d.since)}</small>`:''}${d.note?`<p class="muted clamp2">${esc(d.note)}</p>`:''}${instrumentPanel(main,kinds)}`;
+ const pick=chosen.get(tile),kinds=[...new Set([base,...extra])],main=pick&&kinds.includes(pick)?pick:base;
+ if(midiCount&&tile===(midiOwner||''))midiKind=main;
+ return `<span class="eyebrow">Je joue</span><b class="t-title">${esc(d.name)}</b>${d.since?`<small class="muted">${esc(d.since)}</small>`:''}${d.note?`<p class="muted clamp2">${esc(d.note)}</p>`:''}${instrumentPanel(main,kinds,tile)}`;
 }
 function enhance(T,F){
  T.languages={label:'Langues',cat:'Work',hint:'Icônes, niveaux et précisions dépliables',size:'w',interactive:true,fields:[F('title','Titre'),F('items','Une ligne : langue | niveau | précision','area')],def:{title:'Langues',items:'Français | C2 | Bilingue · niveau déclaré\nEnglish | C2 | Bilingual · self-reported level'},render:d=>`<span class="eyebrow">${esc(d.title)}</span><div class="language-list">${String(d.items||'').split('\n').filter(Boolean).map(line=>{const [name,level,note]=line.split('|').map(x=>x.trim());const code=/fran|french/i.test(name)?'fr':/english|anglais/i.test(name)?'gb':/esp|spanish|español/i.test(name)?'es':'';return `<details><summary><span class="language-icon" aria-hidden="true">${code?`<img src="${esc(base+'flags/'+code+'.svg')}" alt="">`:uiIcon('globe',20)}</span><b>${esc(name)}</b><span class="language-level">${esc(level||'')}${languageSegments(level||'')}</span></summary><p>${esc(note||'')}</p></details>`}).join('')}</div>`};
@@ -105,7 +105,7 @@ function enhance(T,F){
  T.instrument={...T.instrument,interactive:true,
   fields:[F('name','Instrument'),F('kind','Type (son et interaction)','select',Object.entries(KINDS).map(([k,v])=>[k,v.label])),F('since','Depuis / détail'),F('also','Autres instruments joués (séparés par des virgules)'),F('note','Note','area')],
   def:{name:'Piano',kind:'piano',since:'Autodidacte',also:'',note:''},
-  render:d=>instrumentCard(d)};
+  render:(d,t)=>instrumentCard(d,t?.id||'')};
  const oldSocial=T.social;
  T.social={...oldSocial,render:d=>{let html=oldSocial.render(d);if(d.platform==='instagram')html=html.replace('>IG</span>','>'+uiIcon('instagram',24)+'</span>');if(brands[d.platform]?.logo)html=html.replace(esc((d.platform==='github'?'GH':'Spotify')),icon(d.platform));return html}};
  const oldMusic=T.music;
@@ -140,7 +140,7 @@ function photo(id,index){
  show(t.data.caption||t.data.title||'Photo',`<img class="lightbox-image" src="${esc(images[n])}" alt="${esc(t.data.caption||t.data.title||'Photo')} ${n+1}"><div class="photo-controls">${images.length>1?'<button type="button" data-photo-step="-1" aria-label="Photo précédente">←</button>':''}<span role="status">${n+1} / ${images.length}</span>${images.length>1?'<button type="button" data-photo-step="1" aria-label="Photo suivante">→</button>':''}</div>${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Voir la publication ↗</a>`:''}`,{id,index:n});
 }
 function move(step){if(context)photo(context.id,context.index+step)}
-const voices=new Map();let midi=null,midiKind='piano',midiCount=0,chosen=null;
+const voices=new Map();let midi=null,midiKind='piano',midiCount=0,midiOwner=null;const chosen=new Map();
 function audio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!audio.ctx||audio.ctx.state==='closed')audio.ctx=new AC();audio.ctx.resume?.().catch(()=>{});return audio.ctx;}
 /** Starts one synthesised note and returns its release function. Sustained kinds (sax, voix) hold until release. */
 function start(kind,freq){
@@ -169,7 +169,7 @@ function panelNotes(panel){return [...new Set([...panel.querySelectorAll('[data-
 async function connectMidi(panel,button){
  if(!navigator.requestMIDIAccess){button.textContent='MIDI non pris en charge par ce navigateur';return;}
  try{midi=midi||await navigator.requestMIDIAccess();const inputs=[...midi.inputs.values()];
-  midiKind=panel.dataset.kind;midiCount=inputs.length;
+  midiKind=panel.dataset.kind;midiOwner=panel.dataset.tile||null;midiCount=inputs.length;
   for(const input of inputs)input.onmidimessage=e=>{const [st,note,vel]=e.data,cmd=st&0xf0,kind=midiKind,id='midi'+note;if(cmd===0x90&&vel>0){if(document.hidden)return;press(id,kind,440*2**((note-69)/12));}else if(cmd===0x80||cmd===0x90)release(id);};
   button.textContent=inputs.length?midiLabel():'Aucun clavier MIDI détecté';button.setAttribute('aria-pressed',String(inputs.length>0));
  }catch{button.textContent='Accès MIDI refusé';}
@@ -184,7 +184,7 @@ function bind(getTile,isInteractive,applySearch,profile){
  if(e.target.closest('[data-qr-download]')){const source=document.querySelector('#profile-qr canvas');if(!source)return;const canvas=document.createElement('canvas');canvas.width=source.width+40;canvas.height=source.height+40;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,20,20);canvas.toBlob(blob=>{if(blob)download(blob,'profil-qr.png')},'image/png');return}
  const p=e.target.closest('[data-photo]');if(p){e.preventDefault();photo(p.dataset.photo,+p.dataset.index||0);return}
  const note=e.target.closest('[data-note]');if(note){if(e.detail===0){const kind=note.closest('.instrument')?.dataset.kind;press('k'+note.dataset.note,kind,+note.dataset.note);setTimeout(()=>release('k'+note.dataset.note),400);}return}
- const sw=e.target.closest('[data-instrument-switch]');if(sw){const card=sw.closest('.instrument'),kind=sw.dataset.instrumentSwitch;chosen=kind;if(midiCount)midiKind=kind;card.outerHTML=instrumentPanel(kind,card.dataset.kinds.split(','));return}
+ const sw=e.target.closest('[data-instrument-switch]');if(sw){const card=sw.closest('.instrument'),kind=sw.dataset.instrumentSwitch,tile=card.dataset.tile||'';chosen.set(tile,kind);if(midiCount&&tile===(midiOwner||''))midiKind=kind;card.outerHTML=instrumentPanel(kind,card.dataset.kinds.split(','),tile);return}
  const mb=e.target.closest('[data-midi]');if(mb){connectMidi(mb.closest('.instrument'),mb);return}
  const embed=e.target.closest('[data-embed]');if(embed){const src=new URL(embed.dataset.embed);if(src.origin!=='https://open.spotify.com'||!src.pathname.startsWith('/embed/'))return;const frame=document.createElement('iframe');frame.className='embed';frame.title='Lecteur Spotify';frame.src=src.href;frame.allow='encrypted-media; fullscreen; picture-in-picture';embed.replaceWith(frame);return}
  const skill=e.target.closest('[data-skill]');if(skill){search(skill.dataset.skill,'projects');document.getElementById('explore-search')?.focus();return}
@@ -197,5 +197,5 @@ function bind(getTile,isInteractive,applySearch,profile){
  document.addEventListener('keyup',e=>release('key'+e.key));
  document.addEventListener('visibilitychange',()=>{if(document.hidden)dispose()});window.addEventListener('pagehide',()=>{dispose();unplug();});
 }
-window.TilesExperience={choose:k=>{chosen=k;},midiState:()=>({kind:midiKind,count:midiCount}),instrumentKind,instrumentCard,instrumentPanel,panelNotes,setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
+window.TilesExperience={choose:(k,tile='')=>{if(k)chosen.set(tile,k);else chosen.delete(tile);},connectMidiOwner:(tile,kind)=>{midiOwner=tile;midiKind=kind;midiCount=1;},midiState:()=>({kind:midiKind,count:midiCount}),instrumentKind,instrumentCard,instrumentPanel,panelNotes,setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
 })();
