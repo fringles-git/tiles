@@ -1,6 +1,6 @@
 # Tiles
 
-Bento-style link-in-bio and portfolio in vanilla JavaScript + PHP. No Composer packages, database or Node runtime is needed in production. PHP 8.3+ (testé jusqu’à 8.5) with sessions, cURL, GD and fileinfo is supported; Node 24 runs development checks.
+Bento-style link-in-bio and portfolio in vanilla JavaScript + PHP. No Composer packages, database or Node runtime is needed in production. PHP 8.5+ with sessions, cURL, GD and fileinfo is supported; Node 24 runs development checks.
 
 ## Project structure
 

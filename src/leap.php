@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/url.php';
 
 /**
  * Leap links: /go/<tile-id> counts the visit, then redirects to that tile's own URL.
@@ -18,11 +19,8 @@ function leap_target(array $page, string $id, int $now): ?string
             $at = preg_match('/^\d{4}-\d{2}-\d{2}$/', $day) ? strtotime($day . $time) : false;
             if ($at === false || ($key === 'start' ? $at > $now : $at < $now)) { return null; }
         }
-        $url = trim((string) (($tile['data'] ?? [])['url'] ?? ''));
-        if (strlen($url) > 2048 || !preg_match('#^https?://[^\s\x00-\x1f\x7f]+$#i', $url)) { return null; }
-        $parts = parse_url($url);
-        if (!is_array($parts) || empty($parts['host']) || isset($parts['user']) || isset($parts['pass'])) { return null; }
-        return $url;
+        $url = url_safe((string) (($tile['data'] ?? [])['url'] ?? ''));
+        return $url === '' ? null : $url;
     }
     return null;
 }

@@ -24,14 +24,13 @@ function widget_resources(): array
 
 function widget_https(string $url): string
 {
-    $parts = parse_url($url);
-    return is_array($parts) && ($parts['scheme'] ?? '') === 'https' && !empty($parts['host']) && !isset($parts['user']) ? $url : '';
+    return url_safe($url, true);
 }
 
 /** Current team of a driver: Jolpica lists mid-season transfers chronologically. */
 function widget_last(mixed $list): array
 {
-    return is_array($list) && $list !== [] && is_array($last = end($list)) ? $last : [];
+    return is_array($list) && is_array($last = array_last($list)) ? $last : [];
 }
 
 function widget_normalize(string $resource, array $raw): array
@@ -136,7 +135,7 @@ function widget_request(string $url): array
         return strlen($header);
     });
     $headers = ['Accept: application/json'];
-    if (parse_url($url, PHP_URL_HOST) === 'api.football-data.org') {
+    if (url_host($url) === 'api.football-data.org') {
         $token = widget_settings()['football_token'];
         if ($token === '') { curl_close($ch); throw new RuntimeException('not_configured'); }
         $headers[] = 'X-Auth-Token: ' . $token;
