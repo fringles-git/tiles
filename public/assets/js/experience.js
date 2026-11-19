@@ -5,12 +5,12 @@ const base=new URL('../images/',document.currentScript?.src||location.href).href
 const image=s=>typeof s==='string'&&(/^uploads\/[A-Za-z0-9_-]+\.(png|jpe?g|webp|gif)$/.test(s)||/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(s));
 const url=u=>{try{const x=new URL(u);return ['https:','http:'].includes(x.protocol)&&!x.username?x.href:''}catch{return ''}};
 const brands={
- action:{name:'Action',url:'https://www.action.com/fr-fr/',logo:base+'brands/action.svg'},
- basicfit:{name:'Basic-Fit',url:'https://www.basic-fit.com/fr-fr/',logo:'https://www.basic-fit.com/on/demandware.static/Sites-BFE-Site/-/default/dwfd1a63b5/img/svg/logo-bf-orange.svg'},
- hugoboss:{name:'Hugo Boss',url:'https://www.hugoboss.com/fr/fr/'},
- edf:{name:'EDF',url:'https://www.edf.fr/'},
- github:{name:'GitHub',url:'https://github.com/',logo:base+'brands/github.svg'},
- spotify:{name:'Spotify',url:'https://open.spotify.com/',logo:base+'brands/spotify.svg'}
+ action:{match:'action',name:'Action',url:'https://www.action.com/fr-fr/',logo:base+'brands/action.svg'},
+ basicfit:{match:'basic[ -]?fit',name:'Basic-Fit',url:'https://www.basic-fit.com/fr-fr/',logo:'https://www.basic-fit.com/on/demandware.static/Sites-BFE-Site/-/default/dwfd1a63b5/img/svg/logo-bf-orange.svg'},
+ hugoboss:{match:'hugo[ -]?boss',name:'Hugo Boss',url:'https://www.hugoboss.com/fr/fr/'},
+ edf:{match:'edf',name:'EDF',url:'https://www.edf.fr/'},
+ github:{match:'github',name:'GitHub',url:'https://github.com/',logo:base+'brands/github.svg'},
+ spotify:{match:'spotify',name:'Spotify',url:'https://open.spotify.com/',logo:base+'brands/spotify.svg'}
 };
 // Authored outline controls share one 24px grid and stroke; brand marks keep their identities.
 const controlPaths={instagram:'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0M17.5 6.5h.01',search:'M21 21l-5-5M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15',globe:'M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',share:'M12 16V3M7 8l5-5 5 5M5 13v7h14v-7',qr:'M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM21 15v6h-6M18 12h3M12 3v3M12 12v9',download:'M12 3v12M7 10l5 5 5-5M4 17v4h16v-4',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1 1M18 18l1 1M5 19l1-1M18 6l1-1',moon:'M21 13a9 9 0 1 1-10-10 7 7 0 0 0 10 10',monitor:'M3 4h18v13H3zM8 21h8M12 17v4',code:'M8 7l-5 5 5 5M16 7l5 5-5 5',zoom:'M21 21l-5-5M7 10h6M10 7v6M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15',mail:'M4 6h16v12H4zM4 7l8 6 8-6',phone:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2',ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',plus:'M12 5v14M5 12h14',play:'M8 5l11 7-11 7z'};
@@ -19,9 +19,29 @@ function logoMarkup(name,src){const initials=name.split(/[ -]/).map(x=>x[0]).joi
 function languageSegments(level){const key=normalize(level).trim(),scores={a1:1,a2:2,b1:3,b2:4,'b2+':4,c1:5,c2:5,natif:5,bilingue:5,courant:4,notions:1};const n=scores[key];return n?`<span class="language-segments" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i${i<=n?' class="filled"':''}></i>`).join('')}</span>`:'';}
 const tech={html:'html5',html5:'html5',css:'css',javascript:'javascript',react:'react',php:'php',python:'python',bootstrap:'bootstrap',flutter:'flutter',github:'github'};
 const icon=(name,cls='')=>`<img class="brand-icon ${cls}" src="${esc(base+'brands/'+name+'.svg')}" alt="" loading="lazy" decoding="async">`;
+const techColors={html5:'#E34F26',css:'#1572B6',javascript:'#F7DF1E',react:'#61DAFB',php:'#777BB4',python:'#3776AB',bootstrap:'#7952B3',flutter:'#02569B',spotify:'#1DB954',github:'currentColor'};
+const hue=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;return h%360};
+function skillMark(name){
+ const key=tech[normalize(name)];
+ if(key)return `<span class="skill-mark" style="--mark:${techColors[key]||'currentColor'};--mark-url:url('${esc(base+'brands/'+key+'.svg')}')" aria-hidden="true"></span>`;
+ const letters=String(name).trim().split(/[\s-]+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase();
+ return `<span class="skill-mono" style="--h:${hue(normalize(name))}" aria-hidden="true">${esc(letters)}</span>`;
+}
+function span(dates){
+ const t=normalize(dates);if(/\d\s*(?:mois|semaine|jour|an|ans)\b|·/.test(t))return '';if(!/\d{4}\s*(?:-|–|—|a|au|to)\s*(?:\d{4}|now|present|presente|aujourd|en cours|ce jour)/.test(t))return '';
+ const years=(t.match(/\d{4}/g)||[]).map(Number),start=years[0],end=years[1]??new Date().getFullYear();
+ const n=end-start;return n>0?n+(n>1?' ans':' an'):'';
+}
+function timeline(d){
+ return `<span class="eyebrow">${esc(d.title)}</span><ul class="tl">${String(d.items||'').split('\n').filter(Boolean).map(line=>{
+  const [role,org,dates,place]=line.split('|').map(x=>(x||'').trim());
+  const brand=Object.values(brands).find(b=>b.logo&&new RegExp('\\b(?:'+(b.match||'')+')\\b').test(normalize(org)));
+  const meta=[dates,span(dates)].filter(Boolean).map(esc).join(' · ');
+  return `<li><div class="tl-row">${org?logoMarkup(brand?.name||org,brand?.logo):''}<div><b>${esc(role)}</b><small>${esc([org,place].filter(Boolean).join(' · '))}</small><div class="yrs">${meta}</div><div class="employers">${employerLinks(org)}</div></div></div></li>`}).join('')}</ul>`;
+}
 const normalize=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 function employerLinks(text){
- return Object.entries(brands).filter(([key])=>new RegExp('\\b'+({basicfit:'basic[ -]?fit',hugoboss:'hugo[ -]?boss'}[key]||key)+'\\b').test(normalize(text))).map(([,b])=>`<a class="employer" href="${b.url}" target="_blank" rel="noopener noreferrer" aria-label="${esc(b.name)} · site officiel">${logoMarkup(b.name,b.logo)}<span>${esc(b.name)}</span>${uiIcon('ext',16)}</a>`).join('');
+ return Object.entries(brands).filter(([key])=>new RegExp('\\b(?:'+(brands[key].match||key)+')\\b').test(normalize(text))).map(([,b])=>`<a class="employer" href="${b.url}" target="_blank" rel="noopener noreferrer" aria-label="${esc(b.name)} · site officiel">${logoMarkup(b.name,b.logo)}<span>${esc(b.name)}</span>${uiIcon('ext',16)}</a>`).join('');
 }
 function projectKind(d){const text=normalize([d.role,d.tags,d.title].join(' '));return /saas/.test(text)?'saas':/\bapp\b|mobile|flutter/.test(text)?'app':/site|plateforme|web/.test(text)?'site':'experiment';}
 function filter(tiles,query='',category='all',kind='all'){
@@ -41,8 +61,9 @@ function enhance(T,F){
  T.languages={label:'Langues',cat:'Work',hint:'Icônes, niveaux et précisions dépliables',size:'w',interactive:true,fields:[F('title','Titre'),F('items','Une ligne : langue | niveau | précision','area')],def:{title:'Langues',items:'Français | C2 | Bilingue · niveau déclaré\nEnglish | C2 | Bilingual · self-reported level'},render:d=>`<span class="eyebrow">${esc(d.title)}</span><div class="language-list">${String(d.items||'').split('\n').filter(Boolean).map(line=>{const [name,level,note]=line.split('|').map(x=>x.trim());const code=/fran|french/i.test(name)?'fr':/english|anglais/i.test(name)?'gb':/esp|spanish|español/i.test(name)?'es':'';return `<details><summary><span class="language-icon" aria-hidden="true">${code?`<img src="${esc(base+'flags/'+code+'.svg')}" alt="">`:uiIcon('globe',20)}</span><b>${esc(name)}</b><span class="language-level">${esc(level||'')}${languageSegments(level||'')}</span></summary><p>${esc(note||'')}</p></details>`}).join('')}</div>`};
  T.company={label:'Entreprise',cat:'Work',hint:'Logo, expérience et site officiel',size:'w',interactive:true,fields:[F('brand','Entreprise','select',Object.entries(brands).map(([key,b])=>[key,b.name])),F('title','Votre rôle'),F('desc','Votre contribution','area'),F('image','Logo personnalisé (facultatif)','image')],def:{brand:'action',title:'Mon expérience',desc:'',image:''},render:d=>{const b=brands[d.brand]||brands.action;const logo=image(d.image)?d.image:b.logo;return `<div class="company-head">${logoMarkup(b.name,logo)}</div><b class="t-title">${esc(d.title)}</b><p>${esc(d.desc)}</p><a class="company-link" href="${b.url}" target="_blank" rel="noopener noreferrer">${esc(b.name)} · site officiel ↗</a>`}};
  const oldExperience=T.experience;
- T.experience={...oldExperience,interactive:true,render:d=>`<span class="eyebrow">${esc(d.title)}</span><ul class="tl">${String(d.items||'').split('\n').filter(Boolean).map(line=>{const [role,org,years]=line.split('|').map(x=>(x||'').trim());return `<li><div><b>${esc(role)}</b><small>${esc(org)}</small><div class="yrs">${esc(years)}</div><div class="employers">${employerLinks(org)}</div></div></li>`}).join('')}</ul>`};
- T.skills={...T.skills,interactive:true,render:d=>`<span class="eyebrow">${esc(d.title)}</span><div class="cl skill-buttons">${String(d.items||'').split(',').map(x=>x.trim()).filter(Boolean).map(s=>`<button type="button" data-skill="${esc(s)}">${tech[normalize(s)]?icon(tech[normalize(s)]):uiIcon('code',20)}${esc(s)}</button>`).join('')}</div>`};
+ T.experience={...oldExperience,interactive:true,fields:[F('title','Titre'),F('items','Une ligne : Rôle | Organisation | Dates | Lieu (facultatif)','area')],render:timeline};
+ T.education={...T.education,interactive:true,fields:[F('title','Titre'),F('items','Une ligne : Diplôme | École | Dates | Lieu (facultatif)','area')],render:timeline};
+ T.skills={...T.skills,interactive:true,render:d=>`<span class="eyebrow">${esc(d.title)}</span><div class="cl skill-buttons">${String(d.items||'').split(',').map(x=>x.trim()).filter(Boolean).map(s=>`<button type="button" data-skill="${esc(s)}">${skillMark(s)}${esc(s)}</button>`).join('')}</div>`};
  T.image={...T.image,interactive:true,render:(d,t)=>image(d.image)?`<button type="button" class="photo-open" data-photo="${esc(t.id)}" data-index="0" aria-label="Agrandir : ${esc(d.caption||'Photo')}"><img src="${esc(d.image)}" alt="${esc(d.caption||'')}" loading="lazy" decoding="async"><span class="photo-zoom" aria-hidden="true">${uiIcon('zoom',20)}</span></button>${d.caption?`<div class="cap"><span>${esc(d.caption)}</span></div>`:''}`:`<div class="photo-open">${esc(d.caption||'Photo à ajouter')}</div>`};
  T.gallery={...T.gallery,interactive:true,render:(d,t)=>{const images=(d.images||[]).filter(image);return `<div class="gallery-buttons">${images.slice(0,3).map((src,i)=>`<button type="button" data-photo="${esc(t.id)}" data-index="${i}" aria-label="${esc(d.title||'Galerie')} · photo ${i+1}"><img src="${esc(src)}" alt="${esc(d.title||'')} · ${i+1}" loading="lazy" decoding="async"></button>`).join('')}</div><div class="cap">${esc(d.title)}${images.length?' · '+images.length+' photos':''}</div>`}};
  const oldInstrument=T.instrument;
@@ -110,5 +131,5 @@ function bind(getTile,isInteractive,applySearch,profile){
  });
  document.addEventListener('visibilitychange',()=>{if(document.hidden)dispose()});window.addEventListener('pagehide',dispose);
 }
-window.TilesExperience={enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
+window.TilesExperience={skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
 })();

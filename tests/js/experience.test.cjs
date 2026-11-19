@@ -26,3 +26,16 @@ test('personal defaults are F1, PSG and France with separate declared language l
 test('vCard escapes fields and rejects injected contact properties',()=>{const card=api.vcard({name:'Bradley;Test\nEMAIL:evil@example.com',role:'Dev, design',email:'a@example.com\nTEL:123',phone:'+33 (0)1 23'},'https://example.com/profile');assert.ok(card.includes('FN:Bradley\\;Test\\nEMAIL:evil@example.com'));assert.ok(card.includes('TITLE:Dev\\, design'));assert.ok(!card.includes('\r\nEMAIL;'));assert.ok(card.includes('TEL;TYPE=VOICE:+330123'));assert.ok(card.includes('URL:https://example.com/profile'));assert.ok(card.endsWith('END:VCARD\r\n'));});
 test('project subfilters keep section ownership and identify SaaS before app',()=>{const tiles=[{id:'heading',type:'section',data:{title:'Projets'}},{id:'a',type:'project',data:{title:'Application',role:'SaaS PHP'}},{id:'b',type:'project',data:{title:'Festival',role:'App React'}},{id:'c',type:'project',data:{title:'Site église',role:'Web'}}];assert.deepEqual(Array.from(api.filter(tiles,'','projects','saas'),t=>t.id),['heading','a']);assert.deepEqual(Array.from(api.filter(tiles,'','projects','app'),t=>t.id),['heading','b']);assert.equal(api.filter(tiles,'','projects','experiment').length,0);});
 test('language segments never invent a score for unknown free text',()=>{assert.equal(api.languageSegments('Not assessed'),'');assert.equal((api.languageSegments('C2').match(/class="filled"/g)||[]).length,5);assert.equal((api.languageSegments('Notions').match(/class="filled"/g)||[]).length,1);assert.match(api.languageSegments('C2'),/aria-hidden="true"/);});
+test('timeline: dates, duration, place, logo or initials for any organisation, escaped',()=>{
+ assert.equal(api.span('2023 – 2026'),'3 ans');assert.equal(api.span('2025 – 2026'),'1 an');assert.equal(api.span('2022 et 2026'),'');assert.equal(api.span('2022'),'');assert.equal(api.span('2024 – now'),(new Date().getFullYear()-2024)+(new Date().getFullYear()-2024>1?' ans':' an'));
+ const html=api.timeline({title:'Parcours',items:'Agent | Hugo Boss Retail | 2022 – 2024 | Troyes\nStagiaire <b> | Mairie & Co | 2020'});
+ assert.match(html,/2022 – 2024 · 2 ans/);assert.match(html,/Hugo Boss Retail · Troyes/);assert.match(html,/<span>HB<\/span>/);
+ assert.match(html,/<span>M&amp;<\/span>|<span>MC<\/span>/);assert.match(html,/Stagiaire &lt;b&gt;/);assert.doesNotMatch(html,/<b>Stagiaire <b>/);
+});
+test('skills: brand colour from local SVG mask, deterministic monogram for unknown skills',()=>{
+ const html=definitions().skills.render({title:'Outils',items:'HTML, CSS, PHP, Adobe Suite, SQL'});
+ assert.match(html,/--mark:#E34F26/);assert.match(html,/--mark:#1572B6/);assert.match(html,/--mark:#777BB4/);
+ assert.equal((html.match(/skill-mono/g)||[]).length,2);assert.equal(api.skillMark('SQL'),api.skillMark('SQL'));
+ assert.doesNotMatch(html,/<img class="brand-icon/);
+});
+test('duration is not recomputed when the dates field already states one',()=>{assert.equal(api.span('2017 – 2025 · 4 mois'),'');assert.equal(api.span('2024 – 2025 · 1 semaine'),'');assert.equal(api.span('2022 – 2024 (6 mois)'),'');});
