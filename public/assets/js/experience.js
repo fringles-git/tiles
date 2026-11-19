@@ -30,8 +30,25 @@ function skillMark(name){
  return `<span class="skill-mono" style="--h:${hue(normalize(name))}" aria-hidden="true">${esc(letters)}</span>`;
 }
 let library=[];
+let employers=[];
 function setLibrary(tiles){
+ employers=organisations(tiles);
  library=(tiles||[]).filter(t=>t&&t.data&&image(t.data.logo)&&String(t.data.logoFor||'').trim()).map(t=>({key:normalize(t.data.logoFor).trim(),name:String(t.data.logoFor).trim(),logo:t.data.logo})).sort((a,b)=>b.key.length-a.key.length);
+}
+/** Every organisation named in experience tiles, first mention first, deduplicated (accents and case ignored). */
+function organisations(tiles){
+ const seen=new Set(),out=[];
+ for(const t of tiles||[]){if(t?.type!=='experience')continue;
+  for(const line of String(t.data?.items||'').split('\n')){const org=(line.split('|')[1]||'');
+   for(let name of org.split(/,|\set\s/)){name=name.replace(/\(.*?\)/g,'').trim();const k=normalize(name);if(name.length<2||!/^[\p{Lu}\d]/u.test(name)||/^(independant|freelance|evenements|sites?)\b/.test(k)||seen.has(k))continue;seen.add(k);out.push(name);}}}
+ return out;
+}
+function employerStrip(max=7){
+ if(!employers.length)return '';
+ const logoOf=name=>{const lib=libraryLogo(name);return lib?lib.logo:Object.values(brands).find(b=>b.logo&&new RegExp('\\b(?:'+(b.match||'')+')\\b').test(normalize(name)))?.logo||'';};
+ const ranked=employers.map((name,i)=>({name,logo:logoOf(name),i})).sort((a,b)=>(!a.logo)-(!b.logo)||a.i-b.i);
+ const shown=ranked.slice(0,max).reverse(),rest=employers.length-shown.length;
+ return `<div class="stat-logos" aria-label="Entreprises : ${esc(employers.join(', '))}">${shown.map((e,i)=>`<span class="stat-logo" style="--i:${i};--n:${shown.length}" title="${esc(e.name)}">${logoMarkup(e.name,e.logo)}</span>`).join('')}${rest>0?`<span class="stat-logo more" style="--i:${shown.length};--n:${shown.length}">+${rest}</span>`:''}</div>`;
 }
 function libraryLogo(org){const t=normalize(org);return library.find(x=>x.key&&new RegExp('(?:^|[^a-z0-9])'+x.key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:$|[^a-z0-9])').test(t))||null}
 function span(dates){
@@ -106,6 +123,8 @@ function enhance(T,F){
   fields:[F('name','Instrument'),F('kind','Type (son et interaction)','select',Object.entries(KINDS).map(([k,v])=>[k,v.label])),F('since','Depuis / détail'),F('also','Autres instruments joués (séparés par des virgules)'),F('note','Note','area')],
   def:{name:'Piano',kind:'piano',since:'Autodidacte',also:'',note:''},
   render:(d,t)=>instrumentCard(d,t?.id||'')};
+ const oldStat=T.stat;
+ T.stat={...oldStat,fields:[...oldStat.fields,F('logos','Sous le chiffre','select',[['','Rien'],['employers','Logos des entreprises du parcours']])],render:(d,t)=>oldStat.render(d,t)+(d.logos==='employers'?employerStrip():'')};
  const oldSocial=T.social;
  T.social={...oldSocial,render:d=>{let html=oldSocial.render(d);if(d.platform==='instagram')html=html.replace('>IG</span>','>'+uiIcon('instagram',24)+'</span>');if(brands[d.platform]?.logo)html=html.replace(esc((d.platform==='github'?'GH':'Spotify')),icon(d.platform));return html}};
  const oldMusic=T.music;
@@ -197,5 +216,5 @@ function bind(getTile,isInteractive,applySearch,profile){
  document.addEventListener('keyup',e=>release('key'+e.key));
  document.addEventListener('visibilitychange',()=>{if(document.hidden)dispose()});window.addEventListener('pagehide',()=>{dispose();unplug();});
 }
-window.TilesExperience={choose:(k,tile='')=>{if(k)chosen.set(tile,k);else chosen.delete(tile);},connectMidiOwner:(tile,kind)=>{midiOwner=tile;midiKind=kind;midiCount=1;},midiState:()=>({kind:midiKind,count:midiCount}),instrumentKind,instrumentCard,instrumentPanel,panelNotes,setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
+window.TilesExperience={organisations,employerStrip,choose:(k,tile='')=>{if(k)chosen.set(tile,k);else chosen.delete(tile);},connectMidiOwner:(tile,kind)=>{midiOwner=tile;midiKind=kind;midiCount=1;},midiState:()=>({kind:midiKind,count:midiCount}),instrumentKind,instrumentCard,instrumentPanel,panelNotes,setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
 })();
