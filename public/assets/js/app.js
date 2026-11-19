@@ -303,7 +303,7 @@ function renderProfile(){
  const tags=profileTags(p);const hasHours=!!daysLabel((p.hours||{}).days||[]);
  prof.innerHTML=`<div class="phead"><button class="avatar" type="button" data-act="profile" aria-label="Profile photo" ${ui.mode!=='edit'?'tabindex="-1"':''}>${isImg(p.avatar)?`<img src="${p.avatar}" alt="">`:esc(ini)}</button>
  <div class="pid"><h1>${esc(p.name)}</h1>${tags.length?`<div class="ptags">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}${p.location?`<span class="ploc">${ic('pin',13)}${esc(p.location)}</span>`:''}</div></div>
- ${p.bio?`<p class="bio">${esc(p.bio)}</p>`:''}
+ ${p.bio?`<p class="bio">${esc(ui.mode==='edit'?p.bio:(window.TilesPolish?.dedupeBio?.(p.bio,p.location)??p.bio))}</p>`:''}
  ${p.statusOn&&p.status&&!hasHours?`<div class="chips"><span class="chip live"><i></i>${esc(p.status)}</span></div>`:''}
  ${profileExtras(p)}
  ${ui.mode!=='edit'?`<button type="button" class="profile-theme" data-visitor-theme aria-label="Thème : ${visitorTheme==='site'?'réglage du site':visitorTheme==='light'?'clair':'sombre'}. Changer le thème">${ic(visitorTheme==='dark'?'moon':visitorTheme==='light'?'sun':'monitor',20)} Thème : ${visitorTheme==='site'?'du site':visitorTheme==='light'?'clair':'sombre'}</button>`:''}
