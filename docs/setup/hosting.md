@@ -42,11 +42,17 @@ location ~ ^/(?:index|admin|api|widgets|media)\.php$ {
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     fastcgi_pass unix:/run/php/php8.5-fpm.sock;
 }
+location ~ ^/journal-([a-z0-9-]{1,100})$ {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param QUERY_STRING article=$1;
+    fastcgi_pass unix:/run/php/php8.5-fpm.sock;
+}
 location ~ ^/(profil|parcours|creations|passions)$ {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root/index.php;
     fastcgi_param QUERY_STRING section=$1;
-    fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+    fastcgi_pass unix:/run/php/php8.5-fpm.sock;
 }
 location ~ ^/(robots\.txt|sitemap\.xml|llms\.txt)$ {
     include fastcgi_params;
