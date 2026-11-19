@@ -8,8 +8,9 @@ function ink(bg){return contrast(bg,'#FFFFFF')>=contrast(bg,'#000000')?'#FFFFFF'
 function contact(p){const email=String(p.email||'').trim();if(/^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/.test(email))return {href:'mailto:'+email+'?subject='+encodeURIComponent('Discutons de votre projet'),label:'Discutons de votre projet',track:'p-mail'};try{const u=new URL(p.booking);if(['https:','http:'].includes(u.protocol)&&!u.username&&!u.password)return {href:u.href,label:'Discutons de votre projet',track:'p-rdv'};}catch{}return null;}
 function contactRows(p,{esc,ic,telHref,safeUrl,canCall=true}){
  const rows=[],phone=String(p.phone||'').trim(),email=String(p.email||'').trim(),book=safeUrl(p.booking)||'';
- if(phone)rows.push(`<div class="prow k-phone"><span class="pv">${ic('phone',18)}<span>${esc(phone)}</span></span><span class="pact">${canCall?`<a class="act pri" href="${esc(telHref(phone))}">${ic('phone',16)}Appeler</a>`:''}<button type="button" class="act" data-copy="${esc(phone)}">${ic('copy',16)}Copier</button></span></div>`);
- if(email)rows.push(`<div class="prow k-mail"><span class="pv">${ic('mail',18)}<span>${esc(email)}</span></span><span class="pact"><button type="button" class="act" data-copy="${esc(email)}">${ic('copy',16)}Copier</button></span></div>`);
+ const copy=(v,label)=>`<button type="button" class="act sm" data-copy="${esc(v)}" aria-label="${label}" title="Copier">${ic('copy',16)}</button>`;
+ if(phone)rows.push(`<div class="prow k-phone"><span class="pv">${ic('phone',18)}${canCall?`<a class="pl" href="${esc(telHref(phone))}"><span>${esc(phone)}</span></a>`:`<span>${esc(phone)}</span>`}</span><span class="pact">${copy(phone,'Copier le numéro')}</span></div>`);
+ if(email)rows.push(`<div class="prow k-mail"><span class="pv">${ic('mail',18)}<a class="pl" href="mailto:${esc(email)}" data-pclick="p-mail"><span>${esc(email)}</span></a></span><span class="pact">${copy(email,'Copier l’adresse email')}</span></div>`);
  if(rows.length&&/^https?:/.test(book))rows.push(`<a class="pcta k-cal" href="${esc(book)}" target="_blank" rel="noopener" data-pclick="p-rdv">${ic('cal',18)}Prendre rendez-vous</a>`);
  return rows;
 }

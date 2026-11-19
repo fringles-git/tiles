@@ -44,11 +44,32 @@
 @media(max-width:700px){.mobile-contact{position:fixed;z-index:30;left:16px;right:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));min-height:52px;padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--cta-bg);color:var(--cta-fg);border:1px solid var(--line);border-radius:16px;text-decoration:none;font-size:15px;font-weight:700;box-shadow:0 8px 24px -12px rgba(0,0,0,.4)}.has-mobile-contact .page-in{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.mode-preview .tile:hover,.mode-preview .tile:active{transform:none!important}}
 
-/* Bloc contact : actions libellées, une action = un rôle. */
-.prow{flex-wrap:wrap}.prow .pv{flex:1 1 150px}.pact{flex:0 0 auto;flex-wrap:wrap}
-.act{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--fg);font:inherit;font-size:13px;font-weight:700;line-height:1;text-decoration:none;white-space:nowrap;cursor:pointer}
-.act:hover{border-color:color-mix(in srgb,var(--fg) 30%,transparent)}
-.act svg{flex:none;display:block;color:inherit}
-.act.pri{background:var(--ok);border-color:transparent;color:#fff}
+/* Bloc contact : texte cliquable, copie discrète. */
+.prow{flex-wrap:nowrap}.prow .pv{flex:1 1 auto;min-width:0}.pact{flex:0 0 auto}
+.pl{display:inline-flex;min-width:0;color:inherit;text-decoration:none}.pl:hover span{text-decoration:underline;text-underline-offset:3px}.pl:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.act{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--fg);font:inherit;cursor:pointer}
+.act.sm{width:36px;height:36px;padding:0}.act:hover{border-color:color-mix(in srgb,var(--fg) 30%,transparent)}.act svg{flex:none;display:block;color:inherit}
 .k-phone .pv>svg{color:var(--ok)}.k-mail .pv>svg,.pcta.k-cal>svg{color:var(--accent)}
 .pcta.k-cal{min-height:44px}
+
+/* Grille 12 colonnes : barre latérale = 3 colonnes, contenu = 9, écart réduit. */
+@media(min-width:1001px){
+ .page:not([data-layout="top"]) .page-in{grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px}
+ .page:not([data-layout="top"]) .prof{grid-column:1 / span 3}
+ .page:not([data-layout="top"]) .grid-wrap{grid-column:4 / -1}
+}
+/* Onglets, recherche et titres de section alignés sur le bord gauche des cartes. */
+.hub-universes{padding-inline:0}.sec{padding-inline:0}
+/* Projets : horizontaux ou carrés, titre et description visibles d'emblée. */
+.tile.ty-project.sz-l,.tile.ty-project.sz-t{grid-row:span 4}
+.sz-l .pj{flex-direction:row}.sz-l .pj-img{flex:1}.sz-l .pj-t{width:52%;justify-content:flex-end}.sz-l .pj-t p{display:block}
+.sz-t .pj-img{flex:0 0 36%}.sz-t .pj-t p,.sz-s .pj-t p{display:-webkit-box}
+.sz-t .pj-t,.sz-s .pj-t{padding:10px 12px 12px}
+/* Boîte à outils : large et basse plutôt qu'une colonne haute. */
+.tile.ty-skills.sz-t{grid-column:span 2;grid-row:span 4}
+
+/* Rangées au quart d'unité : un titre de section ne prend plus la hauteur d'une demi-carte. */
+.grid{grid-auto-rows:minmax(calc((var(--unit) - 3 * var(--gap)) / 4),auto)}
+.sz-s,.sz-w,.add-tile{grid-row:span 4}.sz-t,.sz-l{grid-row:span 8}.sz-bar{grid-row:span 2}.sz-full{grid-row:span 1}
+.tile.ty-project.sz-l,.tile.ty-project.sz-t,.tile.ty-skills.sz-t{grid-row:span 4}
+.tile.ty-section .ti{padding-inline:0;padding-block:0}.mode-preview .sec{padding-top:18px;padding-bottom:2px}
