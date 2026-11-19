@@ -7,7 +7,7 @@
     "test": "node --test tests/js/*.test.cjs && node scripts/test-php.cjs",
     "test:js": "node --test tests/js/*.test.cjs",
     "test:php": "node scripts/test-php.cjs",
-    "test:http": "node --test tests/js/http.test.cjs",
+    "test:http": "node --test tests/js/http.test.cjs tests/js/*-http.test.cjs",
     "dev": "node scripts/dev.cjs"
   }
 }

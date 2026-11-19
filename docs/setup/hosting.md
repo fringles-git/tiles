@@ -87,3 +87,24 @@ Before a code rollback, restore the previous web-root setting or use the entry p
 git rev-parse --short=12 origin/main
 git hash-object public/assets/js/app.js | cut -c1-12
 ```
+
+## Séparer la page publique et l'admin (deux domaines, mêmes données)
+
+But : `brandonlazarre.fr` sert la page, `tiles.brandonlazarre.fr` sert l'admin. Une seule source de données.
+
+1. **Admin** (installation existante sur `tiles.brandonlazarre.fr`) : dans `config/config.php`
+   ```php
+   'mode' => 'admin',
+   'site_url' => 'https://brandonlazarre.fr',
+   ```
+   Les pages publiques de ce domaine renvoient alors en 301 vers `brandonlazarre.fr` (même chemin), `robots.txt` interdit l'indexation, `admin.php` et `/go/` restent en place.
+2. **Public** : déployer le même dépôt sur `brandonlazarre.fr` (Git de hPanel), racine web sur `public/`, puis `config/config.php` :
+   ```php
+   'mode' => 'public',
+   'site_url' => 'https://brandonlazarre.fr',
+   'data_dir' => '/home/uXXXX/…/tiles.brandonlazarre.fr/…/data',
+   'upload_dir' => '/home/uXXXX/…/tiles.brandonlazarre.fr/…/uploads',
+   ```
+   Chemins absolus de l'installation admin (même compte Hostinger : `pwd` dans son dossier via SSH). `admin.php` et les actions d'édition de l'API y répondent 404 ; visites, clics et inscriptions s'écrivent dans les données partagées.
+3. Ordre sans coupure : déployer et vérifier le public d'abord (`https://brandonlazarre.fr/version`), puis seulement passer l'admin en `mode => 'admin'`.
+4. Retour arrière : retirer `mode` de la configuration de l'admin.

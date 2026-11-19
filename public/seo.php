@@ -11,6 +11,12 @@ $now = time();
 $pagePath = DATA_DIR . '/page.json';
 $page = read_json('page.json', []);
 
+if (TILES_MODE === 'admin' && $file === 'robots.txt') {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "User-agent: *\nDisallow: /\n";
+    exit;
+}
+redirect_public_to_site();
 switch ($file) {
     case 'robots.txt':
         $type = 'text/plain'; $body = seo_robots($base); break;

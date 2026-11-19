@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__) . '/src/lib.php';
+if (TILES_MODE === 'public') { http_response_code(404); header('Content-Type: text/plain; charset=utf-8'); echo 'Not found'; exit; }
 header('X-Robots-Tag: noindex, nofollow');
 
 start_session();
