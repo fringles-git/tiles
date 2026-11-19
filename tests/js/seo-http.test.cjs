@@ -3,7 +3,7 @@ const root=path.join(__dirname,'../..'),php=process.env.PHP_BINARY||'php';
 const available=process.env.TILES_SKIP_HTTP!=='1'&&spawnSync(php,['-v'],{stdio:'ignore'}).status===0;
 test('SEO endpoints and head metadata use the configured canonical origin',{skip:!available?'PHP CLI unavailable':false,timeout:30000},async()=>{
  const tmp=await fs.mkdtemp(path.join(os.tmpdir(),'tiles-seo-')),data=path.join(tmp,'data'),uploads=path.join(tmp,'uploads');await fs.mkdir(data);await fs.mkdir(uploads);
- await fs.writeFile(path.join(data,'page.json'),JSON.stringify({v:1,profile:{name:'Jane Doe',role:'Designer',bio:'Bio text'},tiles:[{id:'a',type:'project',data:{title:'Visible project',desc:'Readable by crawlers',url:'https://example.test/p'}},{id:'b',type:'link',hidden:true,data:{title:'Secret hidden',url:'https://example.test/s'}},{id:'c',type:'link',start:'2099-01-01',data:{title:'Future launch',url:'https://example.test/f'}}],journal:[]}));
+ await fs.writeFile(path.join(data,'page.json'),JSON.stringify({v:1,profile:{name:'Jane Doe',role:'Designer',bio:'Bio text'},journal:[{id:'j1',title:'Mon article publié',excerpt:'Résumé',content:'# Titre\n**gras**',date:'2026-11-10',universe:'pro',published:true},{id:'j2',title:'Brouillon caché',excerpt:'',content:'x',date:'2026-11-11',universe:'pro',published:false}],tiles:[{id:'a',type:'project',data:{title:'Visible project',desc:'Readable by crawlers',url:'https://example.test/p'}},{id:'b',type:'link',hidden:true,data:{title:'Secret hidden',url:'https://example.test/s'}},{id:'c',type:'link',start:'2099-01-01',data:{title:'Future launch',url:'https://example.test/f'}}]}));
  const port=await new Promise(r=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>r(p))})});
  const env={...process.env,TILES_DATA_DIR:data,TILES_UPLOAD_DIR:uploads,TILES_WIDGETS_OFF:'1',TILES_SITE_URL:'https://brandonlazarre.fr'};
  const server=spawn(php,['-S','127.0.0.1:'+port,'-t','public','scripts/dev-router.php'],{cwd:root,env,stdio:'ignore'});
@@ -18,6 +18,10 @@ test('SEO endpoints and head metadata use the configured canonical origin',{skip
   const ns=h=>h.match(/<noscript>([\s\S]*?)<\/noscript>/)[1];
   assert(ns(parcours).includes('Visible project'));assert(!ns(passions).includes('Visible project'));assert(!ns(parcours).includes('Secret hidden'));
   assert.match(ns(passions),/<h1>Passions · /);assert.match(ns(passions),/href="https:\/\/brandonlazarre\.fr\/parcours">Parcours</);
+  const art=await get('/journal-mon-article-publie');assert.equal(art.status,200);const ah=await art.text();
+  assert.match(ah,/<title>Mon article publié · /);assert.match(ah,/canonical" href="https:\/\/brandonlazarre\.fr\/journal-mon-article-publie"/);assert(ah.includes('"@type":"BlogPosting"'));assert(ah.includes('<h2>Titre</h2><p><strong>gras</strong></p>'));
+  const draft=await get('/journal-brouillon-cache');assert.equal(draft.status,404);assert.match(await draft.text(),/content="noindex"/);
+  assert((await(await get('/sitemap.xml')).text()).includes('/journal-mon-article-publie</loc>'));
   const home=await(await get('/')).text();
   assert(!home.includes('Secret hidden')&&!home.includes('Future launch'),'hidden and scheduled tiles are absent from the public HTML, boot data included');
   assert(home.includes('<link rel="canonical" href="https://brandonlazarre.fr/">'));assert(!home.includes('evil.test'));
