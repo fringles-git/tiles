@@ -75,3 +75,9 @@ test('instruments: secondary instruments become switch tabs, from the also field
  assert.equal((T.instrument.render({name:'Piano'}).match(/data-instrument-switch/g)||[]).length,0);
  const panel=api.instrumentPanel('bass',['piano','bass']);assert.match(panel,/aria-pressed="true">Basse/);
 });
+test('instrument choice survives a re-render of the grid',()=>{
+ const T=definitions(),d={name:'Piano',since:'Aussi : basse'};
+ api.choose('bass');assert.match(T.instrument.render(d),/data-kind="bass"/);
+ assert.match(T.instrument.render({name:'Sax',kind:'sax'}),/data-kind="sax"/);
+ api.choose(null);assert.match(T.instrument.render(d),/data-kind="piano"/);
+});

@@ -87,9 +87,10 @@ function instrumentPanel(kind,kinds){
  return `<div class="instrument" data-kind="${kind}" data-kinds="${esc(kinds.join(','))}" tabindex="-1">${tabs}${body}${hint}</div>`;
 }
 function instrumentCard(d){
- const main=KINDS[d.kind]?d.kind:instrumentKind(d.name);
- const extra=String(d.also||'').trim()?String(d.also).split(',').map(x=>x.trim()).filter(Boolean).map(instrumentKind):['piano','bass','sax','voice'].filter(k=>k!==main&&instrumentKind(normalize(d.since+' '+d.note).match({piano:/piano|clavier/,bass:/bass/,sax:/sax/,voice:/chant|voix/}[k])?.[0]||'')===k);
- const kinds=[...new Set([main,...extra])];
+ const base=KINDS[d.kind]?d.kind:instrumentKind(d.name);
+ const extra=String(d.also||'').trim()?String(d.also).split(',').map(x=>x.trim()).filter(Boolean).map(instrumentKind):['piano','bass','sax','voice'].filter(k=>k!==base&&instrumentKind(normalize(d.since+' '+d.note).match({piano:/piano|clavier/,bass:/bass/,sax:/sax/,voice:/chant|voix/}[k])?.[0]||'')===k);
+ const kinds=[...new Set([base,...extra])],main=chosen&&kinds.includes(chosen)?chosen:base;
+ if(midiCount&&kinds.includes(midiKind))midiKind=main;
  return `<span class="eyebrow">Je joue</span><b class="t-title">${esc(d.name)}</b>${d.since?`<small class="muted">${esc(d.since)}</small>`:''}${d.note?`<p class="muted clamp2">${esc(d.note)}</p>`:''}${instrumentPanel(main,kinds)}`;
 }
 function enhance(T,F){
@@ -139,7 +140,7 @@ function photo(id,index){
  show(t.data.caption||t.data.title||'Photo',`<img class="lightbox-image" src="${esc(images[n])}" alt="${esc(t.data.caption||t.data.title||'Photo')} ${n+1}"><div class="photo-controls">${images.length>1?'<button type="button" data-photo-step="-1" aria-label="Photo précédente">←</button>':''}<span role="status">${n+1} / ${images.length}</span>${images.length>1?'<button type="button" data-photo-step="1" aria-label="Photo suivante">→</button>':''}</div>${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Voir la publication ↗</a>`:''}`,{id,index:n});
 }
 function move(step){if(context)photo(context.id,context.index+step)}
-const voices=new Map();let midi=null,midiKind='piano',midiCount=0;
+const voices=new Map();let midi=null,midiKind='piano',midiCount=0,chosen=null;
 function audio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!audio.ctx||audio.ctx.state==='closed')audio.ctx=new AC();audio.ctx.resume?.().catch(()=>{});return audio.ctx;}
 /** Starts one synthesised note and returns its release function. Sustained kinds (sax, voix) hold until release. */
 function start(kind,freq){
@@ -169,7 +170,7 @@ async function connectMidi(panel,button){
  if(!navigator.requestMIDIAccess){button.textContent='MIDI non pris en charge par ce navigateur';return;}
  try{midi=midi||await navigator.requestMIDIAccess();const inputs=[...midi.inputs.values()];
   midiKind=panel.dataset.kind;midiCount=inputs.length;
-  for(const input of inputs)input.onmidimessage=e=>{const [st,note,vel]=e.data,cmd=st&0xf0,kind=midiKind,id='midi'+note;if(cmd===0x90&&vel>0)press(id,kind,440*2**((note-69)/12));else if(cmd===0x80||cmd===0x90)release(id);};
+  for(const input of inputs)input.onmidimessage=e=>{const [st,note,vel]=e.data,cmd=st&0xf0,kind=midiKind,id='midi'+note;if(cmd===0x90&&vel>0){if(document.hidden)return;press(id,kind,440*2**((note-69)/12));}else if(cmd===0x80||cmd===0x90)release(id);};
   button.textContent=inputs.length?midiLabel():'Aucun clavier MIDI détecté';button.setAttribute('aria-pressed',String(inputs.length>0));
  }catch{button.textContent='Accès MIDI refusé';}
 }
@@ -183,7 +184,7 @@ function bind(getTile,isInteractive,applySearch,profile){
  if(e.target.closest('[data-qr-download]')){const source=document.querySelector('#profile-qr canvas');if(!source)return;const canvas=document.createElement('canvas');canvas.width=source.width+40;canvas.height=source.height+40;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,20,20);canvas.toBlob(blob=>{if(blob)download(blob,'profil-qr.png')},'image/png');return}
  const p=e.target.closest('[data-photo]');if(p){e.preventDefault();photo(p.dataset.photo,+p.dataset.index||0);return}
  const note=e.target.closest('[data-note]');if(note){if(e.detail===0){const kind=note.closest('.instrument')?.dataset.kind;press('k'+note.dataset.note,kind,+note.dataset.note);setTimeout(()=>release('k'+note.dataset.note),400);}return}
- const sw=e.target.closest('[data-instrument-switch]');if(sw){const card=sw.closest('.instrument'),kind=sw.dataset.instrumentSwitch;if(midiCount)midiKind=kind;card.outerHTML=instrumentPanel(kind,card.dataset.kinds.split(','));return}
+ const sw=e.target.closest('[data-instrument-switch]');if(sw){const card=sw.closest('.instrument'),kind=sw.dataset.instrumentSwitch;chosen=kind;if(midiCount)midiKind=kind;card.outerHTML=instrumentPanel(kind,card.dataset.kinds.split(','));return}
  const mb=e.target.closest('[data-midi]');if(mb){connectMidi(mb.closest('.instrument'),mb);return}
  const embed=e.target.closest('[data-embed]');if(embed){const src=new URL(embed.dataset.embed);if(src.origin!=='https://open.spotify.com'||!src.pathname.startsWith('/embed/'))return;const frame=document.createElement('iframe');frame.className='embed';frame.title='Lecteur Spotify';frame.src=src.href;frame.allow='encrypted-media; fullscreen; picture-in-picture';embed.replaceWith(frame);return}
  const skill=e.target.closest('[data-skill]');if(skill){search(skill.dataset.skill,'projects');document.getElementById('explore-search')?.focus();return}
@@ -196,5 +197,5 @@ function bind(getTile,isInteractive,applySearch,profile){
  document.addEventListener('keyup',e=>release('key'+e.key));
  document.addEventListener('visibilitychange',()=>{if(document.hidden)dispose()});window.addEventListener('pagehide',()=>{dispose();unplug();});
 }
-window.TilesExperience={midiState:()=>({kind:midiKind,count:midiCount}),instrumentKind,instrumentCard,instrumentPanel,panelNotes,setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
+window.TilesExperience={choose:k=>{chosen=k;},midiState:()=>({kind:midiKind,count:midiCount}),instrumentKind,instrumentCard,instrumentPanel,panelNotes,setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
 })();
