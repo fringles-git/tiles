@@ -66,6 +66,32 @@ function filter(tiles,query='',category='all',kind='all'){
  }
  return output;
 }
+const KINDS={piano:{label:'Piano / clavier'},bass:{label:'Basse'},sax:{label:'Saxophone'},voice:{label:'Chant'},other:{label:'Autre (sans son)'}};
+function instrumentKind(v){const t=normalize(v);if(KINDS[t])return t;return /piano|clavier|keys|keyboard|synth/.test(t)?'piano':/basse|bass/.test(t)?'bass':/sax/.test(t)?'sax':/chant|voix|voice|vocal/.test(t)?'voice':'other';}
+const hz=(base,semi)=>Math.round(base*2**(semi/12)*100)/100;
+const NAMES=['Do','Ré♭','Ré','Mi♭','Mi','Fa','Sol♭','Sol','La♭','La','Si♭','Si'];
+function pads(kind){
+ if(kind==='piano'){const whites=[['Do',261.63],['Ré',293.66],['Mi',329.63],['Fa',349.23],['Sol',392],['La',440],['Si',493.88],['Do aigu',523.25]],blacks=[['Do dièse',277.18,12.5],['Ré dièse',311.13,25],['Fa dièse',369.99,50],['Sol dièse',415.3,62.5],['La dièse',466.16,75]];
+  return `<div class="piano-keys" role="group" aria-label="Clavier de piano">${whites.map(([n,f])=>`<button type="button" class="key white" data-note="${f}" aria-label="Jouer ${n}"></button>`).join('')}${blacks.map(([n,f,l])=>`<button type="button" class="key black" data-note="${f}" style="left:${l}%" aria-label="Jouer ${n}"></button>`).join('')}</div>`;}
+ if(kind==='bass'){const strings=[['Sol',98],['Ré',73.42],['La',55],['Mi',41.2]];
+  return `<div class="bass-neck" role="group" aria-label="Manche de basse, 4 cordes, 5 cases">${strings.map(([n,b],si)=>`<div class="string" style="--w:${1+si*.6}px">${[0,1,2,3,4].map(f=>`<button type="button" data-note="${hz(b,f)}" aria-label="Corde ${n}, ${f?'case '+f:'à vide'}"><i></i></button>`).join('')}</div>`).join('')}</div>`;}
+ if(kind==='sax'||kind==='voice'){const base=kind==='sax'?233.08:261.63,start=kind==='sax'?10:0,steps=[0,2,4,5,7,9,11,12];
+  return `<div class="note-pads" role="group" aria-label="${kind==='sax'?'Saxophone':'Chant'} : notes">${steps.map(st=>`<button type="button" data-note="${hz(base,st)}">${NAMES[(start+st)%12]}</button>`).join('')}</div>`;}
+ return '';
+}
+function instrumentPanel(kind,kinds){
+ const playable=kinds.filter(k=>k!=='other');
+ const tabs=playable.length>1?`<div class="instrument-tabs" role="group" aria-label="Choisir l’instrument">${playable.map(k=>`<button type="button" data-instrument-switch="${k}" aria-pressed="${k===kind}">${esc(KINDS[k].label.split(' /')[0])}</button>`).join('')}</div>`:'';
+ const body=pads(kind);
+ const hint=body?`<small class="piano-hint">${kind==='sax'||kind==='voice'?'Maintenez une note pour la tenir':'Touchez pour jouer'} · clavier : A W S E D F…</small>${typeof navigator!=='undefined'&&navigator.requestMIDIAccess?'<button type="button" class="midi-btn" data-midi aria-pressed="false">Brancher un clavier MIDI</button>':''}`:'';
+ return `<div class="instrument" data-kind="${kind}" data-kinds="${esc(kinds.join(','))}" tabindex="-1">${tabs}${body}${hint}</div>`;
+}
+function instrumentCard(d){
+ const main=KINDS[d.kind]?d.kind:instrumentKind(d.name);
+ const extra=String(d.also||'').trim()?String(d.also).split(',').map(x=>x.trim()).filter(Boolean).map(instrumentKind):['piano','bass','sax','voice'].filter(k=>k!==main&&instrumentKind(normalize(d.since+' '+d.note).match({piano:/piano|clavier/,bass:/bass/,sax:/sax/,voice:/chant|voix/}[k])?.[0]||'')===k);
+ const kinds=[...new Set([main,...extra])];
+ return `<span class="eyebrow">Je joue</span><b class="t-title">${esc(d.name)}</b>${d.since?`<small class="muted">${esc(d.since)}</small>`:''}${d.note?`<p class="muted clamp2">${esc(d.note)}</p>`:''}${instrumentPanel(main,kinds)}`;
+}
 function enhance(T,F){
  T.languages={label:'Langues',cat:'Work',hint:'Icônes, niveaux et précisions dépliables',size:'w',interactive:true,fields:[F('title','Titre'),F('items','Une ligne : langue | niveau | précision','area')],def:{title:'Langues',items:'Français | C2 | Bilingue · niveau déclaré\nEnglish | C2 | Bilingual · self-reported level'},render:d=>`<span class="eyebrow">${esc(d.title)}</span><div class="language-list">${String(d.items||'').split('\n').filter(Boolean).map(line=>{const [name,level,note]=line.split('|').map(x=>x.trim());const code=/fran|french/i.test(name)?'fr':/english|anglais/i.test(name)?'gb':/esp|spanish|español/i.test(name)?'es':'';return `<details><summary><span class="language-icon" aria-hidden="true">${code?`<img src="${esc(base+'flags/'+code+'.svg')}" alt="">`:uiIcon('globe',20)}</span><b>${esc(name)}</b><span class="language-level">${esc(level||'')}${languageSegments(level||'')}</span></summary><p>${esc(note||'')}</p></details>`}).join('')}</div>`};
  T.company={label:'Entreprise',cat:'Work',hint:'Logo, expérience et site officiel',size:'w',interactive:true,fields:[F('brand','Entreprise','select',Object.entries(brands).map(([key,b])=>[key,b.name])),F('title','Votre rôle'),F('desc','Votre contribution','area'),F('image','Logo personnalisé (facultatif)','image')],def:{brand:'action',title:'Mon expérience',desc:'',image:''},render:d=>{const b=brands[d.brand]||brands.action;const logo=image(d.image)?d.image:b.logo;return `<div class="company-head">${logoMarkup(b.name,logo)}</div><b class="t-title">${esc(d.title)}</b><p>${esc(d.desc)}</p><a class="company-link" href="${b.url}" target="_blank" rel="noopener noreferrer">${esc(b.name)} · site officiel ↗</a>`}};
@@ -75,13 +101,10 @@ function enhance(T,F){
  T.skills={...T.skills,interactive:true,render:d=>`<span class="eyebrow">${esc(d.title)}</span><div class="cl skill-buttons">${String(d.items||'').split(',').map(x=>x.trim()).filter(Boolean).map(s=>`<button type="button" data-skill="${esc(s)}">${skillMark(s)}${esc(s)}</button>`).join('')}</div>`};
  T.image={...T.image,interactive:true,render:(d,t)=>image(d.image)?`<button type="button" class="photo-open" data-photo="${esc(t.id)}" data-index="0" aria-label="Agrandir : ${esc(d.caption||'Photo')}"><img src="${esc(d.image)}" alt="${esc(d.caption||'')}" loading="lazy" decoding="async"><span class="photo-zoom" aria-hidden="true">${uiIcon('zoom',20)}</span></button>${d.caption?`<div class="cap"><span>${esc(d.caption)}</span></div>`:''}`:`<div class="photo-open">${esc(d.caption||'Photo à ajouter')}</div>`};
  T.gallery={...T.gallery,interactive:true,render:(d,t)=>{const images=(d.images||[]).filter(image);return `<div class="gallery-buttons">${images.slice(0,3).map((src,i)=>`<button type="button" data-photo="${esc(t.id)}" data-index="${i}" aria-label="${esc(d.title||'Galerie')} · photo ${i+1}"><img src="${esc(src)}" alt="${esc(d.title||'')} · ${i+1}" loading="lazy" decoding="async"></button>`).join('')}</div><div class="cap">${esc(d.title)}${images.length?' · '+images.length+' photos':''}</div>`}};
- const oldInstrument=T.instrument;
- T.instrument={...oldInstrument,interactive:true,render:(d,t)=>{
-  if(!/piano|clavier|keys|keyboard/i.test(d.name||''))return oldInstrument.render(d,t);
-  const whites=[['Do',261.63],['Ré',293.66],['Mi',329.63],['Fa',349.23],['Sol',392],['La',440],['Si',493.88],['Do aigu',523.25]];
-  const blacks=[['Do dièse',277.18,12.5],['Ré dièse',311.13,25],['Fa dièse',369.99,50],['Sol dièse',415.3,62.5],['La dièse',466.16,75]];
-  return `<span class="eyebrow">Je joue</span><b class="t-title">${esc(d.name)}</b><small class="muted">${esc(d.since)}</small>${d.note?`<p class="muted clamp2">${esc(d.note)}</p>`:''}<div class="piano-keys" role="group" aria-label="Clavier de piano">${whites.map(([name,f])=>`<button type="button" class="key white" data-note="${f}" aria-label="Jouer ${name}"></button>`).join('')}${blacks.map(([name,f,left])=>`<button type="button" class="key black" data-note="${f}" style="left:${left}%" aria-label="Jouer ${name}"></button>`).join('')}</div><small class="piano-hint">Touchez les touches pour jouer</small>`;
- }};
+ T.instrument={...T.instrument,interactive:true,
+  fields:[F('name','Instrument'),F('kind','Type (son et interaction)','select',Object.entries(KINDS).map(([k,v])=>[k,v.label])),F('since','Depuis / détail'),F('also','Autres instruments joués (séparés par des virgules)'),F('note','Note','area')],
+  def:{name:'Piano',kind:'piano',since:'Autodidacte',also:'',note:''},
+  render:d=>instrumentCard(d)};
  const oldSocial=T.social;
  T.social={...oldSocial,render:d=>{let html=oldSocial.render(d);if(d.platform==='instagram')html=html.replace('>IG</span>','>'+uiIcon('instagram',24)+'</span>');if(brands[d.platform]?.logo)html=html.replace(esc((d.platform==='github'?'GH':'Spotify')),icon(d.platform));return html}};
  const oldMusic=T.music;
@@ -116,14 +139,37 @@ function photo(id,index){
  show(t.data.caption||t.data.title||'Photo',`<img class="lightbox-image" src="${esc(images[n])}" alt="${esc(t.data.caption||t.data.title||'Photo')} ${n+1}"><div class="photo-controls">${images.length>1?'<button type="button" data-photo-step="-1" aria-label="Photo précédente">←</button>':''}<span role="status">${n+1} / ${images.length}</span>${images.length>1?'<button type="button" data-photo-step="1" aria-label="Photo suivante">→</button>':''}</div>${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Voir la publication ↗</a>`:''}`,{id,index:n});
 }
 function move(step){if(context)photo(context.id,context.index+step)}
-function sound(freq){
- if(!Number.isFinite(freq)||freq<100||freq>1200||Date.now()-lastVoice<70)return;lastVoice=Date.now();
- try{const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return;
- if(!sound.ctx||sound.ctx.state==='closed')sound.ctx=new AudioContext();const ctx=sound.ctx;ctx.resume().catch(()=>{});
- const oscillator=ctx.createOscillator(),gain=ctx.createGain();oscillator.type='triangle';oscillator.frequency.value=freq;gain.gain.setValueAtTime(.12,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.65);oscillator.connect(gain);gain.connect(ctx.destination);oscillator.start();oscillator.stop(ctx.currentTime+.65);
- }catch{}
+const voices=new Map();let midi=null;
+function audio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!audio.ctx||audio.ctx.state==='closed')audio.ctx=new AC();audio.ctx.resume?.().catch(()=>{});return audio.ctx;}
+/** Starts one synthesised note and returns its release function. Sustained kinds (sax, voix) hold until release. */
+function start(kind,freq){
+ if(!Number.isFinite(freq)||freq<25||freq>2100)return ()=>{};
+ if(voices.size>=8){const [k,stop]=voices.entries().next().value;stop();voices.delete(k);}
+ try{const ctx=audio();if(!ctx)return ()=>{};const t=ctx.currentTime,out=ctx.createGain(),osc=ctx.createOscillator();let tail=out;
+  const k=KINDS[kind]?kind:'piano',sustain=k==='sax'||k==='voice';
+  if(k==='piano'){osc.type='triangle';out.gain.setValueAtTime(.16,t);out.gain.exponentialRampToValueAtTime(.0001,t+1.4);}
+  else if(k==='bass'){osc.type='sawtooth';const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(1200,t);f.frequency.exponentialRampToValueAtTime(220,t+.6);osc.connect(f);tail=f;out.gain.setValueAtTime(.22,t);out.gain.exponentialRampToValueAtTime(.0001,t+1.1);}
+  else{osc.type='sawtooth';const lfo=ctx.createOscillator(),depth=ctx.createGain();lfo.frequency.value=5.2;depth.gain.value=freq*.006;lfo.connect(depth);depth.connect(osc.frequency);lfo.start(t);osc.onended=()=>lfo.stop();
+   const f1=ctx.createBiquadFilter(),f2=ctx.createBiquadFilter();f1.type='bandpass';f2.type='bandpass';f1.Q.value=f2.Q.value=k==='voice'?6:1.4;f1.frequency.value=k==='voice'?750:1300;f2.frequency.value=k==='voice'?1150:2600;
+   const mix=ctx.createGain();osc.connect(f1);osc.connect(f2);f1.connect(mix);f2.connect(mix);tail=mix;out.gain.setValueAtTime(.0001,t);out.gain.exponentialRampToValueAtTime(k==='voice'?.5:.28,t+.05);}
+  if(tail!==out)tail.connect(out);else osc.connect(out);out.connect(ctx.destination);osc.frequency.setValueAtTime(freq,t);osc.start(t);
+  if(!sustain){osc.stop(t+1.5);return ()=>{};}
+  let done=false;const stop=()=>{if(done)return;done=true;const n=ctx.currentTime;out.gain.cancelScheduledValues(n);out.gain.setValueAtTime(Math.max(out.gain.value,.0001),n);out.gain.exponentialRampToValueAtTime(.0001,n+.18);osc.stop(n+.2);};
+  setTimeout(stop,8000);return stop;
+ }catch{return ()=>{};}
 }
-function dispose(){if(sound.ctx&&sound.ctx.state!=='closed')sound.ctx.suspend().catch(()=>{})}
+function press(id,kind,freq){release(id);voices.set(id,start(kind,freq));}
+function release(id){const stop=voices.get(id);if(stop){stop();voices.delete(id);}}
+function dispose(){for(const id of [...voices.keys()])release(id);if(midi)for(const input of midi.inputs.values())input.onmidimessage=null;if(audio.ctx&&audio.ctx.state!=='closed')audio.ctx.suspend().catch(()=>{});}
+const KEYS='awsedftgyhujk';
+function panelNotes(panel){return [...new Set([...panel.querySelectorAll('[data-note]')].map(b=>+b.dataset.note))].sort((a,b)=>a-b);}
+async function connectMidi(panel,button){
+ if(!navigator.requestMIDIAccess){button.textContent='MIDI non pris en charge par ce navigateur';return;}
+ try{midi=midi||await navigator.requestMIDIAccess();const inputs=[...midi.inputs.values()];
+  for(const input of inputs)input.onmidimessage=e=>{const [st,note,vel]=e.data,cmd=st&0xf0,kind=panel.isConnected?panel.dataset.kind:'piano',id='midi'+note;if(cmd===0x90&&vel>0)press(id,kind,440*2**((note-69)/12));else if(cmd===0x80||cmd===0x90)release(id);};
+  button.textContent=inputs.length?'Clavier MIDI connecté ('+inputs.length+')':'Aucun clavier MIDI détecté';button.setAttribute('aria-pressed',String(inputs.length>0));
+ }catch{button.textContent='Accès MIDI refusé';}
+}
 function bind(getTile,isInteractive,applySearch,profile){
  lookup=getTile;interactive=isInteractive;search=applySearch;getProfile=profile||getProfile;
  document.addEventListener('error',e=>{if(e.target.matches?.('[data-company-logo]'))e.target.remove();},true);
@@ -133,12 +179,19 @@ function bind(getTile,isInteractive,applySearch,profile){
  if(e.target.closest('[data-contact-download]'))return download(new Blob([vcard(getProfile(),publicUrl())],{type:'text/vcard;charset=utf-8'}),'contact.vcf');
  if(e.target.closest('[data-qr-download]')){const source=document.querySelector('#profile-qr canvas');if(!source)return;const canvas=document.createElement('canvas');canvas.width=source.width+40;canvas.height=source.height+40;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,20,20);canvas.toBlob(blob=>{if(blob)download(blob,'profil-qr.png')},'image/png');return}
  const p=e.target.closest('[data-photo]');if(p){e.preventDefault();photo(p.dataset.photo,+p.dataset.index||0);return}
- const note=e.target.closest('[data-note]');if(note){sound(+note.dataset.note);return}
+ const note=e.target.closest('[data-note]');if(note){if(e.detail===0){const kind=note.closest('.instrument')?.dataset.kind;press('k'+note.dataset.note,kind,+note.dataset.note);setTimeout(()=>release('k'+note.dataset.note),400);}return}
+ const sw=e.target.closest('[data-instrument-switch]');if(sw){const card=sw.closest('.instrument');card.outerHTML=instrumentPanel(sw.dataset.instrumentSwitch,card.dataset.kinds.split(','));return}
+ const mb=e.target.closest('[data-midi]');if(mb){connectMidi(mb.closest('.instrument'),mb);return}
  const embed=e.target.closest('[data-embed]');if(embed){const src=new URL(embed.dataset.embed);if(src.origin!=='https://open.spotify.com'||!src.pathname.startsWith('/embed/'))return;const frame=document.createElement('iframe');frame.className='embed';frame.title='Lecteur Spotify';frame.src=src.href;frame.allow='encrypted-media; fullscreen; picture-in-picture';embed.replaceWith(frame);return}
  const skill=e.target.closest('[data-skill]');if(skill){search(skill.dataset.skill,'projects');document.getElementById('explore-search')?.focus();return}
  const share=e.target.closest('[data-share]');if(share){const link=publicUrl();if(!link)return;try{if(navigator.share)await navigator.share({title:document.title,url:link});else{await navigator.clipboard.writeText(link);share.textContent='Lien copié ✓'}}catch(e){if(e.name!=='AbortError')share.textContent='Le partage est indisponible dans ce navigateur.'}return}
  });
+ document.addEventListener('pointerdown',e=>{if(!interactive())return;const n=e.target.closest('[data-note]');if(!n)return;e.preventDefault();n.setPointerCapture?.(e.pointerId);n.classList.add('on');press('p'+e.pointerId,n.closest('.instrument')?.dataset.kind,+n.dataset.note);});
+ const up=e=>{release('p'+e.pointerId);document.querySelectorAll('.instrument [data-note].on').forEach(b=>b.classList.remove('on'));};
+ document.addEventListener('pointerup',up);document.addEventListener('pointercancel',up);
+ document.addEventListener('keydown',e=>{const panel=e.target.closest?.('.instrument');if(!panel||!interactive()||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;const i=KEYS.indexOf(e.key.toLowerCase());if(i<0)return;const f=panelNotes(panel)[i];if(f===undefined)return;e.preventDefault();press('key'+e.key,panel.dataset.kind,f);});
+ document.addEventListener('keyup',e=>release('key'+e.key));
  document.addEventListener('visibilitychange',()=>{if(document.hidden)dispose()});window.addEventListener('pagehide',dispose);
 }
-window.TilesExperience={setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
+window.TilesExperience={instrumentKind,instrumentCard,instrumentPanel,panelNotes,setLibrary,libraryLogo,skillMark,span,timeline,enhance,filter,bind,dispose,employerLinks,brands,vcard,publicUrl,uiIcon,languageSegments,projectKind};
 })();
