@@ -22,6 +22,8 @@ test('SEO endpoints and head metadata use the configured canonical origin',{skip
   assert.match(ah,/<title>Mon article publié · /);assert.match(ah,/canonical" href="https:\/\/brandonlazarre\.fr\/journal-mon-article-publie"/);assert(ah.includes('"@type":"BlogPosting"'));assert(ah.includes('<h2>Titre</h2><p><strong>gras</strong></p>'));
   const draft=await get('/journal-brouillon-cache');assert.equal(draft.status,404);assert.match(await draft.text(),/content="noindex"/);
   assert((await(await get('/sitemap.xml')).text()).includes('/journal-mon-article-publie</loc>'));
+  const ver=await get('/version');assert.equal(ver.status,200);assert.match(ver.headers.get('content-type'),/^application\/json/);assert.ok('commit' in JSON.parse(await ver.text()));
+  const deny=new RegExp(require('node:fs').readFileSync(path.join(root,'public/.htaccess'),'utf8').match(/<FilesMatch "([^"]+)">/)[1]);assert(!deny.test('version'),'the deployment check is not caught by the Apache file denial');
   const home=await(await get('/')).text();
   assert(!home.includes('Secret hidden')&&!home.includes('Future launch'),'hidden and scheduled tiles are absent from the public HTML, boot data included');
   assert(home.includes('<link rel="canonical" href="https://brandonlazarre.fr/">'));assert(!home.includes('evil.test'));
