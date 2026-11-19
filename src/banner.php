@@ -44,6 +44,11 @@ function banner_store(string $tmp, int $size, string $dir): array
         return ['url' => $url, 'poster' => $poster ?: $url, 'animated' => banner_animated($bytes, $type)];
     }
     if (!$still) { return ['error' => 'Image illisible.']; }
+    if ($type === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
+        $rot = [3 => 180, 6 => -90, 8 => 90][(int) ((@exif_read_data($tmp) ?: [])['Orientation'] ?? 1)] ?? 0;
+        if ($rot) { $still = imagerotate($still, $rot, 0) ?: $still; }
+    }
+    if ($type === IMAGETYPE_PNG) { imagealphablending($still, false); imagesavealpha($still, true); }
     $ext = $type === IMAGETYPE_PNG ? 'png' : 'jpg';
     $ok = $type === IMAGETYPE_PNG ? imagepng($still, "$dir/banner-$id.$ext", 7) : imagejpeg($still, "$dir/banner-$id.$ext", 84);
     if (!$ok) { return ['error' => 'Le serveur n’a pas pu enregistrer la bannière.']; }
