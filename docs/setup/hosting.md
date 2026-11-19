@@ -37,6 +37,12 @@ location ~ ^/uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))$ {
     fastcgi_pass unix:/run/php/php8.4-fpm.sock;
 }
 location /uploads/ { return 404; }
+location ~ ^/go/([a-z0-9-]{1,24})/?$ {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root/go.php;
+    fastcgi_param QUERY_STRING id=$1;
+    fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+}
 location ~ ^/(?:index|admin|api|widgets|media)\.php$ {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
