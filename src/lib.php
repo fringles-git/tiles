@@ -176,6 +176,7 @@ function stats_for_editor(): array
         'views' => (int) ($st['views'] ?? 0),
         'days' => $window['days'],
         'clickDays' => $window['clickDays'],
+        'goDays' => $window['goDays'],
         'clicks' => (object) ($st['clicks'] ?? []),
         'go' => (object) ($st['go'] ?? []),
         'leads' => array_values($leads),

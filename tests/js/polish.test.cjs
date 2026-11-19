@@ -28,12 +28,12 @@ test('bio drops a closing "Basé à <ville>" sentence already shown by the locat
 });
 test('stats summary: period totals, every clicked block, per-channel aggregation and /go/ counts',()=>{
  const tiles=[{id:'ig',type:'social',data:{platform:'instagram'}},{id:'gh',type:'social',data:{platform:'github'}},{id:'ln',type:'link',data:{title:'Site'}}];
- const st={days:[5,5,10,20],clicks:{ig:99,ln:1},go:{ln:3},clickDays:[{ig:50},{},{ig:2,gh:1},{ln:4,'p-cv':1,old:2}]};
+ const st={days:[5,5,10,20],clicks:{ig:99,ln:1},go:{ln:100},clickDays:[{ig:50},{},{ig:2,gh:1},{ln:4,'p-cv':1,old:2}],goDays:[{ln:90},{},{},{ln:3}]};
  const s=p.statsSummary(st,tiles,2);
  assert.equal(s.views,30);assert.equal(s.clicks,10);assert.equal(s.ctr,33);assert.equal(s.cv,1);assert.ok(s.exact);
  assert.deepEqual([...s.rows].map(r=>[r.id,r.clicks]),[['ln',4],['ig',2],['old',2],['gh',1],['p-cv',1]]);
  assert.equal(s.rows[0].go,3);assert.equal(s.rows[0].share,40);assert.equal(s.rows.find(r=>r.id==='old').channel,'deleted');
  assert.deepEqual([...s.channels].map(c=>c[0]),['link','instagram','deleted','github','cv']);
- const legacy=p.statsSummary({days:[1],clicks:{ig:3}},tiles,7);assert.equal(legacy.exact,false);assert.equal(legacy.clicks,3);
+ const legacy=p.statsSummary({days:[1],clicks:{ig:3},go:{ig:2},clickDays:null,goDays:null},tiles,7);assert.equal(legacy.exact,false);assert.equal(legacy.clicks,3);assert.equal(legacy.rows[0].go,2);
  assert.equal(p.statsSummary({},[],7).ctr,0);
 });
