@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require dirname(__DIR__) . '/src/lib.php';
 require dirname(__DIR__) . '/src/seo.php';
+require dirname(__DIR__) . '/src/sections.php';
 
 $page = read_json('page.json', null);
 if (!$page) {
@@ -17,8 +18,15 @@ $name = (string) ($profile['name'] ?? 'Tiles');
 $role = (string) ($profile['role'] ?? '');
 $bio = (string) ($profile['bio'] ?? '');
 $title = $role !== '' ? "$name · $role" : $name;
+$section = section_by_slug($_GET['section'] ?? null);
+$description = $bio;
+if ($section) {
+    $title = $section['label'] . ' · ' . $name;
+    $description = $section['question'];
+}
 
 $base = seo_base_url();
+$url = $base . ($section['slug'] ?? '');
 $now = time();
 $head = '<meta name="robots" content="index, follow, max-image-preview:large">'
     . '<meta name="author" content="' . e($name) . '">'
@@ -26,9 +34,9 @@ $head = '<meta name="robots" content="index, follow, max-image-preview:large">'
     . '<meta property="og:site_name" content="' . e($name) . '">'
     . '<meta property="og:type" content="profile">'
     . '<meta property="og:title" content="' . e($title) . '">'
-    . '<meta property="og:description" content="' . e($bio) . '">'
-    . '<meta property="og:url" content="' . e($base) . '">'
-    . '<link rel="canonical" href="' . e($base) . '">'
+    . '<meta property="og:description" content="' . e($description) . '">'
+    . '<meta property="og:url" content="' . e($url) . '">'
+    . '<link rel="canonical" href="' . e($url) . '">'
     . '<meta name="twitter:card" content="summary_large_image">';
 $avatar = (string) ($profile['avatar'] ?? '');
 $hasAvatar = preg_match('#^uploads/[A-Za-z0-9_-]+\.(jpe?g|png|webp|gif)$#', $avatar) === 1 && is_file(UPLOAD_DIR . '/' . basename($avatar));
@@ -36,7 +44,7 @@ $shareImage = $base . ($hasAvatar ? $avatar : 'assets/images/share.png');
 $head .= '<meta property="og:image" content="' . e($shareImage) . '">'
     . '<meta property="og:image:alt" content="' . e($name . ' · Portfolio') . '">'
     . '<meta name="twitter:title" content="' . e($title) . '">'
-    . '<meta name="twitter:description" content="' . e($bio) . '">'
+    . '<meta name="twitter:description" content="' . e($description) . '">'
     . '<meta name="twitter:image" content="' . e($shareImage) . '">';
 if (!$hasAvatar) {
     $head .= '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">';
@@ -49,4 +57,4 @@ $noscript = '<noscript><main style="max-width:640px;margin:40px auto;padding:0 1
 
 $head .= seo_jsonld($page, $base, $now);
 header('Cache-Control: public, max-age=60');
-render_shell($title, $bio, ['mode' => 'public', 'page' => $page], $head, $noscript);
+render_shell($title, $description, ['mode' => 'public', 'page' => $page], $head, $noscript);

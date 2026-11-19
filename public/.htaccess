@@ -13,6 +13,7 @@ Options -Indexes
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   RewriteRule ^uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))$ media.php?file=$1 [L,QSA,NC]
   RewriteRule ^go/([a-z0-9-]{1,24})/?$ go.php?id=$1 [L,QSA]
+  RewriteRule ^(profil|parcours|creations|passions)$ index.php?section=$1 [L,QSA]
   RewriteRule ^(robots\.txt|sitemap\.xml|llms\.txt)$ seo.php?f=$1 [L,QSA]
   RewriteRule ^uploads(?:/|$) - [R=404,L]
 </IfModule>

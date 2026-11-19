@@ -7,3 +7,10 @@
 .journal-fields{display:flex;flex-direction:column;gap:18px;margin:20px 0}.journal-fields label{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600}.journal-fields input:not([type=checkbox]),.journal-fields textarea,.journal-fields select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--fg);font:inherit;min-height:44px}.journal-fields .chk{flex-direction:row;align-items:center}.journal-text{min-height:240px;resize:vertical;line-height:1.6}
 .journal-manager>div{display:flex;gap:8px;align-items:center;margin-top:12px}.journal-manager .btn{flex:1;min-width:0;justify-content:space-between;white-space:normal;text-align:left}.journal-manager small{color:var(--muted);font-size:11px}.journal-body{line-height:1.8}.journal-body h2{margin-top:24px}.journal-body p,.journal-body ul{margin:14px 0}.journal-body blockquote{padding-left:18px;border-left:3px solid var(--accent);margin:20px 0}.journal-body code{background:var(--surface-2);border-radius:4px;padding:2px 5px}
 @media(max-width:700px){.hub-universes{gap:2px}.hub-universes a{font-size:13px;padding:10px 11px}.hub-articles{grid-template-columns:1fr}}
+/* En-têtes de section publics (Profil, Parcours, Créations, Passions) sur la page unique. */
+.tile.ty-universe{background:transparent;border:0;box-shadow:none}.tile.ty-universe .ti{padding:0;overflow:visible}
+.uni-head{padding:28px 0 4px;scroll-margin-top:24px}.tile.ty-universe:first-child .uni-head{padding-top:0}
+.uni-head h2{margin:0;font-family:var(--f-display);font-size:clamp(26px,3vw,34px);line-height:1.1;letter-spacing:-.03em}
+.uni-head p{margin:6px 0 0;max-width:60ch;color:var(--muted);font-size:15px;line-height:1.45}
+/* Les onglets remplacent la navigation « Sur cette page » en lecture publique. */
+.mode-preview .prof .jump,.mode-preview .jumpbar{display:none!important}

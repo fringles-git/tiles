@@ -168,6 +168,8 @@ const T={
 };
 if(typeof window!=='undefined'&&window.TilesWidgets)Object.assign(T,window.TilesWidgets.definitions(F));
 if(typeof window!=='undefined'&&window.TilesExperience)window.TilesExperience.enhance(T,F);
+/* Synthetic, read-only header inserted by the hub for each public section (never stored, never in the add-block catalog). */
+T.universe={label:'Section',cat:'',size:'full',fields:[],render:d=>`<div class="uni-head" id="${esc(d.slug)}"><h2>${esc(d.title)}</h2><p>${esc(d.question)}</p></div>`};
 const CATS=['Essentials','Work','Creative','Personal','Earn'];
 const SIZES=[['s','Small',[1,0,0,0]],['w','Wide',[1,1,0,0]],['t','Tall',[1,0,1,0]],['l','Large',[1,1,1,1]],['bar','Strip',[1,1,0,0]]];
 

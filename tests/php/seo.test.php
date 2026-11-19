@@ -37,3 +37,8 @@ check(str_contains($body, '<h2>Projets</h2>') && str_contains($body, 'EventFlow'
 check(!str_contains($body, 'Futur') && !str_contains($body, 'uploads/x.jpg') && !str_contains($body, '#fff'), 'scheduled tiles, images and colours excluded');
 $llms = seo_llms($page, $base, $now);
 check(str_starts_with($llms, "# Brandon </script><b>\n") && str_contains($llms, '[EventFlow](https://example.test/ef)') && !str_contains($llms, 'future.test'), 'llms.txt lists live linked tiles only');
+require_once dirname(__DIR__, 2) . '/src/sections.php';
+$xml2 = simplexml_load_string(seo_sitemap('https://x.fr/', null, array_keys(TILES_SECTIONS)));
+check($xml2 !== false && count($xml2->url) === 5 && (string) $xml2->url[2]->loc === 'https://x.fr/parcours', 'sitemap lists the home page and the four sections');
+check(count(simplexml_load_string(seo_sitemap('https://x.fr/', null, ['ok', '../x', 'a b']))->url) === 2, 'sitemap drops malformed slugs');
+check(section_by_slug('parcours')['key'] === 'pro' && section_by_slug('pro') === null && section_by_slug(['x']) === null, 'sections resolve by public slug only');
