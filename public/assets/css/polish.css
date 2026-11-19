@@ -81,3 +81,15 @@
  .page:not([data-layout="top"]) .prof>*{grid-column:1}
  .page:not([data-layout="top"]) .prof>.profile-primary,.page:not([data-layout="top"]) .prof>.pcv,.page:not([data-layout="top"]) .prof>.pcard{grid-column:2}
 }
+
+/* Largeur : plus de plafond à 1240 px sur grande tablette et bureau, marges proportionnées. */
+.page-in{max-width:1480px;padding-inline:clamp(16px,2vw,32px);padding-block:clamp(16px,2vw,28px)}
+.page:not([data-layout="top"]) .prof{top:16px}
+/* Recherche repliée : alignée à droite sur la ligne des onglets au lieu d'une rangée entière. */
+@media(min-width:701px){
+ .mode-preview .grid-wrap{position:relative}
+ .mode-preview .grid-wrap:has(.hub-universes:not([hidden])) .explore-tools:not([open]){position:absolute;top:2px;right:0;margin:0;z-index:2}
+ .mode-preview .grid-wrap:has(.explore-tools:not([open])) .hub-universes{padding-right:220px}
+ .explore-tools:not([open]) summary{padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
