@@ -11,7 +11,7 @@ Options -Indexes
   RewriteRule ^journal-([a-z0-9-]{1,100})$ public/index.php?article=$1 [L,QSA]
   RewriteRule ^assets/(.+)$ public/assets/$1 [L]
   RewriteRule ^(robots\.txt|sitemap\.xml|llms\.txt)$ public/seo.php?f=$1 [L,QSA]
-  RewriteRule ^version\.json$ public/version.php [L]
+  RewriteRule ^version$ public/version.php [L]
   # Permit internal rewrites into public/; its own rules apply afterwards.
   RewriteRule ^public/(?:index|admin|api|widgets|media)\.php$ - [L]
   RewriteRule ^public/go\.php$ - [L]

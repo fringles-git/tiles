@@ -54,7 +54,7 @@ location ~ ^/(profil|parcours|creations|passions)$ {
     fastcgi_param QUERY_STRING section=$1;
     fastcgi_pass unix:/run/php/php8.5-fpm.sock;
 }
-location = /version.json {
+location = /version {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root/version.php;
     fastcgi_pass unix:/run/php/php8.5-fpm.sock;
@@ -81,7 +81,7 @@ Before a code rollback, restore the previous web-root setting or use the entry p
 
 ## Vérifier un déploiement
 
-`https://<site>/version.json` renvoie le commit servi (lu dans `.git`, ou `TILES_COMMIT`), la version de PHP (majeure.mineure) et l'identifiant git de chaque fichier CSS/JS. Comparer avec le dépôt :
+`https://<site>/version` renvoie le commit servi (lu dans `.git`, ou `TILES_COMMIT`), la version de PHP (majeure.mineure) et l'identifiant git de chaque fichier CSS/JS. Comparer avec le dépôt :
 
 ```sh
 git rev-parse --short=12 origin/main
