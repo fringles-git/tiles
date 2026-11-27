@@ -1,0 +1,51 @@
+/* Tiles · Bento cards (FAQ, progress, process, local time) and animated figures.
+   Radii derive from --r so the card family follows the Design panel; motion is opt-in. */
+
+/* FAQ: native <details>, findable with Ctrl+F, no script. */
+.faq{display:flex;flex-direction:column;margin-top:2px}
+.faq details{border-top:1px solid var(--line)}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;display:flex;align-items:center;gap:.6ch;min-height:44px;padding:8px 0;font-weight:600;cursor:pointer;border-radius:calc(var(--r) / 3)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::before{content:"";flex-shrink:0;width:.55em;height:.55em;border-right:2px solid currentColor;border-bottom:2px solid currentColor;rotate:-45deg;translate:0 -1px;opacity:.7}
+.faq details[open]>summary::before{rotate:45deg;translate:0 -3px}
+.faq summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.faq p{margin:0 0 12px;color:var(--muted);line-height:1.5}
+.faq details::details-content{overflow:clip;contain:layout}
+.faq details:not([open])::details-content{block-size:0}
+@media (prefers-reduced-motion:no-preference){
+  .faq summary::before{transition:rotate .2s,translate .2s}
+  .faq details::details-content{interpolate-size:allow-keywords;transition:block-size .25s ease-in-out,content-visibility .25s;transition-behavior:allow-discrete}
+}
+.mode-edit .faq summary{pointer-events:none}
+
+/* Progress bars: the percentage is text; the bar is decorative. */
+.pbars{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.pbar-h{display:flex;justify-content:space-between;gap:8px;font-size:14px;margin-bottom:5px}
+.pbar-h b{font-variant-numeric:tabular-nums}
+.pbar{display:block;height:8px;border-radius:calc(var(--r) / 6);background:color-mix(in srgb,var(--fg) 9%,transparent);overflow:hidden}
+.pbar i{display:block;height:100%;width:100%;transform-origin:left;scale:var(--p) 1;background:var(--tint,var(--accent));border-radius:inherit}
+@media (prefers-reduced-motion:no-preference){
+  .pbar i{transition:scale .9s cubic-bezier(.2,.8,.2,1)}
+  @starting-style{.pbar i{scale:0 1}}
+}
+@media (forced-colors:active){.pbar{border:1px solid CanvasText}.pbar i{background:Highlight}}
+
+/* Process: numbered steps with a counter, no images. */
+.steps{list-style:none;counter-reset:step;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.steps li{counter-increment:step;display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:10px;align-items:start}
+.steps li::before{content:counter(step);grid-row:span 2;display:grid;place-items:center;width:28px;height:28px;border-radius:calc(var(--r) / 3);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--fg);font:700 13px/1 var(--f-mono)}
+.steps b{line-height:1.3}
+.steps small{line-height:1.4}
+
+/* Local time: a soft sky gradient behind the digits, day or night. */
+.ty-clock .ti{isolation:isolate}
+.clock-time{margin-top:auto}
+.clock-time time{font-variant-numeric:tabular-nums}
+.clock-rel{display:block}
+.clock-sky{position:absolute;inset:0;z-index:-1;opacity:.5;pointer-events:none}
+.clock-sky.day{background:radial-gradient(120% 90% at 100% 0,color-mix(in srgb,#FFC861 45%,transparent),transparent 60%)}
+.clock-sky.night{background:radial-gradient(120% 90% at 100% 0,color-mix(in srgb,#5B6CFF 40%,transparent),transparent 60%)}
+
+/* Count-up keeps its width stable while digits change. */
+.count-up{font-variant-numeric:tabular-nums}

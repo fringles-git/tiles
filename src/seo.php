@@ -101,7 +101,7 @@ function seo_llms(array $page, string $base, int $now): string
 /** Crawler-readable HTML of every live tile (also shown to visitors without JavaScript). */
 function seo_body(array $page, int $now): string
 {
-    $skip = ['url' => 1, 'image' => 1, 'images' => 1, 'color' => 1, 'icon' => 1, 'lat' => 1, 'lon' => 1, 'zoom' => 1, 'follow' => 1, 'view' => 1, 'f1follow' => 1, 'genre' => 1];
+    $skip = ['url' => 1, 'image' => 1, 'images' => 1, 'color' => 1, 'icon' => 1, 'lat' => 1, 'lon' => 1, 'zoom' => 1, 'follow' => 1, 'view' => 1, 'f1follow' => 1, 'genre' => 1, 'tz' => 1];
     $out = '';
     foreach (($page['tiles'] ?? []) as $tile) {
         if (!is_array($tile) || !seo_tile_live($tile, $now)) { continue; }
