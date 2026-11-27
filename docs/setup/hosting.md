@@ -48,7 +48,9 @@ location ~ ^/journal-([a-z0-9-]{1,100})$ {
     fastcgi_param QUERY_STRING article=$1;
     fastcgi_pass unix:/run/php/php8.5-fpm.sock;
 }
-location ~ ^/(profil|parcours|creations|passions)$ {
+# Universe pages: default and custom slugs (index.php answers 404 for unknown ones).
+# `location = /version` above or below wins over this regex.
+location ~ "^/([a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?)$" {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root/index.php;
     fastcgi_param QUERY_STRING section=$1;

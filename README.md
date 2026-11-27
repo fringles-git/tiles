@@ -46,7 +46,7 @@ Read [hosting and migration](docs/setup/hosting.md) for Apache/Nginx examples, H
 
 ## Portfolio and editor
 
-The original card sizes, case studies, piano, sports illustrations, QR sharing, vCard, languages, logos, maps and cached widgets are retained. Four optional universes (Humain, Pro, Créa, Lifestyle) filter the existing page without moving its tiles. The editor can assign a tile's universe and create a Markdown journal with autosaved drafts, explicit publication, reading time and delete/undo. Visitor responses exclude draft article content. JSON exports include the journal; imports preserve the current server revision to retain conflict protection.
+The original card sizes, case studies, piano, sports illustrations, QR sharing, vCard, languages, logos, maps and cached widgets are retained. Universes filter the page without moving its tiles. The four defaults (Profil, Parcours, Créations, Passions) can be renamed, recoloured, reordered, deleted or extended up to 12 in Design › Univers; each one gets its own URL (`/<slug>`), sitemap entry and crawler-readable HTML, and an unknown slug answers 404. The editor can assign a tile's universe and create a Markdown journal with autosaved drafts, explicit publication, reading time and delete/undo. Visitor responses exclude draft article content. JSON exports include the journal; imports preserve the current server revision to retain conflict protection.
 
 ## Bento blocks, motion and editor
 

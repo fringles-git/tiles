@@ -251,6 +251,8 @@ let hub=null;
  if(!p.hours||!Array.isArray(p.hours.days))p.hours={days:[0,0,0,0,0,0,0],from:'09:00',to:'18:00',note:''};
  if(p.showNav===undefined)p.showNav=true;
  if(p.cv===undefined)p.cv='';})();
+/* Custom universes travel with the page; the defaults apply when it has none. */
+if(window.TilesHub)window.TilesHub.setUniverses(S.universes);
 const DAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 const DAYS_LONG=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 const toMin=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1])*60+(+m[2]):null};
@@ -279,10 +281,10 @@ function api(action,body,isForm){
 function beacon(payload){try{const b=new Blob([JSON.stringify(payload)],{type:'application/json'});if(navigator.sendBeacon&&navigator.sendBeacon('api.php?action=track',b))return}catch(e){}try{fetch('api.php?action=track',{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'},keepalive:true})}catch(e){}}
 let saveT,saving=false,dirty=false;
 /* Undo/redo (editor only): snapshots of everything the editor changes except stats, revision and journal. */
-const snap=()=>JSON.stringify({sample:S.sample,profile:S.profile,theme:S.theme,tiles:S.tiles});
+const snap=()=>JSON.stringify({sample:S.sample,profile:S.profile,theme:S.theme,tiles:S.tiles,universes:S.universes,journalUniverses:(S.journal||[]).map(j=>[j.id,j.universe])});
 let hist=null,restoring=false;
 function syncHistory(){for(const [act,ok] of [['undo',hist?.canUndo()],['redo',hist?.canRedo()]]){const b=document.querySelector(`#bar [data-act="${act}"]`);if(b)b.disabled=!ok}}
-function restoreFrom(state,label){if(!state)return;const o=JSON.parse(state);S.sample=o.sample;S.profile=o.profile;S.theme=o.theme;S.tiles=o.tiles;if(ui.drawer)closeDrawer();ui.sel=null;restoring=true;try{render();save()}finally{restoring=false}syncHistory();toast(label)}
+function restoreFrom(state,label){if(!state)return;const o=JSON.parse(state);S.sample=o.sample;S.profile=o.profile;S.theme=o.theme;S.tiles=o.tiles;if(o.universes)S.universes=o.universes;else delete S.universes;for(const [id,u] of o.journalUniverses||[]){const j=(S.journal||[]).find(x=>x.id===id);if(j)j.universe=u}window.TilesHub?.setUniverses(S.universes);if(ui.drawer)closeDrawer();ui.sel=null;restoring=true;try{render();save()}finally{restoring=false}syncHistory();toast(label)}
 function undo(){restoreFrom(hist?.undo(),'Modification annulée')}
 function redo(){restoreFrom(hist?.redo(),'Modification rétablie')}
 function setSaveState(t,cls){const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}}
@@ -502,7 +504,8 @@ function openDesign(){
  <div class="fld"><span class="lb">Typeface</span><div class="sizes">${[['grotesk','Grotesk'],['editorial','Editorial'],['mono','Mono']].map(([k,l])=>`<button type="button" data-font="${k}" aria-pressed="${th.font===k}">${l}</button>`).join('')}</div></div>
  <div class="fld"><span class="lb">Profile position</span><div class="sizes">${[['side','Beside the grid'],['top','Above the grid']].map(([k,l])=>`<button type="button" data-layout="${k}" aria-pressed="${th.layout===k}">${l}</button>`).join('')}</div></div>
  <div class="fld"><label for="d-radius">Corner radius · <span id="rv">${th.radius}</span>px</label><input type="range" id="d-radius" min="6" max="36" value="${th.radius}"></div>
- <div class="fld"><label for="d-gap">Spacing · <span id="gv">${th.gap}</span>px</label><input type="range" id="d-gap" min="6" max="24" value="${th.gap}"></div>`,'design');
+ <div class="fld"><label for="d-gap">Spacing · <span id="gv">${th.gap}</span>px</label><input type="range" id="d-gap" min="6" max="24" value="${th.gap}"></div>
+ <div class="grp"><h4>Univers</h4><p class="hint">${Object.values(window.TilesHub?.universes||{}).map(u=>esc(u.label)).join(' · ')}</p><button type="button" class="btn" data-act="universes">Gérer les univers</button></div>`,'design');
 }
 function openExport(){
  openDrawer('Export & import',`<p class="muted" style="font-size:13px">This JSON is your whole page. The PHP version stores exactly this in <code>data/page.json</code>, so you can design here and drop it into your site.</p>
@@ -567,8 +570,8 @@ dbody.addEventListener('click',e=>{
  if(b.dataset.font){S.theme.font=b.dataset.font;$$('[data-font]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.layout){S.theme.layout=b.dataset.layout;$$('[data-layout]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.xact==='copy'){const ta=$('#x-out');copyText(ta.value,ta);return}
- if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});o.rev=S.rev;S=o;save();render();openExport();toast('Page imported')}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
- if(b.dataset.xact==='reset'){const old=S;S=seed();save();render();openExport();toast('Sample page restored',()=>{S=old;save();render()});return}
+ if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});o.rev=S.rev;S=o;window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Page imported')}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
+ if(b.dataset.xact==='reset'){const old=S;S=seed();window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Sample page restored',()=>{S=old;window.TilesHub?.setUniverses(S.universes);save();render()});return}
 });
 
 /* ---------- Tile operations ---------- */
@@ -689,6 +692,7 @@ function animate(update){if(window.TilesBento)window.TilesBento.transition(updat
 $('#explore-search')?.addEventListener('input',e=>setExplorer(e.target.value,ui.category));
 function handleAct(a){
  if(a==='journal')return hub?.manager();
+ if(a==='universes')return hub?.universeManager();
  if(a==='add')return openAdd();
  if(a==='undo')return undo();
  if(a==='redo')return redo();
@@ -713,7 +717,7 @@ document.addEventListener('click',e=>{
 
 if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
 if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer,()=>S.profile);
-if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,save,openDrawer,dbody,render:()=>animate(render),toast,visible,getQuery:()=>ui.query});
+if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,getDrawer:()=>ui.drawer,save,openDrawer,dbody,render:()=>animate(render),toast,visible,getQuery:()=>ui.query});
 if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
 if(!PUBLIC&&window.TilesEditor){hist=window.TilesEditor.history();hist.reset(snap());window.TilesEditor.touchReorder({grid,isEditing:()=>ui.mode==='edit',onDrop:reorder,onAnnounce:t=>toast(t)});}
 if(window.TilesBento)window.TilesBento.bind({grid,isPublic:()=>ui.mode!=='edit'});
