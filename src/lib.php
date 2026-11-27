@@ -232,6 +232,7 @@ function render_shell(string $title, string $description, array $boot, string $e
 <script src="assets/js/hub.js?v=<?= asset_v('js/hub.js') ?>"></script>
 <script src="assets/js/polish.js?v=<?= asset_v('js/polish.js') ?>"></script>
 <script src="assets/js/bento.js?v=<?= asset_v('js/bento.js') ?>"></script>
+<?php if (($boot['mode'] ?? '') === 'admin'): ?><script src="assets/js/editor.js?v=<?= asset_v('js/editor.js') ?>"></script><?php endif; ?>
 <script src="assets/js/app.js?v=<?= asset_v('js/app.js') ?>"></script>
 </body>
 </html>

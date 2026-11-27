@@ -278,8 +278,15 @@ function api(action,body,isForm){
 }
 function beacon(payload){try{const b=new Blob([JSON.stringify(payload)],{type:'application/json'});if(navigator.sendBeacon&&navigator.sendBeacon('api.php?action=track',b))return}catch(e){}try{fetch('api.php?action=track',{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'},keepalive:true})}catch(e){}}
 let saveT,saving=false,dirty=false;
+/* Undo/redo (editor only): snapshots of everything the editor changes except stats, revision and journal. */
+const snap=()=>JSON.stringify({sample:S.sample,profile:S.profile,theme:S.theme,tiles:S.tiles});
+let hist=null,restoring=false;
+function syncHistory(){for(const [act,ok] of [['undo',hist?.canUndo()],['redo',hist?.canRedo()]]){const b=document.querySelector(`#bar [data-act="${act}"]`);if(b)b.disabled=!ok}}
+function restoreFrom(state,label){if(!state)return;const o=JSON.parse(state);S.sample=o.sample;S.profile=o.profile;S.theme=o.theme;S.tiles=o.tiles;if(ui.drawer)closeDrawer();ui.sel=null;restoring=true;try{render();save()}finally{restoring=false}syncHistory();toast(label)}
+function undo(){restoreFrom(hist?.undo(),'Modification annulée')}
+function redo(){restoreFrom(hist?.redo(),'Modification rétablie')}
 function setSaveState(t,cls){const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}}
-function save(){if(PUBLIC)return;dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
+function save(){if(PUBLIC)return;if(hist&&!restoring){const f=document.activeElement;hist.record(snap(),f&&f.matches?.('#dbody input:not([type=checkbox]):not([type=radio]):not([type=range]),#dbody textarea')?f.id:'');syncHistory();}dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
 function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Saving…','busy');
  const page=Object.assign({},S);delete page.stats;
  api('save',{page,base:S.rev||0}).then(j=>{S.rev=j.rev;saving=false;setSaveState(dirty?'Unsaved changes':'Saved','ok');if(dirty)flush()})
@@ -429,6 +436,20 @@ function closeDrawer(){page.inert=false;$('#bar').inert=false;document.body.styl
 $('#scrim').addEventListener('click',closeDrawer);
 drawer.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const nodes=Array.from(drawer.querySelectorAll('button,input,textarea,select,a[href]')).filter(x=>!x.disabled&&x.getClientRects().length);const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.drawer)closeDrawer()});
+document.addEventListener('keydown',e=>{
+ if(PUBLIC||ui.mode!=='edit')return;
+ /* Native undo stays inside text fields. */
+ const typing=e.target.closest?.('input,textarea,select,[contenteditable]');
+ const k=e.key.toLowerCase();
+ if((e.ctrlKey||e.metaKey)&&!e.altKey&&!typing&&(k==='z'||k==='y')){e.preventDefault();if(k==='y'||e.shiftKey)redo();else undo();return}
+ /* Alt + arrows move the focused block; focus and an announcement follow it. */
+ const tile=e.target.closest?.('#grid > .tile');
+ if(tile&&e.target===tile&&e.altKey&&!e.ctrlKey&&!e.metaKey&&['ArrowLeft','ArrowUp','ArrowRight','ArrowDown'].includes(e.key)){
+  e.preventDefault();const id=tile.dataset.id;const dir=e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:1;const i=S.tiles.findIndex(t=>t.id===id);
+  if(i+dir<0||i+dir>=S.tiles.length){toast(dir<0?'Déjà en première position':'Déjà en dernière position');return}
+  moveTile(id,dir);const el=grid.querySelector(`[data-id="${CSS.escape(id)}"]`);el?.focus();el?.scrollIntoView({block:'nearest'});toast(`Position ${i+dir+1} sur ${S.tiles.length}`);
+ }
+});
 
 function fieldHTML(f,val,prefix){
  const id=`${prefix}-${f.k}`;
@@ -454,7 +475,7 @@ function openTile(id){
  <div class="row-btns"><button class="btn sm" type="button" data-tact="dup">${ic('copy',14)}Duplicate</button><button class="btn sm danger" type="button" data-tact="del">${ic('trash',14)}Delete</button></div>`,'tile');
 }
 function openAdd(){
- openDrawer('Add a block',CATS.map(c=>`<div class="cat"><h4>${c}</h4><div class="blocks">${Object.entries(T).filter(([,d])=>d.cat===c).map(([k,d])=>`<button class="blk" type="button" data-addtype="${k}"><b>${esc(d.label)}</b><small>${esc(d.hint)}</small></button>`).join('')}</div></div>`).join(''),'add');
+ openDrawer('Add a block',`<div class="fld add-find"><label for="add-find">Chercher un bloc</label><input id="add-find" type="search" placeholder="FAQ, photo, heure…" autocomplete="off"><small id="add-find-n" class="muted" role="status"></small></div>`+CATS.map(c=>`<div class="cat"><h4>${c}</h4><div class="blocks">${Object.entries(T).filter(([,d])=>d.cat===c).map(([k,d])=>`<button class="blk" type="button" data-addtype="${k}"><b>${esc(d.label)}</b><small>${esc(d.hint)}</small></button>`).join('')}</div></div>`).join(''),'add');
 }
 function openProfile(){
  const p=S.profile;
@@ -493,6 +514,9 @@ function readImage(file,max=1600){const fd=new FormData();fd.append('file',file)
 function readImageLocal(file,max=1200){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const img=new Image();img.onload=()=>{const s=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.84))};img.onerror=rej;img.src=r.result};r.readAsDataURL(file)})}
 dbody.addEventListener('input',async e=>{
  const el=e.target;
+ if(el.id==='add-find'){const n=v=>String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),q=n(el.value.trim());let shown=0;
+  $$('.blk',dbody).forEach(b=>{const d=T[b.dataset.addtype];const hit=!q||n(d.label+' '+d.hint+' '+b.dataset.addtype).includes(q);b.hidden=!hit;if(hit)shown++});
+  $$('.cat',dbody).forEach(c=>{c.hidden=!c.querySelector('.blk:not([hidden])')});$('#add-find-n').textContent=q?(shown?shown+' bloc'+(shown>1?'s':''):'Aucun bloc ne correspond'):'';return}
  const tf=el.closest('#tile-form');
  if(tf&&el.dataset.k){const t=byId(tf.dataset.id);t.data[el.dataset.k]=el.value;renderGrid();save();return}
  if(el.dataset.opt){const t=byId(ui.sel);if(!t)return;t[el.dataset.opt]=el.type==='checkbox'?el.checked:el.value;renderGrid();save();return}
@@ -554,6 +578,7 @@ function addTile(type){
 }
 function dupTile(id){const i=S.tiles.findIndex(t=>t.id===id);if(i<0)return;const c=JSON.parse(JSON.stringify(S.tiles[i]));c.id=uid();S.tiles.splice(i+1,0,c);save();openTile(c.id);toast('Block duplicated')}
 function delTile(id){const i=S.tiles.findIndex(t=>t.id===id);if(i<0)return;const [t]=S.tiles.splice(i,1);closeDrawer();ui.sel=null;renderGrid();save();toast('Block deleted',()=>{S.tiles.splice(i,0,t);renderGrid();save()})}
+function reorder(fromId,toId,after){const from=S.tiles.findIndex(x=>x.id===fromId);if(from<0||!byId(toId))return;const [m]=S.tiles.splice(from,1);let to=S.tiles.findIndex(x=>x.id===toId);if(after)to++;S.tiles.splice(to,0,m);renderGrid();save();toast(`Position ${to+1} sur ${S.tiles.length}`,undo)}
 function moveTile(id,dir){const i=S.tiles.findIndex(t=>t.id===id);const j=i+dir;if(i<0||j<0||j>=S.tiles.length)return;[S.tiles[i],S.tiles[j]]=[S.tiles[j],S.tiles[i]];renderGrid();save();const el=grid.querySelector(`[data-id="${id}"] [data-tb="${dir<0?'left':'right'}"]`);if(el)el.focus()}
 
 function copyText(text,fallbackEl){
@@ -662,6 +687,8 @@ $('#explore-search')?.addEventListener('input',e=>setExplorer(e.target.value,ui.
 function handleAct(a){
  if(a==='journal')return hub?.manager();
  if(a==='add')return openAdd();
+ if(a==='undo')return undo();
+ if(a==='redo')return redo();
  if(a==='connections')return openConnections();
  if(a==='design')return openDesign();
  if(a==='export')return openExport();
@@ -685,8 +712,9 @@ if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
 if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer,()=>S.profile);
 if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,save,openDrawer,dbody,render:()=>animate(render),toast,visible,getQuery:()=>ui.query});
 if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
+if(!PUBLIC&&window.TilesEditor){hist=window.TilesEditor.history();hist.reset(snap());window.TilesEditor.touchReorder({grid,isEditing:()=>ui.mode==='edit',onDrop:reorder,onAnnounce:t=>toast(t)});}
 if(window.TilesBento)window.TilesBento.bind({grid,isPublic:()=>ui.mode!=='edit'});
-paintIcons();render();
+paintIcons();render();syncHistory();
 /* After the first render: body classes and tiles exist only now. */
 if(window.TilesBento)window.TilesBento.intro(grid);
 if(PUBLIC)beacon({type:'view'});
