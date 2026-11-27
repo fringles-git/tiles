@@ -48,6 +48,10 @@ Read [hosting and migration](docs/setup/hosting.md) for Apache/Nginx examples, H
 
 The original card sizes, case studies, piano, sports illustrations, QR sharing, vCard, languages, logos, maps and cached widgets are retained. Four optional universes (Humain, Pro, Créa, Lifestyle) filter the existing page without moving its tiles. The editor can assign a tile's universe and create a Markdown journal with autosaved drafts, explicit publication, reading time and delete/undo. Visitor responses exclude draft article content. JSON exports include the journal; imports preserve the current server revision to retain conflict protection.
 
+## Bento blocks, motion and editor
+
+FAQ, progress bars, process steps and local time blocks; big numbers count up when they appear. Filters and sections animate with View Transitions, precise pointers get a soft spotlight, and every motion respects `prefers-reduced-motion`. The editor has undo/redo (Ctrl/Cmd+Z, Ctrl+Shift+Z), Alt + arrow keys and long-press touch reordering, and a block search. Stats add cookieless daily unique visitors, traffic sources (in-app browsers, `utm_source`, referrer host) and devices. See [the Bento benchmark](docs/development/bento-benchmark.md).
+
 ## Leap links
 
 Every tile with a URL has a tracked link `/go/<tile-id>` (shown in the tile editor). It counts the visit in `data/stats.json` (`clicks` and `go`), then redirects with a 302 to the tile's stored URL. The destination is never read from the request, hidden or out-of-schedule tiles return 404, only `http(s)` URLs are used, and HEAD requests, prefetches and link-preview bots are not counted. `/go/` is disallowed in `robots.txt`.
