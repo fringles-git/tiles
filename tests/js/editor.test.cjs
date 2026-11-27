@@ -8,10 +8,16 @@ test('undo/redo walks back and forth through recorded states',()=>{
  assert.equal(h.undo(),'b');assert.equal(h.undo(),'a');assert.equal(h.undo(),null);assert.equal(h.canUndo(),false);
  assert.equal(h.redo(),'b');assert.equal(h.redo(),'c');assert.equal(h.redo(),null);
 });
-test('a typing burst becomes one undo step',()=>{
+test('a typing burst in one field becomes one undo step',()=>{
  const now=clock(),h=ed.history({now,merge:1000});h.reset('');
- now.add(5000);h.record('H');for(const s of ['He','Hel','Hell','Hello']){now.add(200);h.record(s);}
+ now.add(5000);h.record('H','f-title');for(const s of ['He','Hel','Hell','Hello']){now.add(200);h.record(s,'f-title');}
  assert.deepEqual({...h.size()},{past:1,future:0});assert.equal(h.undo(),'');
+});
+test('quick discrete actions or another field keep their own undo steps',()=>{
+ const now=clock(),h=ed.history({now,merge:1000});h.reset('a');
+ now.add(100);h.record('resized');now.add(100);h.record('moved');
+ now.add(100);h.record('t1','f-title');now.add(100);h.record('d1','f-desc');
+ assert.equal(h.size().past,4);assert.equal(h.undo(),'t1');assert.equal(h.undo(),'moved');assert.equal(h.undo(),'resized');
 });
 test('a new change after undo drops the redo branch; identical states are ignored',()=>{
  const now=clock(),h=ed.history({now});h.reset('a');now.add(2000);h.record('b');h.undo();

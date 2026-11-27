@@ -4,20 +4,22 @@
 (function(){
 'use strict';
 
-/* Snapshots are strings so equality is cheap and nothing aliases live state. */
+/* Snapshots are strings so equality is cheap and nothing aliases live state.
+ * Only consecutive changes with the same non-empty merge key (one text field) within `merge` ms
+ * become one step; discrete actions (resize, move, delete) always get their own step. */
 function history({limit=80,merge=1000,now=()=>Date.now()}={}){
- let past=[],future=[],current=null,last=0;
+ let past=[],future=[],current=null,last=0,lastKey='';
  return {
-  reset(state){current=state;past=[];future=[];last=0;},
+  reset(state){current=state;past=[];future=[];last=0;lastKey='';},
   /* Returns true when a new undo step was created. */
-  record(state){
+  record(state,key=''){
    if(state===current)return false;
-   if(current!==null&&now()-last<merge&&past.length){current=state;future=[];last=now();return false;}
+   if(key&&key===lastKey&&now()-last<merge&&past.length){current=state;future=[];last=now();return false;}
    if(current!==null){past.push(current);if(past.length>limit)past.shift();}
-   current=state;future=[];last=now();return current!==null&&past.length>0;
+   current=state;future=[];last=now();lastKey=key;return past.length>0;
   },
-  undo(){if(!past.length)return null;future.push(current);current=past.pop();last=0;return current;},
-  redo(){if(!future.length)return null;past.push(current);current=future.pop();last=0;return current;},
+  undo(){if(!past.length)return null;future.push(current);current=past.pop();last=0;lastKey='';return current;},
+  redo(){if(!future.length)return null;past.push(current);current=future.pop();last=0;lastKey='';return current;},
   canUndo:()=>past.length>0,
   canRedo:()=>future.length>0,
   size:()=>({past:past.length,future:future.length})
@@ -33,10 +35,10 @@ function touchReorder({grid,isEditing,onDrop,onAnnounce=()=>{},delay=420,slop=8}
  let timer=0,start=null,drag=null,frame=0,suppressClick=false;
  const reducedMotion=()=>typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
  const clearMarkers=()=>grid.querySelectorAll('.tile.drop').forEach(t=>t.classList.remove('drop'));
- function cancelPress(){clearTimeout(timer);timer=0;start=null;}
+ function cancelPress(){clearTimeout(timer);timer=0;if(start)start.tile.draggable=start.draggable;start=null;}
  function end(commit){
   if(!drag)return;cancelAnimationFrame(frame);frame=0;
-  const {tile,target,after,id}=drag;drag=null;
+  const {tile,target,after,id,draggable}=drag;drag=null;tile.draggable=draggable;
   tile.classList.remove('lifting');tile.style.translate='';tile.style.removeProperty('--lift-scroll');
   document.documentElement.classList.remove('is-reordering');clearMarkers();
   if(commit&&target&&target.dataset.id!==id){onDrop(id,target.dataset.id,after);}
@@ -62,11 +64,11 @@ function touchReorder({grid,isEditing,onDrop,onAnnounce=()=>{},delay=420,slop=8}
  grid.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'||!isEditing()||e.button!==0)return;
   const tile=e.target.closest('.tile');if(!tile||e.target.closest('.tb,button,a,input,textarea,select'))return;
-  tile.draggable=false;/* Android Chrome would otherwise start a native drag on long press. */
-  cancelPress();start={x:e.clientX,y:e.clientY,id:e.pointerId,tile};
+  cancelPress();start={x:e.clientX,y:e.clientY,id:e.pointerId,tile,draggable:tile.draggable};
+  tile.draggable=false;/* Android Chrome would otherwise start a native drag on long press; restored on release. */
   timer=setTimeout(()=>{
    if(!start)return;
-   drag={tile:start.tile,id:start.tile.dataset.id,pointer:start.id,x0:start.x,y0:start.y,x:start.x,y:start.y,s0:scrollY,target:null,after:false};start=null;
+   drag={draggable:start.draggable,tile:start.tile,id:start.tile.dataset.id,pointer:start.id,x0:start.x,y0:start.y,x:start.x,y:start.y,s0:scrollY,target:null,after:false};start=null;
    drag.tile.classList.add('lifting');document.documentElement.classList.add('is-reordering');
    if(navigator.vibrate&&!reducedMotion())navigator.vibrate(12);
    onAnnounce('Bloc saisi. Glisser puis relâcher pour le déposer.');

@@ -286,7 +286,7 @@ function restoreFrom(state,label){if(!state)return;const o=JSON.parse(state);S.s
 function undo(){restoreFrom(hist?.undo(),'Modification annulée')}
 function redo(){restoreFrom(hist?.redo(),'Modification rétablie')}
 function setSaveState(t,cls){const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}}
-function save(){if(PUBLIC)return;if(hist&&!restoring){hist.record(snap());syncHistory();}dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
+function save(){if(PUBLIC)return;if(hist&&!restoring){const f=document.activeElement;hist.record(snap(),f&&f.matches?.('#dbody input:not([type=checkbox]):not([type=radio]):not([type=range]),#dbody textarea')?f.id:'');syncHistory();}dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
 function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Saving…','busy');
  const page=Object.assign({},S);delete page.stats;
  api('save',{page,base:S.rev||0}).then(j=>{S.rev=j.rev;saving=false;setSaveState(dirty?'Unsaved changes':'Saved','ok');if(dirty)flush()})
@@ -715,6 +715,8 @@ if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
 if(!PUBLIC&&window.TilesEditor){hist=window.TilesEditor.history();hist.reset(snap());window.TilesEditor.touchReorder({grid,isEditing:()=>ui.mode==='edit',onDrop:reorder,onAnnounce:t=>toast(t)});}
 if(window.TilesBento)window.TilesBento.bind({grid,isPublic:()=>ui.mode!=='edit'});
 paintIcons();render();syncHistory();
+/* After the first render: body classes and tiles exist only now. */
+if(window.TilesBento)window.TilesBento.intro(grid);
 if(PUBLIC)beacon({type:'view'});
 })();
 
