@@ -75,3 +75,16 @@
   .tiles-intro .grid>.tile{animation:bento-rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 35ms)}
 }
 @keyframes bento-rise{from{opacity:0;translate:0 12px}}
+
+/* ---------- Editor ---------- */
+/* Long-press reorder (touch): the lifted tile follows the finger above its neighbours. */
+.mode-edit .tile{-webkit-touch-callout:none}
+.tile.lifting{position:relative;z-index:20;pointer-events:none;scale:1.03;box-shadow:0 24px 48px -18px rgba(0,0,0,.45);opacity:.96}
+.is-reordering,.is-reordering *{-webkit-user-select:none;user-select:none}
+@media (prefers-reduced-motion:no-preference){.tile.lifting{transition:scale .15s,box-shadow .15s}}
+/* Keyboard focus on a block in the editor, also a hint for Alt + arrows. */
+.mode-edit .tile:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.add-find{margin-bottom:4px}
+.add-find input{width:100%}
+.blk[hidden],.cat[hidden]{display:none}
+#bar [data-act="undo"]:disabled,#bar [data-act="redo"]:disabled{opacity:.4;cursor:default}
