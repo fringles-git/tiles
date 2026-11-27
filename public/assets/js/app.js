@@ -286,7 +286,7 @@ function restoreFrom(state,label){if(!state)return;const o=JSON.parse(state);S.s
 function undo(){restoreFrom(hist?.undo(),'Modification annulée')}
 function redo(){restoreFrom(hist?.redo(),'Modification rétablie')}
 function setSaveState(t,cls){const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}}
-function save(){if(PUBLIC)return;if(hist&&!restoring){hist.record(snap());syncHistory();}dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
+function save(){if(PUBLIC)return;if(hist&&!restoring){const f=document.activeElement;hist.record(snap(),f&&f.matches?.('#dbody input:not([type=checkbox]):not([type=radio]):not([type=range]),#dbody textarea')?f.id:'');syncHistory();}dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
 function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Saving…','busy');
  const page=Object.assign({},S);delete page.stats;
  api('save',{page,base:S.rev||0}).then(j=>{S.rev=j.rev;saving=false;setSaveState(dirty?'Unsaved changes':'Saved','ok');if(dirty)flush()})
@@ -399,7 +399,7 @@ function statsHTML(){
  <svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Vues par jour, ${n} derniers jours"><line class="gd" x1="0" x2="${W}" y1="${H-14}" y2="${H-14}"/><path class="ar" d="${area}"/><path class="ln" d="${path}" vector-effect="non-scaling-stroke"/><circle class="dt" cx="${last[0]}" cy="${last[1]}" r="4" vector-effect="non-scaling-stroke"/></svg>
  ${sum.exact?'':'<p class="hint">Clics par jour enregistrés à partir de maintenant : les clics ci-dessous sont les totaux depuis le début.</p>'}
  <div class="stats-cols"><div><span class="eyebrow">Par canal</span><div class="tops">${sum.channels.length?sum.channels.map(([c,v])=>`<div class="top"><span>${esc(chName(c))}</span><span class="barx"><i style="width:${(v/cmax*100).toFixed(1)}%;background:${chColor(c)}"></i></span><b>${fr(v)}</b></div>`).join(''):'<p class="muted">Aucun clic sur la période.</p>'}</div></div>
- <div><span class="eyebrow">Par lien</span><table class="stats-table"><thead><tr><th scope="col">Bloc</th><th scope="col">Clics</th><th scope="col">Part</th><th scope="col" title="Clics sur ce bloc divisés par les vues de la page">Taux</th><th scope="col" title="Visites passées par le lien court /go/${sum.exact?' sur la période':', depuis le début'}">/go/</th></tr></thead><tbody>${sum.rows.map(r=>`<tr><td>${esc(rowName(r))}</td><td>${fr(r.clicks)}</td><td>${r.share}%</td><td>${sum.views?Math.round(r.clicks/sum.views*1000)/10+'%':'–'}</td><td>${r.go?fr(r.go):'–'}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">Aucun clic sur la période.</td></tr>'}</tbody></table></div></div>
+ <div><span class="eyebrow">Par lien</span><table class="stats-table"><thead><tr><th scope="col">Bloc</th><th scope="col">Clics</th><th scope="col">Part</th><th scope="col" title="Clics sur ce bloc divisés par les vues de la page">Taux</th><th scope="col" title="Visites passées par le lien court /go/${sum.exact?' sur la période':', depuis le début'}">/go/</th></tr></thead><tbody>${sum.rows.map(r=>`<tr><td>${esc(rowName(r))}</td><td>${fr(r.clicks)}</td><td>${r.share}%</td><td>${sum.exact&&sum.views?Math.round(r.clicks/sum.views*1000)/10+'%':'–'}</td><td>${r.go?fr(r.go):'–'}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">Aucun clic sur la période.</td></tr>'}</tbody></table></div></div>
  ${aud.tracked?`<div class="stats-cols"><div><span class="eyebrow">Sources des visites</span><div class="tops">${bars(aud.sources,k=>names.SOURCE_NAMES[k]||k,k=>(PLAT[k]||[])[1]||'var(--accent)')}</div></div><div><span class="eyebrow">Appareils</span><div class="tops">${bars(aud.devices,k=>names.DEVICE_NAMES[k]||k,()=>'var(--accent)')}</div></div></div>`:'<p class="hint">Sources, appareils et visiteurs uniques : enregistrés à partir des prochaines visites.</p>'}
  ${st.leads.length?`<div><span class="eyebrow">Inscriptions</span><div class="leads" style="margin-top:6px">${st.leads.slice(-12).map(l=>`<span>${esc(l)}</span>`).join('')}</div></div>`:''}
  <small class="muted">Visites et clics de la page publique, enregistrés sur ton serveur, sans cookie. Ajoute <code>?utm_source=instagram</code> à ton lien de bio pour attribuer les visites sans référent.</small></section>`;
@@ -718,6 +718,8 @@ if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
 if(!PUBLIC&&window.TilesEditor){hist=window.TilesEditor.history();hist.reset(snap());window.TilesEditor.touchReorder({grid,isEditing:()=>ui.mode==='edit',onDrop:reorder,onAnnounce:t=>toast(t)});}
 if(window.TilesBento)window.TilesBento.bind({grid,isPublic:()=>ui.mode!=='edit'});
 paintIcons();render();syncHistory();
+/* After the first render: body classes and tiles exist only now. */
+if(window.TilesBento)window.TilesBento.intro(grid);
 if(PUBLIC){let utm='';try{utm=new URLSearchParams(location.search).get('utm_source')||''}catch(e){}beacon({type:'view',ref:document.referrer||'',utm:utm.slice(0,64)})}
 })();
 

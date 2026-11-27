@@ -74,7 +74,7 @@ function stats_source(string $referrer, string $ua, string $utm = '', string $ow
         'x' => ['x.com', 'twitter.com', 't.co'], 'linkedin' => ['linkedin.com', 'lnkd.in'], 'youtube' => ['youtube.com', 'youtu.be'],
         'snapchat' => ['snapchat.com'], 'pinterest' => ['pinterest.com', 'pinterest.fr', 'pin.it'], 'threads' => ['threads.net', 'threads.com'],
         'whatsapp' => ['whatsapp.com', 'wa.me'], 'telegram' => ['telegram.org', 't.me'], 'github' => ['github.com'],
-        'search' => ['google.', 'bing.com', 'duckduckgo.com', 'qwant.com', 'ecosia.org', 'search.yahoo.com', 'search.brave.com', 'yandex.'],
+        'search' => ['bing.com', 'duckduckgo.com', 'qwant.com', 'ecosia.org', 'search.yahoo.com', 'search.brave.com'],
         'ai' => ['chatgpt.com', 'chat.openai.com', 'perplexity.ai', 'claude.ai', 'gemini.google.com', 'copilot.microsoft.com', 'mistral.ai'],
         'email' => ['mail.google.com', 'outlook.live.com', 'outlook.office.com', 'mail.yahoo.com', 'mail.proton.me']];
     $match = static function (string $host) use ($hosts): ?string {
@@ -83,10 +83,11 @@ function stats_source(string $referrer, string $ua, string $utm = '', string $ow
         // Specific hosts (gemini.google.com, mail.google.com) win over the generic search rule.
         foreach (['ai', 'email'] as $first) { foreach ($hosts[$first] as $h) { if ($host === $h || str_ends_with($host, '.' . $h)) { return $first; } } }
         foreach ($hosts as $key => $list) {
-            foreach ($list as $h) {
-                if (str_ends_with($h, '.') ? (str_starts_with($host, $h) || str_contains($host, '.' . $h)) : ($host === $h || str_ends_with($host, '.' . $h))) { return $key; }
-            }
+            foreach ($list as $h) { if ($host === $h || str_ends_with($host, '.' . $h)) { return $key; } }
         }
+        // Google and Yandex run one domain per country: the brand label must be followed only by a public suffix
+        // (google.fr, google.co.uk, google.com.br), so news.google.example.org stays "other".
+        if (preg_match('/(?:\A|\.)(?:google|yandex)\.(?:com|[a-z]{2}|co\.[a-z]{2}|com\.[a-z]{2})\z/', $host)) { return 'search'; }
         return null;
     };
     $utm = strtolower(trim($utm));
