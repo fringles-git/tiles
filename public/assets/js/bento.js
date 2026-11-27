@@ -77,6 +77,32 @@ function enhance(T,F){
   render:d=>{const c=clockParts(d);return `<span class="eyebrow">Heure locale</span><span class="big clock-time" data-clock="${esc(c.tz)}"><time>${esc(c.time)}</time></span><span class="bottom"><b>${esc(d.place)}</b> <small class="muted">${esc(c.offset)}</small><small class="muted clock-rel" data-clock-rel>${esc(c.relative)}</small></span><span class="clock-sky ${c.day?'day':'night'}" aria-hidden="true"></span>`}};
 }
 
+/* ---------- Motion: view transitions between filters, pointer spotlight ---------- */
+let running=null;
+const tileName=id=>'tile-'+String(id).replace(/[^A-Za-z0-9_-]/g,'');
+function nameTiles(grid,on){for(const el of grid.children){const id=el.dataset&&el.dataset.id;if(!id)continue;el.style.viewTransitionName=on?tileName(id):'';el.style.viewTransitionClass=on?'tile':'';}}
+/* Animate a grid re-render (filter, search, section). Falls back to an instant update when the API,
+ * the grid or the motion preference says no, in the editor, or while another transition runs. */
+function transition(update){
+ const grid=document.getElementById('grid');
+ if(running||!grid||typeof document.startViewTransition!=='function'||reduced()||document.body.classList.contains('mode-edit')){update();return;}
+ nameTiles(grid,true);
+ try{running=document.startViewTransition(()=>{update();nameTiles(grid,true);});}catch{running=null;nameTiles(grid,false);update();return;}
+ running.finished.catch(()=>{}).finally(()=>{nameTiles(grid,false);running=null;});
+}
+/* Soft light under the pointer: precise pointers with hover only; touch keeps the press feedback. */
+function spotlight(grid){
+ if(typeof matchMedia!=='function'||!matchMedia('(hover: hover) and (pointer: fine)').matches)return;
+ let frame=0,last=null;
+ grid.addEventListener('pointermove',e=>{last=e;if(frame)return;frame=requestAnimationFrame(()=>{frame=0;const t=last.target.closest&&last.target.closest('.tile');if(!t)return;const r=t.getBoundingClientRect();t.style.setProperty('--mx',Math.round(last.clientX-r.left)+'px');t.style.setProperty('--my',Math.round(last.clientY-r.top)+'px');});},{passive:true});
+}
+/* First paint only: tiles rise in order, capped so the last ones never wait long. */
+function intro(grid){
+ if(reduced()||!document.body.classList.contains('is-public'))return;
+ [...grid.children].forEach((el,i)=>el.style.setProperty('--i',Math.min(i,12)));
+ document.body.classList.add('tiles-intro');setTimeout(()=>document.body.classList.remove('tiles-intro'),1400);
+}
+
 /* ---------- Runtime: clocks and figures, public view only ---------- */
 let clockTimer=0,figures=null;
 function tickClocks(root=document){
@@ -91,9 +117,10 @@ function observeFigures(grid,isPublic){
 }
 function bind({grid,isPublic}){
  observeFigures(grid,isPublic);
+ spotlight(grid);
  const start=()=>{clearInterval(clockTimer);clockTimer=0;if(document.visibilityState==='visible'){tickClocks();clockTimer=setInterval(tickClocks,20000)}};
  document.addEventListener('visibilitychange',start);start();
 }
 
-window.TilesBento={enhance,bind,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
+window.TilesBento={enhance,bind,intro,transition,tileName,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
 })();
