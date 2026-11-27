@@ -169,7 +169,7 @@ function stats_for_editor(): array
 {
     require_once __DIR__ . '/stats.php';
     $st = read_json('stats.json', []);
-    $window = stats_window($st, time(), 30);
+    $window = stats_window($st, time(), 30) + stats_audience_window($st, time(), 30);
     $leads = array_map(fn($l) => (string) ($l['email'] ?? ''), read_json('leads.json', []));
     return [
         'sample' => false,
@@ -177,6 +177,9 @@ function stats_for_editor(): array
         'days' => $window['days'],
         'clickDays' => $window['clickDays'],
         'goDays' => $window['goDays'],
+        'uniqDays' => $window['uniqDays'],
+        'srcDays' => $window['srcDays'],
+        'devDays' => $window['devDays'],
         'clicks' => (object) ($st['clicks'] ?? []),
         'go' => (object) ($st['go'] ?? []),
         'leads' => array_values($leads),

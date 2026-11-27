@@ -26,3 +26,10 @@ test('drop lands after a tile past its middle or in its lower quarter',()=>{
  const r={left:0,top:0,width:100,height:100};
  assert.equal(ed.dropAfter(r,40,40),false);assert.equal(ed.dropAfter(r,60,10),true);assert.equal(ed.dropAfter(r,10,80),true);
 });
+test('audience sums the period, sorts buckets and says when nothing is tracked yet',()=>{
+ const st={uniqDays:[9,1,2],srcDays:[{x:9},{instagram:1},{instagram:2,search:1}],devDays:[{},{mobile:1},{mobile:2,desktop:1}]};
+ const a=ed.audience(st,2);assert.equal(a.tracked,true);assert.equal(a.uniq,3);
+ assert.deepEqual(JSON.parse(JSON.stringify(a.sources)),[['instagram',3],['search',1]]);assert.deepEqual(JSON.parse(JSON.stringify(a.devices)),[['mobile',3],['desktop',1]]);
+ assert.equal(ed.audience({uniqDays:null},7).tracked,false);assert.equal(ed.audience({},7).tracked,false);
+ for(const k of ['search','direct','other','ai','email'])assert.ok(ed.SOURCE_NAMES[k]);
+});
