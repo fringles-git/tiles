@@ -7,11 +7,11 @@ Options -Indexes
   RewriteRule ^(index|admin|api|widgets|media)\.php$ public/$1.php [L,QSA]
   RewriteRule ^uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))$ public/media.php?file=$1 [L,QSA,NC]
   RewriteRule ^go/([a-z0-9-]{1,24})/?$ public/go.php?id=$1 [L,QSA]
-  RewriteRule ^(profil|parcours|creations|passions)$ public/index.php?section=$1 [L,QSA]
   RewriteRule ^journal-([a-z0-9-]{1,100})$ public/index.php?article=$1 [L,QSA]
   RewriteRule ^assets/(.+)$ public/assets/$1 [L]
   RewriteRule ^(robots\.txt|sitemap\.xml|llms\.txt)$ public/seo.php?f=$1 [L,QSA]
   RewriteRule ^version$ public/version.php [L]
+  RewriteRule ^([a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?)$ public/index.php?section=$1 [L,QSA]
   # Permit internal rewrites into public/; its own rules apply afterwards.
   RewriteRule ^public/(?:index|admin|api|widgets|media)\.php$ - [L]
   RewriteRule ^public/go\.php$ - [L]

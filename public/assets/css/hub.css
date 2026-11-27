@@ -14,3 +14,11 @@
 .uni-head p{margin:6px 0 0;max-width:60ch;color:var(--muted);font-size:15px;line-height:1.45}
 /* Les onglets remplacent la navigation « Sur cette page » en lecture publique. */
 .mode-preview .prof .jump,.mode-preview .jumpbar{display:none!important}
+/* Universes manager (Design drawer). */
+.uni-list{display:flex;flex-direction:column;gap:12px;margin:12px 0}
+.uni-row{border:1px solid var(--line);border-radius:calc(var(--r,24px) / 2);padding:12px;margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.uni-row legend{font-weight:700;padding:0 4px}
+.uni-row .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.uni-row .row small{flex:1;min-width:120px}
+.uni-msg{margin:0;color:var(--danger,#D6363F);font-size:13px;font-weight:600}
+.uni-msg:empty{display:none}

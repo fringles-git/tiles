@@ -30,3 +30,37 @@ test('journal slugs and Markdown are identical in PHP and JS',()=>{
  assert.deepEqual(slugs,Array.from(h.withSlugs(journal),j=>j.slug));assert.equal(md,h.markdown(journal[0].content));
  assert.equal(h.rootPath('/journal-abc'),'/');assert.equal(h.rootPath('/sub/parcours'),'/sub/');assert.equal(h.sectionHref('/journal-abc','pro'),'/parcours');
 });
+test('custom universes: validation is identical in PHP and JS',()=>{
+ const {spawnSync}=require('node:child_process');
+ const ok={key:'engage',slug:'engagement',label:'Engagement',accent:'#123456',question:'TBD'};
+ const cases=[[ok],[{...ok,question:undefined,accent:undefined}],[],[{...ok,key:'Bad'}],[{...ok,slug:'admin'}],[{...ok,slug:'journal-x'}],[{...ok,slug:'-x'}],[{...ok,label:'  '}],[{...ok,label:'x'.repeat(41)}],[{...ok,accent:'red'}],[ok,{...ok,key:'b'}],[ok,{...ok,slug:'other'}],Array.from({length:13},(_,i)=>({...ok,key:'k'+i,slug:'s'+i})),Array.from({length:12},(_,i)=>({...ok,key:'k'+i,slug:'s'+i}))];
+ const js=cases.map(c=>h.validUniverses(JSON.parse(JSON.stringify(c))));
+ assert.deepEqual(js,[true,true,false,false,false,false,false,false,false,false,false,false,false,true]);
+ const php=spawnSync(process.env.PHP_BINARY||'php',['-r','require "src/sections.php";foreach(json_decode(stream_get_contents(STDIN),true) as $c){echo json_encode(valid_universes($c)),"\\n";}'],{cwd:root,input:JSON.stringify(cases),encoding:'utf8'});
+ if(php.error)return;assert.equal(php.status,0,php.stderr);assert.deepEqual(php.stdout.trim().split('\n').map(JSON.parse),js);
+});
+test('custom universes: same section for every tile in PHP and JS, deleted defaults fall back to the first universe',()=>{
+ const {spawnSync}=require('node:child_process');
+ const list=[{key:'pro',slug:'parcours',label:'Parcours'},{key:'engage',slug:'engagement',label:'Engagement'},{key:'humain',slug:'profil',label:'Profil'}];
+ const tiles=[{id:'a',type:'project',data:{}},{id:'b',type:'sport',data:{}},{id:'c',type:'link',universe:'engage',data:{}},{id:'d',type:'social',data:{}},{id:'s',type:'section',data:{}},{id:'e',type:'instrument',data:{}},{id:'f',type:'clock',data:{}},{id:'wojpaqd',type:'link',data:{}}];
+ try{
+  h.setUniverses(list);
+  assert.deepEqual(tiles.map(t=>h.universe(t)),['pro','pro','engage','humain','pro','pro','humain','pro']);
+  assert.equal(h.fromLocation('https://x.fr/engagement'),'engage');assert.equal(h.fromLocation('https://x.fr/passions'),'all');
+  const php=spawnSync(process.env.PHP_BINARY||'php',['-r','require "src/sections.php";$in=json_decode(stream_get_contents(STDIN),true);$k=array_column(tiles_universes(["universes"=>$in[0]]),"key");echo json_encode(array_map(fn($t)=>tile_universe($t,$k),$in[1])),"\\n";foreach($k as $key){echo json_encode(array_column(section_tiles($in[1],$key,$k),"id")),"\\n";}echo json_encode(section_by_slug("engagement",["universes"=>$in[0]])["key"]),"\\n",json_encode(section_by_slug("passions",["universes"=>$in[0]]));'],{cwd:root,input:JSON.stringify([list,tiles]),encoding:'utf8'});
+  if(php.error)return;assert.equal(php.status,0,php.stderr);
+  const [kinds,...rest]=php.stdout.trim().split('\n').map(JSON.parse);
+  assert.deepEqual(kinds,tiles.map(t=>h.universe(t)));
+  list.forEach((u,i)=>assert.deepEqual(rest[i],Array.from(h.filter(tiles,u.key),t=>t.id)));
+  assert.equal(rest[3],'engage');assert.equal(rest[4],null);
+ }finally{h.setUniverses(h.DEFAULTS);}
+ assert.deepEqual(Object.keys(h.universes),['humain','pro','crea','lifestyle']);
+});
+test('custom universes: page validation checks every assignment against the page list',()=>{
+ const base={profile:{},tiles:[{id:'a',type:'link',universe:'engage',data:{}}],universes:[{key:'engage',slug:'engagement',label:'Engagement'}]};
+ assert.equal(h.validPage(base),true);
+ assert.equal(h.validPage({...base,universes:undefined}),false,'custom key without the list');
+ assert.equal(h.validPage({...base,tiles:[{id:'a',type:'link',universe:'pro',data:{}}]}),false,'default key removed from the list');
+ assert.equal(h.validPage({...base,journal:[{id:'j',title:'t',excerpt:'',content:'c',date:'2026-11-27',universe:'engage',published:false}]}),true);
+ assert.equal(h.validPage({...base,universes:[{key:'engage',slug:'api',label:'X'}]}),false,'reserved slug');
+});

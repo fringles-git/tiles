@@ -9,13 +9,13 @@ if (preg_match('#\A/uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))\z#i', $
 if (preg_match('#\A/go/([a-z0-9-]{1,24})/?\z#', $path, $m)) {
     $_GET['id'] = $m[1]; require $public . '/go.php'; return true;
 }
-if (preg_match('#\A/(profil|parcours|creations|passions)\z#', $path, $m)) {
-    $_GET['section'] = $m[1]; $_SERVER['SCRIPT_NAME'] = '/index.php'; require $public . '/index.php'; return true;
-}
 if (preg_match('#\A/journal-([a-z0-9-]{1,100})\z#', $path, $m)) {
     $_GET['article'] = $m[1]; $_SERVER['SCRIPT_NAME'] = '/index.php'; require $public . '/index.php'; return true;
 }
 if ($path === '/version') { require $public . '/version.php'; return true; }
+if (preg_match('#\A/([a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?)\z#', $path, $m)) {
+    $_GET['section'] = $m[1]; $_SERVER['SCRIPT_NAME'] = '/index.php'; require $public . '/index.php'; return true;
+}
 if (in_array($path, ['/robots.txt', '/sitemap.xml', '/llms.txt'], true)) {
     $_GET['f'] = ltrim($path, '/'); require $public . '/seo.php'; return true;
 }

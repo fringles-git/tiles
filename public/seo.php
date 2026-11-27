@@ -21,7 +21,7 @@ switch ($file) {
     case 'robots.txt':
         $type = 'text/plain'; $body = seo_robots($base); break;
     case 'sitemap.xml':
-        $type = 'application/xml'; $body = seo_sitemap($base, is_file($pagePath) ? (int) filemtime($pagePath) : null, array_merge(array_keys(TILES_SECTIONS), array_map(static fn(array $a): string => 'journal-' . $a['slug'], journal_published($page)))); break;
+        $type = 'application/xml'; $body = seo_sitemap($base, is_file($pagePath) ? (int) filemtime($pagePath) : null, array_merge(array_column(tiles_universes($page), 'slug'), array_map(static fn(array $a): string => 'journal-' . $a['slug'], journal_published($page)))); break;
     case 'llms.txt':
         $type = 'text/plain'; $body = seo_llms($page, $base, $now); break;
     default:
