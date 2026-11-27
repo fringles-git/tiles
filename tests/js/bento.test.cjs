@@ -47,3 +47,11 @@ test('figures: prefix, thousands separator, decimals and suffix survive the coun
  const h=b.parseFigure('≈ 95 %');assert.equal(h.prefix,'≈ ');assert.equal(b.formatFigure(h,95),'≈ 95 %');
  assert.equal(b.parseFigure('–'),null);assert.equal(b.parseFigure(''),null);
 });
+test('view-transition names are valid idents even for ids starting with a digit',()=>{
+ assert.equal(b.tileName('0ry1y9r'),'tile-0ry1y9r');assert.equal(b.tileName('a"b c'),'tile-abc');
+});
+test('transition runs the update immediately when the API is missing',()=>{
+ const w={};let ran=0;const document={getElementById:()=>null,body:{classList:{contains:()=>false}}};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../public/assets/js/bento.js'),'utf8'),{window:w,Intl,Date,document});
+ w.TilesBento.transition(()=>ran++);assert.equal(ran,1);
+});

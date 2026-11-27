@@ -49,3 +49,29 @@
 
 /* Count-up keeps its width stable while digits change. */
 .count-up{font-variant-numeric:tabular-nums}
+
+/* ---------- Motion ---------- */
+/* View transitions between filters and sections: tiles glide to their new place, new ones fade in. */
+@media (prefers-reduced-motion:no-preference){
+  ::view-transition-group(root){animation-duration:.2s}
+  ::view-transition-group(.tile){animation-duration:.38s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+  ::view-transition-new(.tile):only-child{animation:bento-in .28s ease-out both}
+  ::view-transition-old(.tile):only-child{animation:bento-out .18s ease-in both}
+}
+@keyframes bento-in{from{opacity:0;scale:.96}}
+@keyframes bento-out{to{opacity:0;scale:.96}}
+
+/* Pointer spotlight (precise pointers only, set by bento.js). Decorative, below the content. */
+@media (hover:hover) and (pointer:fine){
+  .mode-preview .tile:not(.bare)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .25s;
+    background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--accent) 14%,transparent),transparent 70%)}
+  .mode-preview .tile:not(.bare):hover::after{opacity:1}
+  .mode-preview .tile>.ti{z-index:1}
+}
+@media (forced-colors:active){.mode-preview .tile::after{display:none}}
+
+/* First paint: a short staggered rise, public page only. */
+@media (prefers-reduced-motion:no-preference){
+  .tiles-intro .grid>.tile{animation:bento-rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 35ms)}
+}
+@keyframes bento-rise{from{opacity:0;translate:0 12px}}

@@ -655,8 +655,9 @@ function setExplorer(query,category,kind=ui.projectKind){
  const kinds=$('#project-kinds');if(kinds)kinds.hidden=category!=='projects';
  $$('[data-project-kind]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.projectKind===kind));
  ui.query=query;ui.category=category;const input=$('#explore-search');if(input&&input.value!==query)input.value=query;
- $$('[data-category]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.category===category));renderGrid();renderProfile();
+ $$('[data-category]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.category===category));animate(()=>{renderGrid();renderProfile();});
 }
+function animate(update){if(window.TilesBento)window.TilesBento.transition(update);else update();}
 $('#explore-search')?.addEventListener('input',e=>setExplorer(e.target.value,ui.category));
 function handleAct(a){
  if(a==='journal')return hub?.manager();
@@ -682,7 +683,7 @@ document.addEventListener('click',e=>{
 
 if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
 if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer,()=>S.profile);
-if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,save,openDrawer,dbody,render,toast,visible,getQuery:()=>ui.query});
+if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,save,openDrawer,dbody,render:()=>animate(render),toast,visible,getQuery:()=>ui.query});
 if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
 if(window.TilesBento)window.TilesBento.bind({grid,isPublic:()=>ui.mode!=='edit'});
 paintIcons();render();
