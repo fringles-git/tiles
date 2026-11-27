@@ -89,5 +89,16 @@ function touchReorder({grid,isEditing,onDrop,onAnnounce=()=>{},delay=420,slop=8}
  grid.addEventListener('click',e=>{if(suppressClick){e.preventDefault();e.stopImmediatePropagation();suppressClick=false;}},true);
 }
 
-window.TilesEditor={history,touchReorder,dropAfter};
+/* Audience over the last n days: summed daily unique visitors (a returning visitor counts once per
+ * day, as with Plausible) plus view counts per source and device. tracked=false before any data. */
+function audience(st,n){
+ const pick=a=>Array.isArray(a)?a.slice(-n):null,u=pick(st&&st.uniqDays);
+ if(!u)return {tracked:false,uniq:0,sources:[],devices:[]};
+ const total=rows=>{const o={};for(const d of rows||[])for(const [k,v] of Object.entries(d||{}))o[k]=(o[k]||0)+(+v||0);return Object.entries(o).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));};
+ return {tracked:true,uniq:u.reduce((a,b)=>a+(+b||0),0),sources:total(pick(st.srcDays)),devices:total(pick(st.devDays))};
+}
+const SOURCE_NAMES={instagram:'Instagram',tiktok:'TikTok',facebook:'Facebook',x:'X',linkedin:'LinkedIn',youtube:'YouTube',snapchat:'Snapchat',pinterest:'Pinterest',threads:'Threads',whatsapp:'WhatsApp',telegram:'Telegram',github:'GitHub',search:'Recherche',ai:'IA',email:'E-mail',other:'Autres',direct:'Direct'};
+const DEVICE_NAMES={mobile:'Téléphone',tablet:'Tablette',desktop:'Ordinateur'};
+
+window.TilesEditor={history,touchReorder,dropAfter,audience,SOURCE_NAMES,DEVICE_NAMES};
 })();

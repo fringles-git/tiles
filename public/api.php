@@ -39,9 +39,25 @@ if ($action === 'track') {
     } elseif ($type !== 'view') {
         out(['error' => 'Bad type.'], 400);
     }
-    with_lock('stats', function () use ($type, $id) {
-        $st = read_json('stats.json', ['views' => 0, 'days' => [], 'clicks' => []]);
-        write_json('stats.json', stats_record($st, $type, $id, time()));
+    $ua = substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 512);
+    if ($type === 'view' && stats_is_bot($ua)) {
+        out([]);
+    }
+    with_lock('stats', function () use ($type, $id, $in, $ua) {
+        $now = time();
+        $st = stats_record(read_json('stats.json', ['views' => 0, 'days' => [], 'clicks' => []]), $type, $id, $now);
+        if ($type === 'view') {
+            // Audience without cookies: a daily-salted one-way key, a source bucket and a device class.
+            // Neither the IP address, the user agent nor the referrer URL is written anywhere.
+            $stored = read_json('salt.json', []);
+            $salt = stats_salt($stored, $now);
+            if ($salt !== $stored) { write_json('salt.json', $salt); }
+            $host = strtolower((string) preg_replace('/:\d+\z/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+            $field = static fn(string $k, int $max): string => is_array($in) && is_string($in[$k] ?? null) ? substr($in[$k], 0, $max) : '';
+            $st = stats_audience($st, stats_visitor((string) ($_SERVER['REMOTE_ADDR'] ?? ''), $ua, $salt['salt']),
+                stats_source($field('ref', 2048), $ua, $field('utm', 64), $host), stats_device($ua), $now);
+        }
+        write_json('stats.json', $st);
     });
     out([]);
 }

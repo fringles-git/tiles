@@ -23,3 +23,32 @@ check(count(stats_window(stats_record([], 'click', 'g', $now), $now, 3)['goDays'
 $bad = stats_record(['views' => 'x', 'days' => 'x', 'clicks' => 3, 'clickDays' => ['2026-11-19' => 'x'], 'go' => null], 'click', 'a', $now, true);
 check($bad['clicks']['a'] === 1 && $bad['clickDays']['2026-11-19']['a'] === 1 && $bad['go']['a'] === 1, 'corrupted stats file never breaks recording');
 check(stats_record(['days' => 'x'], 'view', '', $now)['days']['2026-11-19'] === 1, 'corrupted view series is reset');
+
+/* Audience */
+$ig = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Instagram 350.0.0';
+check(stats_source('', $ig) === 'instagram', 'Instagram in-app browser is recognised without a referrer');
+check(stats_source('', 'Mozilla/5.0 (Linux; Android 14) [FBAN/FB4A;FBAV/450.0]') === 'facebook', 'Facebook in-app browser');
+check(stats_source('https://www.google.fr/', 'Mozilla/5.0') === 'search' && stats_source('https://www.bing.com/search?q=x', 'Mozilla') === 'search', 'search engines share one bucket');
+check(stats_source('https://gemini.google.com/app', 'Mozilla') === 'ai' && stats_source('https://chatgpt.com/', 'Mozilla') === 'ai', 'AI assistants are not counted as search');
+check(stats_source('https://mail.google.com/mail/u/0', 'Mozilla') === 'email', 'webmail is email, not search');
+check(stats_source('https://t.co/abc', 'Mozilla') === 'x' && stats_source('https://l.instagram.com/?u=x', 'Mozilla') === 'instagram', 'short and redirect hosts map to their network');
+check(stats_source('https://evil.example/google.com', 'Mozilla') === 'other' && stats_source('https://notgoogle.com/', 'Mozilla') === 'other', 'only the host is matched, never the path or a look-alike');
+check(stats_source('https://news.google.example.org/', 'Mozilla') === 'other' && stats_source('https://google.evil.com/', 'Mozilla') === 'other' && stats_source('https://www.google.co.uk/', 'Mozilla') === 'search' && stats_source('https://www.google.com.br/', 'Mozilla') === 'search' && stats_source('https://yandex.ru/', 'Mozilla') === 'search', 'country search domains match only before a public suffix');
+check(stats_source('https://brandonlazarre.fr/parcours', 'Mozilla', '', 'brandonlazarre.fr') === 'direct' && stats_source('', 'Mozilla') === 'direct' && stats_source('javascript:alert(1)', 'Mozilla') === 'direct', 'own pages, no referrer and non-http values are direct');
+check(stats_source('https://www.google.com/', 'Mozilla', 'IG') === 'instagram' && stats_source('', 'Mozilla', 'newsletter') === 'email' && stats_source('', 'Mozilla', 'flyer') === 'other', 'utm_source wins over the referrer and unknown campaigns are "other"');
+check(stats_device($ig) === 'mobile' && stats_device('Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X)') === 'tablet' && stats_device('Mozilla/5.0 (Linux; Android 14; SM-X710)') === 'tablet' && stats_device('Mozilla/5.0 (Windows NT 10.0; Win64; x64)') === 'desktop', 'device classes');
+check(stats_is_bot('Googlebot/2.1') && stats_is_bot('facebookexternalhit/1.1') && stats_is_bot('') && !stats_is_bot($ig), 'bots and link previews are not visitors');
+$salt = stats_salt([], $now);
+check(strlen($salt['salt']) === 64 && stats_salt($salt, $now) === $salt && stats_salt($salt, $now + 86400)['salt'] !== $salt['salt'], 'salt is random, stable for the day and replaced the next day');
+$v = stats_visitor('203.0.113.9', $ig, $salt['salt']);
+check(strlen($v) === 16 && !str_contains($v, '203') && $v !== stats_visitor('203.0.113.9', $ig, stats_salt([], $now + 86400)['salt']), 'visitor key is a short one-way hash that changes with the salt');
+$a = stats_audience([], $v, 'instagram', 'mobile', $now);
+$a = stats_audience($a, $v, 'instagram', 'mobile', $now);
+$a = stats_audience($a, 'other-visitor', 'search', 'desktop', $now);
+check($a['uniqDays']['2026-11-19'] === 2 && $a['srcDays']['2026-11-19'] === ['instagram' => 2, 'search' => 1] && $a['devDays']['2026-11-19']['mobile'] === 2, 'a returning visitor counts once per day; sources and devices count every view');
+$b = stats_audience($a, $v, 'x', 'mobile', $now + 86400);
+check($b['uniqDays']['2026-11-20'] === 1 && count($b['seen']['keys']) === 1 && $b['seen']['day'] === '2026-11-20', 'only today\'s visitor keys are kept');
+check(stats_audience([], 'k', 'evil<script>', 'fridge', $now)['srcDays']['2026-11-19'] === ['other' => 1] && stats_audience([], 'k', 'x', 'fridge', $now)['devDays']['2026-11-19'] === ['desktop' => 1], 'unknown buckets cannot be injected');
+$aw = stats_audience_window($a, $now, 3);
+check($aw['uniqDays'] === [0, 0, 2] && ((array) $aw['srcDays'][2])['instagram'] === 2 && json_encode($aw['devDays'][0]) === '{}', 'audience window is aligned with the view window');
+check(stats_audience_window([], $now, 3)['uniqDays'] === null, 'no audience data yet: window says so');

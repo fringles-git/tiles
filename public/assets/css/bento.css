@@ -90,3 +90,6 @@
 #bar [data-act="undo"]:disabled,#bar [data-act="redo"]:disabled{opacity:.4;cursor:default}
 /* Seven bar actions on a phone: wrap to a second row instead of pushing "Add block" off-screen. */
 @media (max-width:720px){.acts{flex-wrap:wrap;justify-content:flex-end;min-width:0}}
+/* Five figures when audience data exists: columns adapt instead of overflowing. */
+.stats .kpis{grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr))}
+.stats code{font-family:var(--f-mono);font-size:.92em}
