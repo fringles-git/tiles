@@ -687,6 +687,8 @@ if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,s
 if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
 if(window.TilesBento)window.TilesBento.bind({grid,isPublic:()=>ui.mode!=='edit'});
 paintIcons();render();
+/* After the first render: body classes and tiles exist only now. */
+if(window.TilesBento)window.TilesBento.intro(grid);
 if(PUBLIC)beacon({type:'view'});
 })();
 
