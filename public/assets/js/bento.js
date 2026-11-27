@@ -117,10 +117,10 @@ function observeFigures(grid,isPublic){
 }
 function bind({grid,isPublic}){
  observeFigures(grid,isPublic);
- spotlight(grid);intro(grid);
+ spotlight(grid);
  const start=()=>{clearInterval(clockTimer);clockTimer=0;if(document.visibilityState==='visible'){tickClocks();clockTimer=setInterval(tickClocks,20000)}};
  document.addEventListener('visibilitychange',start);start();
 }
 
-window.TilesBento={enhance,bind,transition,tileName,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
+window.TilesBento={enhance,bind,intro,transition,tileName,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
 })();
