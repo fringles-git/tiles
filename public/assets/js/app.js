@@ -168,6 +168,7 @@ const T={
 };
 if(typeof window!=='undefined'&&window.TilesWidgets)Object.assign(T,window.TilesWidgets.definitions(F));
 if(typeof window!=='undefined'&&window.TilesExperience)window.TilesExperience.enhance(T,F);
+if(typeof window!=='undefined'&&window.TilesBento)window.TilesBento.enhance(T,F);
 /* Synthetic, read-only header inserted by the hub for each public section (never stored, never in the add-block catalog). */
 T.universe={label:'Section',cat:'',size:'full',fields:[],render:d=>`<div class="uni-head" id="${esc(d.slug)}"><h2>${esc(d.title)}</h2><p>${esc(d.question)}</p></div>`};
 const CATS=['Essentials','Work','Creative','Personal','Earn'];
@@ -370,7 +371,7 @@ function tileHTML(t){
  const inter=typeof def.interactive==='function'?def.interactive(t.data,t):def.interactive;
  const asLink=mode!=='edit'&&href&&!inter;
  const tag=asLink?'a':'div';
- const cls=['tile','sz-'+t.size,'ty-'+t.type,FLOW.includes(t.type)?'flow':'',def.bleed?'bleed':'',def.bare?'bare':'',t.spot?'spot':'',ui.sel===t.id&&mode==='edit'?'is-sel':'',flag&&mode==='edit'?'dim':''].filter(Boolean).join(' ');
+ const cls=['tile','sz-'+t.size,'ty-'+t.type,FLOW.includes(t.type)||def.flow?'flow':'',def.bleed?'bleed':'',def.bare?'bare':'',t.spot?'spot':'',ui.sel===t.id&&mode==='edit'?'is-sel':'',flag&&mode==='edit'?'dim':''].filter(Boolean).join(' ');
  const c=(S.stats.clicks[t.id]||0);
  return `<article class="${cls}" data-id="${esc(t.id)}"${mode==='edit'?' draggable="true" tabindex="0"':''}${tint?` style="--tint:${tint}"`:''}><${tag} class="ti"${asLink?` href="${esc(href)}" target="_blank" rel="noopener" data-track`:''}>${def.render(t.data,t)}</${tag}>${flag&&mode==='edit'?`<span class="flag">${flag}</span>`:''}${mode==='stats'&&t.type!=='section'?`<span class="cnt">${c} clics</span>`:''}${mode==='edit'?toolbar(t):''}</article>`;
 }
@@ -683,6 +684,7 @@ if(window.TilesWidgets)window.TilesWidgets.bind(byId,()=>ui.mode!=='edit');
 if(window.TilesExperience)window.TilesExperience.bind(byId,()=>ui.mode!=='edit',setExplorer,()=>S.profile);
 if(window.TilesHub)hub=window.TilesHub.bind({getPage:()=>S,getMode:()=>ui.mode,save,openDrawer,dbody,render,toast,visible,getQuery:()=>ui.query});
 if(window.TilesPolish)window.TilesPolish.bind({render,applyTheme});
+if(window.TilesBento)window.TilesBento.bind({grid,isPublic:()=>ui.mode!=='edit'});
 paintIcons();render();
 if(PUBLIC)beacon({type:'view'});
 })();
