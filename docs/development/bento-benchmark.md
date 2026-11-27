@@ -101,5 +101,5 @@ Freemium possible : 7 jours de stats en gratuit ; 30/90 jours, sources, appareil
 ## 5. Vérifier
 
 - `npm run test:js` : `bento.test.cjs` et `editor.test.cjs`.
-- `npm run test:php` : `stats.test.php` (18 nouveaux contrôles).
+- `npm run test:php` : `stats.test.php` (19 nouveaux contrôles).
 - Étapes manuelles : section « Tester » de chaque PR.
