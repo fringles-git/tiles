@@ -10,3 +10,5 @@ config/config.php
 config/auth.php
 node_modules/
 .sites-runtime/
+
+vendor/

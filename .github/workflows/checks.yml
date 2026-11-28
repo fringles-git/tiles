@@ -32,6 +32,8 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: curl, gd, fileinfo
           coverage: none
+      - name: composer.json valid
+        run: composer validate --strict --no-check-lock
       - run: npm run check
       - run: npm run test:php
       - name: HTTP boundary, media, authentication and persistence

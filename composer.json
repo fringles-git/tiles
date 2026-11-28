@@ -1,0 +1,26 @@
+{
+    "name": "fringles-git/tiles",
+    "description": "Bento-style link-in-bio and portfolio. Vanilla PHP + JS, no runtime dependencies.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.5"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1.31"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tiles\\": "src/Tiles/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.5.0"
+        }
+    },
+    "scripts": {
+        "analyse": "phpstan analyse --no-progress src public scripts"
+    }
+}
