@@ -4,6 +4,10 @@ require_once __DIR__ . '/paths.php';
 require_once __DIR__ . '/widget-config.php';
 
 ini_set('display_errors', '0');
+
+// Uploads: GD needs ~4 bytes per pixel, so the cap protects memory_limit (40 MP ≈ 160 MB).
+const UPLOAD_MAX_SIDE = 10000;
+const UPLOAD_MAX_PIXELS = 40_000_000;
 error_reporting(E_ALL);
 
 /**
@@ -135,11 +139,28 @@ function with_lock(string $name, callable $fn)
     }
 }
 
-function is_https(?array $server = null): bool
+/**
+ * X-Forwarded-Proto is honoured only from a configured proxy (TILES_TRUSTED_PROXIES or
+ * 'trusted_proxies' in config.php): any client can send that header.
+ */
+function is_https(?array $server = null, ?array $proxies = null): bool
 {
     $server ??= $_SERVER;
-    return (!empty($server['HTTPS']) && $server['HTTPS'] !== 'off')
-        || (($server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    if (!empty($server['HTTPS']) && $server['HTTPS'] !== 'off') {
+        return true;
+    }
+    $proxies ??= tiles_trusted_proxies();
+    return ($server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'
+        && in_array((string) ($server['REMOTE_ADDR'] ?? ''), $proxies, true);
+}
+
+/** Exact proxy IP addresses, from the environment (comma-separated) or config.php. */
+function tiles_trusted_proxies(): array
+{
+    $env = getenv('TILES_TRUSTED_PROXIES');
+    $list = $env !== false ? explode(',', $env) : (array) (tiles_private_config()['trusted_proxies'] ?? []);
+    return array_values(array_filter(array_map(fn ($ip) => trim((string) $ip), $list),
+        fn ($ip) => filter_var($ip, FILTER_VALIDATE_IP) !== false));
 }
 
 function start_session(): void
@@ -186,6 +207,53 @@ function stats_for_editor(): array
     ];
 }
 
+/** One random nonce per response, for the inline TILES_BOOT script. */
+function csp_nonce(): string
+{
+    static $nonce = null;
+    return $nonce ??= rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
+}
+
+/**
+ * Content Security Policy for HTML pages. Third parties are listed one by one:
+ * YouTube (nocookie) and Spotify players, the map (MapLibre from unpkg, OpenFreeMap tiles),
+ * radio streams (any HTTPS host). Inline style attributes stay allowed: tile markup uses them.
+ */
+function csp_policy(string $nonce): string
+{
+    return implode('; ', [
+        "default-src 'self'",
+        "script-src 'self' 'nonce-$nonce' https://unpkg.com",
+        "style-src 'self' 'unsafe-inline' https://unpkg.com",
+        "img-src 'self' data: blob: https:",
+        "font-src 'self'",
+        "connect-src 'self' https://tiles.openfreemap.org",
+        "media-src 'self' blob: https:",
+        'frame-src https://www.youtube-nocookie.com https://open.spotify.com',
+        "worker-src 'self' blob:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'self'",
+    ]);
+}
+
+/**
+ * CSP starts in report-only mode (violations only appear in the browser console):
+ * set 'csp' => 'enforce' in config.php, or TILES_CSP=enforce, once the console stays clean.
+ */
+function send_security_headers(): void
+{
+    $mode = (string) (getenv('TILES_CSP') ?: (tiles_private_config()['csp'] ?? 'report'));
+    if ($mode !== 'off') {
+        header(($mode === 'enforce' ? 'Content-Security-Policy: ' : 'Content-Security-Policy-Report-Only: ') . csp_policy(csp_nonce()));
+    }
+    if (is_https()) {
+        // 180 days, this host only: subdomains keep their own policy.
+        header('Strict-Transport-Security: max-age=15552000');
+    }
+}
+
 function e(string $s): string
 {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
@@ -203,6 +271,7 @@ function render_shell(string $title, string $description, array $boot, string $e
     header('Content-Type: text/html; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
+    send_security_headers();
     $bootJson = json_encode(
         $boot,
         JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
@@ -235,7 +304,7 @@ function render_shell(string $title, string $description, array $boot, string $e
 <body>
 <?php readfile(__DIR__ . '/templates/markup.html'); ?>
 <?= $noscript ?>
-<script>window.TILES_BOOT=<?= $bootJson ?>;</script>
+<script nonce="<?= csp_nonce() ?>">window.TILES_BOOT=<?= $bootJson ?>;</script>
 </body>
 </html>
 <?php

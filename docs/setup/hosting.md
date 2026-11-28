@@ -112,3 +112,9 @@ But : `brandonlazarre.fr` sert la page, `tiles.brandonlazarre.fr` sert l'admin. 
    Chemins absolus de l'installation admin (même compte Hostinger : `pwd` dans son dossier via SSH). `admin.php` et les actions d'édition de l'API y répondent 404 ; visites, clics et inscriptions s'écrivent dans les données partagées.
 3. Ordre sans coupure : déployer et vérifier le public d'abord (`https://brandonlazarre.fr/version`), puis seulement passer l'admin en `mode => 'admin'`.
 4. Retour arrière : retirer `mode` de la configuration de l'admin.
+
+## Security headers
+
+HTML pages send a Content Security Policy built in `src/lib.php` (`csp_policy()`), with a fresh nonce for the inline `TILES_BOOT` script. It starts as `Content-Security-Policy-Report-Only`: violations show in the browser console and nothing is blocked. Once the console stays clean on the public page, the editor, the map, the radio, YouTube and Spotify, set `'csp' => 'enforce'` in `config/config.php` (or `TILES_CSP=enforce`). `'off'` removes the header.
+
+Over HTTPS, pages also send `Strict-Transport-Security: max-age=15552000` (180 days, this host only). Browsers then refuse plain HTTP for that time: keep the SSL certificate renewed.

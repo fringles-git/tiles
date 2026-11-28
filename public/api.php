@@ -68,18 +68,23 @@ if ($action === 'lead') {
     if (strlen($email) > 200 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         out(['error' => 'Enter a valid email address.'], 400);
     }
-    with_lock('leads', function () use ($email) {
+    $stored = with_lock('leads', function () use ($email): bool {
         $leads = read_json('leads.json', []);
         foreach ($leads as $l) {
             if (strcasecmp((string) ($l['email'] ?? ''), $email) === 0) {
-                return;
+                return true;
             }
         }
-        if (count($leads) < 5000) {
-            $leads[] = ['email' => $email, 'at' => gmdate('c')];
-            write_json('leads.json', $leads);
+        if (count($leads) >= 5000) {
+            return false;
         }
+        $leads[] = ['email' => $email, 'at' => gmdate('c')];
+        return write_json('leads.json', $leads);
     });
+    // Never tell a visitor they are subscribed when nothing was stored (list full or write failure).
+    if (!$stored) {
+        out(['error' => 'Signups are closed for now. Try again later.'], 503);
+    }
     out([]);
 }
 
@@ -154,6 +159,11 @@ switch ($action) {
         }
         $info = @getimagesize($f['tmp_name']);
         $type = $info[2] ?? 0;
+        // GD decodes to ~4 bytes per pixel: cap pixels before decoding (decompression bomb, memory_limit).
+        if ($info && (($info[0] ?? 0) > UPLOAD_MAX_SIDE || ($info[1] ?? 0) > UPLOAD_MAX_SIDE
+            || ($info[0] ?? 0) * ($info[1] ?? 0) > UPLOAD_MAX_PIXELS)) {
+            out(['error' => 'The image is too large. Use at most ' . UPLOAD_MAX_SIDE . ' px per side (' . intdiv(UPLOAD_MAX_PIXELS, 1000000) . ' megapixels).'], 400);
+        }
         $img = match ($type) {
             IMAGETYPE_JPEG => @imagecreatefromjpeg($f['tmp_name']),
             IMAGETYPE_PNG => @imagecreatefrompng($f['tmp_name']),

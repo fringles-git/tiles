@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 
 if (!is_admin()) {
     header('Content-Type: text/html; charset=utf-8');
+    send_security_headers();
     ?><!doctype html>
 <html lang="en">
 <head>
