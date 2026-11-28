@@ -4,6 +4,10 @@ require_once __DIR__ . '/paths.php';
 require_once __DIR__ . '/widget-config.php';
 
 ini_set('display_errors', '0');
+
+// Uploads: GD needs ~4 bytes per pixel, so the cap protects memory_limit (40 MP ≈ 160 MB).
+const UPLOAD_MAX_SIDE = 10000;
+const UPLOAD_MAX_PIXELS = 40_000_000;
 error_reporting(E_ALL);
 
 /**
@@ -135,11 +139,28 @@ function with_lock(string $name, callable $fn)
     }
 }
 
-function is_https(?array $server = null): bool
+/**
+ * X-Forwarded-Proto is honoured only from a configured proxy (TILES_TRUSTED_PROXIES or
+ * 'trusted_proxies' in config.php): any client can send that header.
+ */
+function is_https(?array $server = null, ?array $proxies = null): bool
 {
     $server ??= $_SERVER;
-    return (!empty($server['HTTPS']) && $server['HTTPS'] !== 'off')
-        || (($server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    if (!empty($server['HTTPS']) && $server['HTTPS'] !== 'off') {
+        return true;
+    }
+    $proxies ??= tiles_trusted_proxies();
+    return ($server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'
+        && in_array((string) ($server['REMOTE_ADDR'] ?? ''), $proxies, true);
+}
+
+/** Exact proxy IP addresses, from the environment (comma-separated) or config.php. */
+function tiles_trusted_proxies(): array
+{
+    $env = getenv('TILES_TRUSTED_PROXIES');
+    $list = $env !== false ? explode(',', $env) : (array) (tiles_private_config()['trusted_proxies'] ?? []);
+    return array_values(array_filter(array_map(fn ($ip) => trim((string) $ip), $list),
+        fn ($ip) => filter_var($ip, FILTER_VALIDATE_IP) !== false));
 }
 
 function start_session(): void
