@@ -216,15 +216,15 @@ function csp_nonce(): string
 
 /**
  * Content Security Policy for HTML pages. Third parties are listed one by one:
- * YouTube (nocookie) and Spotify players, the map (MapLibre from unpkg, OpenFreeMap tiles),
+ * YouTube (nocookie) and Spotify players, the map tiles (OpenFreeMap; MapLibre itself is self-hosted),
  * radio streams (any HTTPS host). Inline style attributes stay allowed: tile markup uses them.
  */
 function csp_policy(string $nonce): string
 {
     return implode('; ', [
         "default-src 'self'",
-        "script-src 'self' 'nonce-$nonce' https://unpkg.com",
-        "style-src 'self' 'unsafe-inline' https://unpkg.com",
+        "script-src 'self' 'nonce-$nonce'",
+        "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https:",
         "font-src 'self'",
         "connect-src 'self' https://tiles.openfreemap.org",

@@ -30,6 +30,7 @@ root /srv/tiles/public;
 index index.php;
 
 location / { try_files $uri $uri/ =404; }
+# Self-hosted MapLibre is an ES module: `.mjs` must be served as JavaScript (recent mime.types already map it).
 # Self-hosted fonts never change under the same name.
 location ~ ^/assets/fonts/.+\.woff2$ { add_header Cache-Control "public, max-age=31536000, immutable"; }
 location ~ ^/uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))$ {

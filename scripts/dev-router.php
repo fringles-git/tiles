@@ -23,6 +23,6 @@ if (in_array($path, ['/', '/index.php', '/admin.php', '/api.php', '/widgets.php'
 if (str_starts_with($path, '/assets/')) {
     $file = realpath($public . $path);
     if ($file !== false && str_starts_with($file, realpath($public . '/assets') . DIRECTORY_SEPARATOR) && is_file($file)
-        && preg_match('/\.(?:css|js|svg|png|jpe?g|gif|webp|woff2?|txt|md)\z/i', $file)) { return false; }
+        && preg_match('/\.(?:css|m?js|svg|png|jpe?g|gif|webp|woff2?|txt|md)\z/i', $file)) { return false; }
 }
 http_response_code(404); echo 'Not found'; return true;
