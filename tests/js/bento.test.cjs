@@ -97,3 +97,19 @@ test('motion CSS: every animation is opt-in and the reveal is progressive',()=>{
  assert.match(css,/\.tile\.spot\{animation:bento-reveal[^}]*,wiggle 4s/,'scroll reveal must not drop the Spotlight wiggle');
  assert.match(css,/forced-colors:active\)\{\.hub-universes::before\{display:none\}/);
 });
+test('copy confirmation swaps the icon for a check, then restores it once',()=>{
+ const timers=[];const m=load({setTimeout:f=>timers.push(f)});
+ const cls=new Set();const btn={innerHTML:'<svg>copy</svg>',classList:{add:c=>cls.add(c),remove:c=>cls.delete(c),contains:c=>cls.has(c)}};
+ m.copied(btn);assert.match(btn.innerHTML,/M5 12l5 5 9-10/);assert.ok(cls.has('is-copied'));
+ m.copied(btn);assert.equal(timers.length,1,'a second click while confirmed does not stack');
+ timers[0]();assert.equal(btn.innerHTML,'<svg>copy</svg>');assert.ok(!cls.has('is-copied'));
+ m.copied(null);
+});
+test('tab indicator scrolls a newly active, off-screen tab into view',()=>{
+ let mo,frames=[],scrolled=null;const a={offsetLeft:420,offsetTop:0,offsetWidth:90,offsetHeight:44};
+ const nav={hidden:false,scrollLeft:0,clientWidth:360,scrollTo:o=>{scrolled=o},querySelector:()=>a,style:{setProperty(){}},classList:{contains:()=>true,add(){},remove(){}}};
+ const m=load({MutationObserver:class{constructor(f){mo=f}observe(){}},ResizeObserver:class{observe(){}},requestAnimationFrame:f=>frames.push(f),document:{},matchMedia:()=>({matches:false})});
+ m.tabIndicator(nav);while(frames.length)frames.shift()();
+ assert.deepEqual(JSON.parse(JSON.stringify(scrolled)),{left:404,behavior:'smooth'});
+ scrolled=null;mo();while(frames.length)frames.shift()();assert.equal(scrolled,null,'same tab: no scroll on resize or count change');
+});

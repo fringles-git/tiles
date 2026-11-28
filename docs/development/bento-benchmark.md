@@ -134,3 +134,39 @@ Source : [ShowMotion](https://showmotion.bohehub.com/fr/), 259 motifs en 15 cat�
 - **Skeleton Shimmer** pour les widgets en direct (sports, radio) pendant le chargement.
 - **Crossfade Page Transition** (`@view-transition { navigation: auto }`) si les études de cas deviennent des pages.
 - **Copy-to-Clipboard Feedback** : icône copier qui devient coche 1,2 s, en plus du toast.
+
+## 7. Deuxième tri : pawr.link et clones Bento — 28 novembre 2026
+
+Sources : [pawr.link](https://pawr.link/) (accueil + profil `/max`), [Bento_Clone](https://github.com/RaDiO-AcTiVe8970/Bento_Clone/blob/main/README.md) (README), [bento-clone-app](https://bento-clone-app.vercel.app/), [bentoclone](https://bentoclone.vercel.app/), [bento-box-clone](https://bento-box-clone.vercel.app/).
+
+**Limite.** Les trois clones Vercel ne montrent que des pages d'accueil marketing : ni éditeur, ni profil public, aucune interaction décrite. `bento-box-clone` ne rend que trois paragraphes. Les captures et les classes CSS de pawr.link n'ont pas pu être lues : survols et durées non mesurés. Le tri vient donc surtout de pawr.link et du README.
+
+### Appliqué (PR `feat/motion-3`)
+
+| Idée | Source | Dans Tiles |
+|---|---|---|
+| Retour visible sur l'action | pawr (bouton Share), clones (CTA) | Bouton copier : l'icône devient une coche verte 1,5 s, le toast annonce toujours |
+| Navigation clavier dans les bandeaux défilants | pawr | Onglet d'univers actif ramené dans la vue sur mobile (lien direct, retour arrière, clic) |
+| Cartes lien « riches » qui montrent la destination | pawr (favicon, domaine, aperçu) | Flèche ↗ visible au focus clavier et, atténuée, au tactile ; glisse vers le coin au survol. Le domaine était déjà affiché |
+| — (régression #46, revue Codex) | — | Les tuiles Spotlight gardent leur oscillation sous la révélation au défilement |
+
+### Écarté
+
+- **Fond en dégradé maillé animé** (Bento_Clone) : coût GPU permanent ; déjà écarté au tri ShowMotion.
+- **Framer Motion, @dnd-kit, Next.js, Prisma** (Bento_Clone) : dépendances lourdes. Tiles fait déjà le glisser-déposer, l'appui long et Alt + flèches en natif (#40).
+- **Visites « aujourd'hui / hier »** (pawr) : les stats de #41 sont plus complètes (visiteurs, sources, appareils, taux par bloc).
+- **Bandeau de logos et chiffres d'engagement non sourcés** (clones) : marketing, pas une fonction.
+- **Configuration de page par un agent** (pawr) : hors périmètre.
+
+### Retenu pour plus tard (fonctions, pas mouvement)
+
+| # | Fonction | Source | Effort | Impact | Modèle SaaS |
+|---|---|---|---|---|---|
+| 1 | Import d'une page Bento.me (export ZIP) ou Linktree (URL) | Bento_Clone, pawr | M | ★★★ | Acquisition : Bento.me a fermé en février 2026 |
+| 2 | Carte lien enrichie : favicon et image Open Graph, récupérés côté serveur et mis en cache (`widget-cache.php`), jamais depuis le navigateur du visiteur | pawr | M | ★★★ | Offre payante possible |
+| 3 | Image Open Graph générée par page et par univers | pawr (`/max/opengraph-image`) | S | ★★ | — |
+| 4 | Installation sur l'écran d'accueil (manifeste PWA) | pawr | S | ★ | — |
+| 5 | Recadrage d'image à l'envoi | pawr | M | ★★ | — |
+| 6 | Mention « Fait avec Tiles » cliquable vers l'inscription | pawr (« Join Max on pawr.link ») | S | ★★ | Boucle virale du gratuit |
+
+Repère prix : pawr vend 2 $/mois (24 $/an) après 7 jours d'essai complet, sans carte.

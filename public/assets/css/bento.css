@@ -131,3 +131,16 @@
 /* Five figures when audience data exists: columns adapt instead of overflowing. */
 .stats .kpis{grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr))}
 .stats code{font-family:var(--f-mono);font-size:.92em}
+
+/* External-link arrow: also shown on keyboard focus and, dimmed, on touch screens where hover never happens.
+   On hover it nudges toward the corner, the direction it points. */
+.mode-preview .tile:focus-within .go{opacity:1}
+@media (hover:none){.mode-preview .go{opacity:.55}}
+@media (prefers-reduced-motion:no-preference){
+  .mode-preview .go{transition:opacity .2s,translate .2s cubic-bezier(.2,.8,.2,1)}
+  .mode-preview .tile:hover .go{translate:2px -2px}
+}
+/* Copy button confirmation: check in the success colour, short pop. */
+[data-copy].is-copied{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+@media (prefers-reduced-motion:no-preference){[data-copy].is-copied svg{animation:bento-pop .28s cubic-bezier(.2,.8,.2,1)}}
+@keyframes bento-pop{from{scale:.5;opacity:0}}
