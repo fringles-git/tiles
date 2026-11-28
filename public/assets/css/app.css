@@ -81,6 +81,8 @@ p{margin:0}
 /* ---------- Grid ---------- */
 .grid-wrap{container-type:inline-size;min-width:0}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));--unit:calc((100cqi - 3 * var(--gap)) / 4);grid-auto-rows:calc(var(--unit) / 2 - var(--gap) / 2);gap:var(--gap);grid-auto-flow:dense}
+/* A heading and the tiles up to the next heading share one run: same columns (subgrid), same rows, own dense packing. */
+.grid-run{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;grid-auto-rows:inherit;row-gap:inherit;grid-auto-flow:dense;min-width:0}
 .sz-s{grid-column:span 1;grid-row:span 2}
 .sz-w{grid-column:span 2;grid-row:span 2}
 .sz-t{grid-column:span 1;grid-row:span 4}
