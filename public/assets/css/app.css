@@ -532,3 +532,16 @@ a.btn{color:inherit;text-decoration:none}
 .u-w600{font-weight:600!important}
 .u-w700{font-weight:700!important}
 .noscript-page{max-width:640px;margin:40px auto;padding:0 16px;font-family:sans-serif}
+/* P0 editor cleanup: plain status list for live data, collapsed server diagnostics, separated delete. */
+.conn-list{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:8px}
+.conn-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.conn-list .ok{color:var(--muted);font-size:13px}
+.conn-list .warn{color:var(--danger);font-size:13px;text-align:right}
+.diag{font-size:13px;color:var(--muted)}
+.diag summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+.tb .tb-del{color:#ffb4ab}
+.tb .tb-del:hover,.tb .tb-del:focus-visible{background:color-mix(in srgb,var(--danger) 35%,transparent)}
+.j-del{min-height:44px}
+.brand .acct{margin-left:4px;font-family:var(--f-body,inherit);font-weight:600;letter-spacing:0}
+/* Password and search fields: same look as the other inputs (were browser defaults, square black border). */
+.fld input[type=password],.fld input[type=search]{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px}

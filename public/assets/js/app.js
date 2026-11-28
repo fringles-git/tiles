@@ -308,7 +308,11 @@ window.addEventListener('beforeunload',e=>{if(dirty||saving){e.preventDefault();
 /* ---------- Helpers ---------- */
 const byId=id=>S.tiles.find(t=>t.id===id);
 const inWindow=t=>{const now=new Date();if(t.start&&new Date(t.start+'T00:00:00')>now)return false;if(t.end&&new Date(t.end+'T23:59:59')<now)return false;return true};
-const visible=t=>!t.hidden&&inWindow(t)&&T[t.type];
+// A block whose fields are all empty is not shown to visitors (no "TBD", no blank card): flagged "Vide" in the editor.
+const DECOR_KEYS=new Set(['color','style','platform','logoFor','brand','zoom','mode','layout','tone','icon','kind','unit']);
+const SELF_CONTAINED=new Set(['clock']);
+function blank(t){if(SELF_CONTAINED.has(t.type))return false;const vals=Object.entries(t.data||{}).filter(([k])=>!DECOR_KEYS.has(k)).map(([,v])=>v);return !vals.some(v=>Array.isArray(v)?v.length>0:(typeof v==='string'?v.trim()!=='':v!=null&&v!==false&&v!==''))}
+const visible=t=>!t.hidden&&inWindow(t)&&T[t.type]&&!((PUBLIC||ui.mode==='preview')&&blank(t));
 const tileName=t=>{const d=t.data||{};if(t.type==='stat')return (d.value+' '+(d.label||'')).trim();if(t.type==='social')return (PLAT[d.platform]||[''])[0]+(d.handle?' @'+d.handle:'');return d.title||d.name||d.club||d.caption||d.place||T[t.type].label};
 
 /* ---------- Render ---------- */
@@ -380,13 +384,13 @@ const FLOW=['experience','education','skills','text','now','faith','testimonial'
 function sizeIcon(cells){return `<span class="sz-ico">${cells.map(c=>`<i class="${c?'f':''}"></i>`).join('')}</span>`}
 function toolbar(t){
  const def=T[t.type];const sizes=def.sizes?[]:SIZES;
- return `<div class="tb" role="toolbar" aria-label="Block tools">${sizes.map(([k,l])=>`<button type="button" data-tb="size" data-v="${k}" aria-pressed="${t.size===k}" aria-label="${l}" title="${l}">${k==='bar'?'▭':k.toUpperCase()}</button>`).join('')}${sizes.length?'<span class="sep"></span>':''}<button type="button" data-tb="left" aria-label="Move earlier">${ic('left',15)}</button><button type="button" data-tb="right" aria-label="Move later">${ic('right',15)}</button><button type="button" data-tb="edit" aria-label="Edit">${ic('edit',15)}</button><button type="button" data-tb="del" aria-label="Delete">${ic('trash',15)}</button></div>`;
+ return `<div class="tb" role="toolbar" aria-label="Block tools">${sizes.map(([k,l])=>`<button type="button" data-tb="size" data-v="${k}" aria-pressed="${t.size===k}" aria-label="${l}" title="${l}">${k==='bar'?'▭':k.toUpperCase()}</button>`).join('')}${sizes.length?'<span class="sep"></span>':''}<button type="button" data-tb="left" aria-label="Move earlier">${ic('left',15)}</button><button type="button" data-tb="right" aria-label="Move later">${ic('right',15)}</button><button type="button" data-tb="edit" aria-label="Modifier" title="Modifier">${ic('edit',15)}</button><span class="sep"></span><button type="button" class="tb-del" data-tb="del" aria-label="Supprimer le bloc" title="Supprimer le bloc (annulable)">${ic('trash',15)}</button></div>`;
 }
 function tileHTML(t){
  const def=T[t.type];if(!def)return '';
  const mode=ui.mode;const href=def.href?safeHref(def.href(t.data)):'';
  const tint=def.tint?def.tint(t.data):'';
- const flag=t.hidden?'Hidden':(!inWindow(t)?'Scheduled':'');
+ const flag=t.hidden?'Masqué':(!inWindow(t)?'Programmé':(blank(t)?'Vide · non publié':''));
  const inter=typeof def.interactive==='function'?def.interactive(t.data,t):def.interactive;
  const asLink=mode!=='edit'&&href&&!inter;
  const tag=asLink?'a':'div';
@@ -406,7 +410,7 @@ function statsHTML(){
  const cmax=Math.max(1,...sum.channels.map(x=>x[1]));
  const aud=window.TilesEditor?window.TilesEditor.audience(st,n):{tracked:false},names=window.TilesEditor||{};
  const bars=(list,label,color)=>{const m=Math.max(1,...list.map(x=>x[1])),tot=list.reduce((a,x)=>a+x[1],0)||1;return list.length?list.map(([k,v])=>`<div class="top"><span>${esc(label(k))}</span><span class="barx"><i data-css="width:${(v/m*100).toFixed(1)}%;background:${color(k)}"></i></span><b>${Math.round(v/tot*100)}%</b></div>`).join(''):'<p class="muted">Aucune visite sur la période.</p>'};
- return `<section class="stats" aria-label="Statistiques de la page"><div class="stats-head"><h2>${n} derniers jours</h2><div class="seg sm" role="group" aria-label="Période">${[7,14,30].map(d=>`<button type="button" data-stats-days="${d}" aria-pressed="${d===n}">${d} j</button>`).join('')}</div>${st.sample?'<span class="samp">Inclut des chiffres d’exemple</span>':''}<button class="btn sm" data-act="reset-stats">Réinitialiser</button></div>
+ return `<section class="stats" aria-label="Statistiques de la page"><div class="stats-head"><h2>${n} derniers jours</h2><div class="seg sm" role="group" aria-label="Période">${[7,14,30].map(d=>`<button type="button" data-stats-days="${d}" aria-pressed="${d===n}">${d} j</button>`).join('')}</div>${st.sample?'<span class="samp">Inclut des chiffres d’exemple</span>':''}<button class="btn sm danger" data-act="reset-stats">Réinitialiser les statistiques…</button></div>
  <div class="kpis"><div class="kpi"><small>Vues</small><b>${fr(sum.views)}</b></div>${aud.tracked?`<div class="kpi" title="Visiteurs distincts de chaque jour, additionnés. Sans cookie : un même visiteur revenu un autre jour compte à nouveau."><small>Visiteurs uniques</small><b>${fr(aud.uniq)}</b></div>`:''}<div class="kpi"><small>Clics</small><b>${fr(sum.clicks)}</b></div><div class="kpi"><small>Taux de clic</small><b>${sum.ctr}%</b></div><div class="kpi"><small>CV téléchargé</small><b>${fr(sum.cv)}</b></div></div>
  <svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Vues par jour, ${n} derniers jours"><line class="gd" x1="0" x2="${W}" y1="${H-14}" y2="${H-14}"/><path class="ar" d="${area}"/><path class="ln" d="${path}" vector-effect="non-scaling-stroke"/><circle class="dt" cx="${last[0]}" cy="${last[1]}" r="4" vector-effect="non-scaling-stroke"/></svg>
  ${sum.exact?'':'<p class="hint">Clics par jour enregistrés à partir de maintenant : les clics ci-dessous sont les totaux depuis le début.</p>'}
@@ -483,7 +487,7 @@ function openTile(id){
  const t=byId(id);if(!t)return;const def=T[t.type];ui.sel=id;renderGrid();
  const sizes=def.sizes?'':`<div class="fld"><span class="lb">Size</span><div class="sizes">${SIZES.map(([k,l,c])=>`<button type="button" data-size="${k}" aria-pressed="${t.size===k}">${k==='bar'?'<span class="sz-ico"><i class="f"></i><i class="f"></i></span>':sizeIcon(c)}${l}</button>`).join('')}</div></div>`;
  openDrawer(def.label,`<div id="tile-form" data-id="${id}" class="u-flex u-col u-gap14">${def.fields.map(f=>fieldHTML(f,t.data[f.k],'f-'+id)).join('')}</div>
- ${def.fields.some(f=>f.k==='url')?`<div class="fld"><label for="leap-${id}">Lien suivi (Leap link)</label><input id="leap-${id}" type="text" readonly value="${esc(location.origin+'/go/'+id)}"><small class="muted">À partager hors de la page : chaque visite est comptée avant la redirection. Actif après enregistrement.</small></div>`:''}
+ ${def.fields.some(f=>f.k==='url')?`<div class="fld"><label for="leap-${id}">Lien de suivi</label><input id="leap-${id}" type="text" readonly value="${esc(location.origin+'/go/'+id)}"><small class="hint">Pour partager ailleurs : compte les visites, puis redirige.</small></div>`:''}
  <div class="grp"><h4>Display</h4><div class="fld"><label for="opt-universe">Univers</label><select id="opt-universe" data-opt="universe">${Object.entries(window.TilesHub.universes).map(([key,v])=>`<option value="${key}"${hub.universe(t)===key?' selected':''}>${v.label}</option>`).join('')}</select></div>${sizes}
   <label class="chk"><input type="checkbox" id="opt-spot" data-opt="spot"${t.spot?' checked':''}>Spotlight (highlight and gentle wiggle)</label>
   <label class="chk"><input type="checkbox" id="opt-hidden" data-opt="hidden"${t.hidden?' checked':''}>Hide from public page</label>
@@ -519,12 +523,19 @@ function openDesign(){
  <div class="fld"><label for="d-gap">Spacing · <span id="gv">${th.gap}</span>px</label><input type="range" id="d-gap" min="6" max="24" value="${th.gap}"></div>
  <div class="grp"><h4>Univers</h4><p class="hint">${Object.values(window.TilesHub?.universes||{}).map(u=>esc(u.label)).join(' · ')}</p><button type="button" class="btn" data-act="universes">Gérer les univers</button></div>`,'design');
 }
+// Export: the page only, without stats, revision or developer notes.
+function exportable(){const o=Object.assign({},S);delete o.stats;delete o.rev;delete o._capabilities;delete o.publishedAt;return o}
+const CONN_NAMES={jolpica:'Formule 1',football:'Football',radio:'Radio'};
+function openAccount(){
+ openDrawer('Compte',`<div class="grp"><h4>Mot de passe</h4><form id="pw-form" class="u-flex u-col u-gap10"><div class="fld"><label for="pw-cur">Mot de passe actuel</label><input type="password" id="pw-cur" autocomplete="current-password" required></div><div class="fld"><label for="pw-new">Nouveau mot de passe</label><input type="password" id="pw-new" autocomplete="new-password" minlength="10" required aria-describedby="pw-hint"><small class="hint" id="pw-hint">10 caractères minimum.</small></div><div class="row-btns"><button class="btn sm" type="submit">Changer le mot de passe</button></div><span class="hint" id="pw-msg"></span></form></div>
+ <div class="grp"><h4>Session</h4><button class="btn sm" type="button" data-act="logout">Se déconnecter</button></div>`,'account');
+}
 function openExport(){
- openDrawer('Export & import',`<p class="muted u-fs13">This JSON is your whole page. The PHP version stores exactly this in <code>data/page.json</code>, so you can design here and drop it into your site.</p>
- <div class="fld"><label for="x-out">Your page</label><textarea id="x-out" class="code" readonly>${esc(JSON.stringify(S,null,2))}</textarea></div>
+ openDrawer('Export & import',`<p class="muted u-fs13">Toute ta page en JSON : garde-la en sauvegarde ou réimporte-la plus tard.</p>
+ <div class="fld"><label for="x-out">Your page</label><textarea id="x-out" class="code" readonly>${esc(JSON.stringify(exportable(),null,2))}</textarea></div>
  <div class="row-btns"><button class="btn sm" type="button" data-download-page>Télécharger JSON</button><button class="btn sm pri" type="button" data-xact="copy">${ic('copy',14)}Copy JSON</button></div>
- <div class="grp"><h4>Import</h4><div class="fld"><label for="x-in">Paste a page JSON</label><textarea id="x-in" class="code" placeholder='{"profile":{...},"tiles":[...]}'></textarea></div><div class="row-btns"><button class="btn sm" type="button" data-xact="import">Replace page</button></div><span class="hint" id="x-msg"></span></div>
- <div class="grp"><h4>Account</h4><form id="pw-form" class="u-flex u-col u-gap10"><div class="fld"><label for="pw-cur">Current password</label><input type="password" id="pw-cur" autocomplete="current-password" required></div><div class="fld"><label for="pw-new">New password (10+ characters)</label><input type="password" id="pw-new" autocomplete="new-password" minlength="10" required></div><div class="row-btns"><button class="btn sm" type="submit">Change password</button><button class="btn sm ghost" type="button" data-act="logout">Log out</button></div><span class="hint" id="pw-msg"></span></form></div>`,'export');
+ <div class="grp"><h4>Import</h4><div class="fld"><label for="x-in">Paste a page JSON</label><textarea id="x-in" class="code" placeholder='{"profile":{...},"tiles":[...]}'></textarea></div><div class="row-btns"><button class="btn sm danger" type="button" data-xact="import">Remplacer toute la page…</button></div><p class="hint">Remplace tous les blocs, le profil et le journal. Annulable juste après (Annuler / Ctrl+Z).</p><span class="hint" id="x-msg"></span></div>
+ `,'export');
 }
 
 /* drawer input handling */
@@ -582,7 +593,7 @@ dbody.addEventListener('click',e=>{
  if(b.dataset.font){S.theme.font=b.dataset.font;$$('[data-font]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.layout){S.theme.layout=b.dataset.layout;$$('[data-layout]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.xact==='copy'){const ta=$('#x-out');copyText(ta.value,ta);return}
- if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});delete o._capabilities;o.rev=S.rev;S=o;window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Page imported')}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
+ if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');if(!confirm('Remplacer toute la page (blocs, profil, journal) par ce JSON ?'))return;const before=JSON.parse(JSON.stringify(S));o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});delete o._capabilities;o.rev=S.rev;S=o;window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Page remplacée',()=>{S=before;window.TilesHub?.setUniverses(S.universes);save();render();openExport()})}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
  if(b.dataset.xact==='reset'){const old=S;S=seed();window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Sample page restored',()=>{S=old;window.TilesHub?.setUniverses(S.universes);save();render()});return}
 });
 
@@ -595,7 +606,7 @@ function addTile(type){
  requestAnimationFrame(()=>{const el=grid.querySelector(`[data-id="${esc(t.id)}"]`);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'})});
 }
 function dupTile(id){const i=S.tiles.findIndex(t=>t.id===id);if(i<0)return;const c=JSON.parse(JSON.stringify(S.tiles[i]));c.id=uid();S.tiles.splice(i+1,0,c);save();openTile(c.id);toast('Block duplicated')}
-function delTile(id){const i=S.tiles.findIndex(t=>t.id===id);if(i<0)return;const [t]=S.tiles.splice(i,1);closeDrawer();ui.sel=null;renderGrid();save();toast('Block deleted',()=>{S.tiles.splice(i,0,t);renderGrid();save()})}
+function delTile(id){const i=S.tiles.findIndex(t=>t.id===id);if(i<0)return;const [t]=S.tiles.splice(i,1);closeDrawer();ui.sel=null;renderGrid();save();toast('Bloc supprimé',()=>{S.tiles.splice(i,0,t);renderGrid();save()})}
 function reorder(fromId,toId,after){const from=S.tiles.findIndex(x=>x.id===fromId);if(from<0||!byId(toId))return;const [m]=S.tiles.splice(from,1);let to=S.tiles.findIndex(x=>x.id===toId);if(after)to++;S.tiles.splice(to,0,m);renderGrid();save();toast(`Position ${to+1} sur ${S.tiles.length}`,undo)}
 function moveTile(id,dir){const i=S.tiles.findIndex(t=>t.id===id);const j=i+dir;if(i<0||j<0||j>=S.tiles.length)return;[S.tiles[i],S.tiles[j]]=[S.tiles[j],S.tiles[i]];renderGrid();save();const el=grid.querySelector(`[data-id="${id}"] [data-tb="${dir<0?'left':'right'}"]`);if(el)el.focus()}
 
@@ -691,7 +702,7 @@ function setMode(m){
 }
 function openConnections(){
  openDrawer('Connexions API','<p role="status">Vérification de la configuration…</p>','connections');
- api('connections',{}).then(({connections:c})=>{if(ui.drawer!=='connections')return;dbody.innerHTML=`<p>Formule 1, radio et cartes : aucune clé requise.</p><p>Football : ${c.footballConfigured?'token présent · validité à vérifier auprès du fournisseur':'token à ajouter sur le serveur'}.</p><p>PHP cURL : ${c.curl?'disponible':'manquant'} · stockage : ${c.cacheWritable?'accessible':'non accessible'}</p><h4>Sports configurés</h4><ul>${c.sports.map(x=>`<li>${esc(x.name)}</li>`).join('')}</ul><h4>Budgets partagés par jour</h4><ul>${Object.entries(c.limits).map(([name,n])=>`<li>${esc(name)} : ${n} requêtes maximum · ${c.usage[name]?.day||'aucune utilisation'} : ${c.usage[name]?.count||0}</li>`).join('')}</ul><p>Le token reste dans FOOTBALL_DATA_TOKEN ou config/config.php. Il ne se renseigne pas dans cet éditeur.</p>`}).catch(e=>{if(ui.drawer==='connections')dbody.textContent=e.message});
+ api('connections',{}).then(({connections:c})=>{if(ui.drawer!=='connections')return;dbody.innerHTML=`<ul class="conn-list"><li><b>Formule 1, radio, cartes</b><span class="ok">Prêt · aucune clé requise</span></li><li><b>Football</b>${c.footballConfigured?'<span class="ok">Prêt</span>':'<span class="warn">Clé manquante : à configurer sur le serveur</span>'}</li><li><b>Données en direct</b>${c.curl&&c.cacheWritable?'<span class="ok">Prêt</span>':'<span class="warn">Indisponible sur ce serveur</span>'}</li></ul><details class="diag"><summary>Diagnostic technique</summary><p>Extension cURL : ${c.curl?'disponible':'manquante'}. Cache : ${c.cacheWritable?'accessible en écriture':'non accessible en écriture'}.</p><p>Équipes suivies : ${c.sports.map(x=>esc(x.name)).join(', ')||'aucune'}.</p><ul>${Object.entries(c.limits).map(([name,n])=>{const u=c.usage[name];const day=u?.day?new Date(u.day+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'';return `<li>${esc(CONN_NAMES[name]||name)} : ${u?.count||0} / ${n} requêtes${day?' le '+day:' aujourd’hui'}</li>`}).join('')}</ul><p>La clé football se règle côté serveur (voir la documentation d’hébergement), jamais dans l’éditeur.</p></details>`}).catch(e=>{if(ui.drawer==='connections')dbody.textContent=e.message});
 }
 function setExplorer(query,category,kind=ui.projectKind){
  if(category!=='projects')kind='all';ui.projectKind=kind;
@@ -713,11 +724,12 @@ function handleAct(a){
  if(a==='connections')return openConnections();
  if(a==='design')return openDesign();
  if(a==='export')return openExport();
+ if(a==='account')return openAccount();
  if(a==='profile'){if(ui.mode==='edit')openProfile();return}
  if(a==='close')return closeDrawer();
  if(a==='hide-banner'){S.sample=false;save();render();return}
  if(a==='empty'){const old=JSON.parse(JSON.stringify(S));S.tiles=[];S.sample=false;S.stats={sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]};save();render();toast('Page cleared',()=>{S=old;save();render()});return}
- if(a==='reset-stats'){api('reset-stats',{}).then(()=>{S.stats={sample:false,views:0,days:Array(30).fill(0),clickDays:[],clicks:{},go:{},leads:S.stats.leads||[]};render();toast('Chiffres réinitialisés')}).catch(e=>toast(e.message));return}
+ if(a==='reset-stats'){if(!confirm('Effacer toutes les statistiques (vues, clics, sources, appareils) ? Les inscrits sont conservés. Action définitive.'))return;api('reset-stats',{}).then(()=>{S.stats={sample:false,views:0,days:Array(30).fill(0),clickDays:[],clicks:{},go:{},leads:S.stats.leads||[]};render();toast('Statistiques effacées')}).catch(e=>toast(e.message));return}
  if(a==='logout'){flush();api('logout',{}).finally(()=>{location.href='admin.php'});return}
 }
 document.addEventListener('click',e=>{
