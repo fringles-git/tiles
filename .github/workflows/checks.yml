@@ -34,6 +34,10 @@ jobs:
           coverage: none
       - name: composer.json valid
         run: composer validate --strict --no-check-lock
+      - name: Static analysis (PHPStan)
+        run: |
+          composer install --no-interaction --no-progress
+          vendor/bin/phpstan analyse --no-progress --error-format=github
       - run: npm run check
       - run: npm run test:php
       - name: HTTP boundary, media, authentication and persistence

@@ -1,0 +1,16 @@
+# Static analysis, dev only (composer install, then composer analyse).
+# Level 5: levels 0 to 5 pass with no error and no baseline. Raise one level per PR;
+# if a level brings existing errors, fix them or record them in phpstan-baseline.neon.
+parameters:
+    level: 5
+    phpVersion: 80500
+    paths:
+        - src
+        - public
+        - scripts
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+    dynamicConstantNames:
+        - DATA_DIR
+        - UPLOAD_DIR
+        - TILES_MODE

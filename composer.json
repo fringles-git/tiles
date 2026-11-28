@@ -21,6 +21,6 @@
         }
     },
     "scripts": {
-        "analyse": "phpstan analyse --no-progress src public scripts"
+        "analyse": "phpstan analyse --no-progress"
     }
 }
