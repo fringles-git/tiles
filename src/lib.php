@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/paths.php';
 require_once __DIR__ . '/widget-config.php';
+require_once __DIR__ . '/throttle.php';
 
 ini_set('display_errors', '0');
 
