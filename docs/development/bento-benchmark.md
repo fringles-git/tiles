@@ -1,6 +1,6 @@
 # Benchmark Bento : 23 modèles Framer, recherches et plan — 27 novembre 2026
 
-PR liées : #38 (cartes), #39 (micro-interactions), #40 (éditeur), #41 (stats). Elles sont empilées : merger dans l'ordre.
+PR liées : #38 (cartes), #39 (micro-interactions, renforcée par #46), #40 (éditeur), #41 (stats). Elles sont empilées : merger dans l'ordre.
 
 ## Méthode et limites
 
@@ -108,7 +108,7 @@ Freemium possible : 7 jours de stats en gratuit ; 30/90 jours, sources, appareil
 
 Source : [ShowMotion](https://showmotion.bohehub.com/fr/), 259 motifs en 15 catégories. Critères : utile à une page link-in-bio, natif (CSS ou quelques lignes de JS), désactivé avec `prefers-reduced-motion`, sans forme ronde ni pilule.
 
-### Appliqué (PR `feat/motion-2`)
+### Appliqué (#46)
 
 | Motif ShowMotion | Dans Tiles | Technique |
 |---|---|---|
