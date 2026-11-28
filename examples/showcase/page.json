@@ -1,0 +1,1185 @@
+{
+ "v": 1,
+ "_capabilities": "Informational only, ignored by Tiles (removed on import). See docs/development/showcase.md.",
+ "profile": {
+  "name": "TBD",
+  "role": "TBD",
+  "tags": "TBD",
+  "bio": "TBD",
+  "location": "TBD",
+  "status": "TBD",
+  "statusOn": true,
+  "avatar": "",
+  "banner": "",
+  "bannerStill": "",
+  "header": "classic",
+  "email": "TBD",
+  "phone": "TBD",
+  "booking": "TBD",
+  "cv": "",
+  "cvNote": "TBD",
+  "showNav": true,
+  "hours": {
+   "days": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0
+   ],
+   "from": "09:00",
+   "to": "18:00",
+   "note": "TBD"
+  }
+ },
+ "theme": {
+  "skin": "auto",
+  "accent": "#0B7A75",
+  "radius": 24,
+  "font": "grotesk",
+  "layout": "side",
+  "gap": 14
+ },
+ "universes": [
+  {
+   "key": "humain",
+   "slug": "profil",
+   "label": "Profil",
+   "accent": "#9E5A3F",
+   "question": "TBD"
+  },
+  {
+   "key": "pro",
+   "slug": "parcours",
+   "label": "Parcours",
+   "accent": "#0B3D91",
+   "question": "TBD"
+  },
+  {
+   "key": "crea",
+   "slug": "creations",
+   "label": "Créations",
+   "accent": "#7946BC",
+   "question": "TBD"
+  },
+  {
+   "key": "lifestyle",
+   "slug": "passions",
+   "label": "Passions",
+   "accent": "#B51E27",
+   "question": "TBD"
+  },
+  {
+   "key": "custom",
+   "slug": "univers-personnalise",
+   "label": "Univers personnalisé",
+   "accent": "#0B7A75",
+   "question": "TBD"
+  }
+ ],
+ "tiles": [
+  {
+   "id": "sc-s-essentials",
+   "type": "section",
+   "size": "full",
+   "universe": "humain",
+   "data": {
+    "title": "Essentials"
+   }
+  },
+  {
+   "id": "sc-link",
+   "type": "link",
+   "size": "w",
+   "universe": "humain",
+   "data": {
+    "title": "TBD",
+    "url": "TBD",
+    "desc": "TBD",
+    "color": ""
+   }
+  },
+  {
+   "id": "sc-contact",
+   "type": "contact",
+   "size": "w",
+   "universe": "humain",
+   "data": {
+    "title": "TBD",
+    "email": "TBD",
+    "phone": "TBD"
+   }
+  },
+  {
+   "id": "sc-text-note",
+   "type": "text",
+   "size": "w",
+   "universe": "humain",
+   "data": {
+    "text": "TBD",
+    "style": "note"
+   }
+  },
+  {
+   "id": "sc-text-quote",
+   "type": "text",
+   "size": "w",
+   "universe": "humain",
+   "data": {
+    "text": "TBD",
+    "style": "quote"
+   }
+  },
+  {
+   "id": "sc-image",
+   "type": "image",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "image": "",
+    "caption": "TBD",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-map",
+   "type": "map",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "place": "TBD",
+    "note": "TBD",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-atlas",
+   "type": "atlas",
+   "size": "l",
+   "universe": "humain",
+   "data": {
+    "place": "TBD",
+    "lat": "TBD",
+    "lon": "TBD",
+    "zoom": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-clock",
+   "type": "clock",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "place": "TBD",
+    "tz": "Europe/Paris"
+   }
+  },
+  {
+   "id": "sc-s-social",
+   "type": "section",
+   "size": "full",
+   "universe": "humain",
+   "data": {
+    "title": "Social"
+   }
+  },
+  {
+   "id": "sc-social-instagram",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "instagram",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-tiktok",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "tiktok",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-youtube",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "youtube",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-x",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "x",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-linkedin",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "linkedin",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-github",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "github",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-behance",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "behance",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-dribbble",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "dribbble",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-twitch",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "twitch",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-whatsapp",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "whatsapp",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-threads",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "threads",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-facebook",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "facebook",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-vimeo",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "vimeo",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-soundcloud",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "soundcloud",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-pinterest",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "pinterest",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-discord",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "discord",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-social-snapchat",
+   "type": "social",
+   "size": "s",
+   "universe": "humain",
+   "data": {
+    "platform": "snapchat",
+    "handle": "TBD",
+    "url": "TBD",
+    "cta": "TBD"
+   }
+  },
+  {
+   "id": "sc-faith",
+   "type": "faith",
+   "size": "w",
+   "universe": "humain",
+   "data": {
+    "verse": "TBD",
+    "ref": "TBD",
+    "church": "TBD",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-s-work",
+   "type": "section",
+   "size": "full",
+   "universe": "pro",
+   "data": {
+    "title": "Work"
+   }
+  },
+  {
+   "id": "sc-project-saas",
+   "type": "project",
+   "size": "l",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "role": "TBD",
+    "year": "TBD",
+    "desc": "TBD",
+    "tags": "SaaS",
+    "image": "",
+    "url": "TBD",
+    "problem": "TBD",
+    "solution": "TBD",
+    "outcome": "TBD"
+   },
+   "spot": true
+  },
+  {
+   "id": "sc-project-app",
+   "type": "project",
+   "size": "l",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "role": "TBD",
+    "year": "TBD",
+    "desc": "TBD",
+    "tags": "App",
+    "image": "",
+    "url": "TBD",
+    "problem": "TBD",
+    "solution": "TBD",
+    "outcome": "TBD"
+   }
+  },
+  {
+   "id": "sc-project-site",
+   "type": "project",
+   "size": "l",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "role": "TBD",
+    "year": "TBD",
+    "desc": "TBD",
+    "tags": "Site",
+    "image": "",
+    "url": "TBD",
+    "problem": "TBD",
+    "solution": "TBD",
+    "outcome": "TBD"
+   }
+  },
+  {
+   "id": "sc-project-experiment",
+   "type": "project",
+   "size": "l",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "role": "TBD",
+    "year": "TBD",
+    "desc": "TBD",
+    "tags": "TBD",
+    "image": "",
+    "url": "TBD",
+    "problem": "TBD",
+    "solution": "TBD",
+    "outcome": "TBD"
+   }
+  },
+  {
+   "id": "sc-company",
+   "type": "company",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "brand": "action",
+    "title": "TBD",
+    "desc": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-experience",
+   "type": "experience",
+   "size": "t",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "items": "TBD",
+    "logoFor": "TBD",
+    "logo": ""
+   }
+  },
+  {
+   "id": "sc-education",
+   "type": "education",
+   "size": "t",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "items": "TBD",
+    "logoFor": "TBD",
+    "logo": ""
+   }
+  },
+  {
+   "id": "sc-skills",
+   "type": "skills",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "items": "TBD"
+   }
+  },
+  {
+   "id": "sc-languages",
+   "type": "languages",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "items": "TBD"
+   }
+  },
+  {
+   "id": "sc-cv",
+   "type": "cv",
+   "size": "s",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "updated": "TBD",
+    "file": "",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-stat-plain",
+   "type": "stat",
+   "size": "s",
+   "universe": "pro",
+   "data": {
+    "value": "TBD",
+    "label": "TBD",
+    "color": "",
+    "logos": ""
+   }
+  },
+  {
+   "id": "sc-stat-employers",
+   "type": "stat",
+   "size": "s",
+   "universe": "pro",
+   "data": {
+    "value": "TBD",
+    "label": "TBD",
+    "color": "",
+    "logos": "employers"
+   }
+  },
+  {
+   "id": "sc-progress",
+   "type": "progress",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "items": "TBD",
+    "color": ""
+   }
+  },
+  {
+   "id": "sc-testimonial",
+   "type": "testimonial",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "quote": "TBD",
+    "author": "TBD",
+    "role": "TBD"
+   }
+  },
+  {
+   "id": "sc-steps",
+   "type": "steps",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "items": "TBD"
+   }
+  },
+  {
+   "id": "sc-faq",
+   "type": "faq",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "items": "TBD"
+   }
+  },
+  {
+   "id": "sc-booking",
+   "type": "booking",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "duration": "TBD",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-s-earn",
+   "type": "section",
+   "size": "full",
+   "universe": "pro",
+   "data": {
+    "title": "Earn"
+   }
+  },
+  {
+   "id": "sc-product",
+   "type": "product",
+   "size": "s",
+   "universe": "pro",
+   "data": {
+    "name": "TBD",
+    "price": "TBD",
+    "desc": "TBD",
+    "image": "",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-tip",
+   "type": "tip",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "desc": "TBD",
+    "amounts": "TBD",
+    "currency": "TBD",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-form",
+   "type": "form",
+   "size": "w",
+   "universe": "pro",
+   "data": {
+    "title": "TBD",
+    "desc": "TBD",
+    "button": "TBD"
+   }
+  },
+  {
+   "id": "sc-s-creative",
+   "type": "section",
+   "size": "full",
+   "universe": "crea",
+   "data": {
+    "title": "Creative"
+   }
+  },
+  {
+   "id": "sc-gallery",
+   "type": "gallery",
+   "size": "l",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "images": [],
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-video",
+   "type": "video",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "platform": "TBD",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-music-spotify",
+   "type": "music",
+   "size": "s",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "artist": "TBD",
+    "service": "spotify",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-music-apple",
+   "type": "music",
+   "size": "s",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "artist": "TBD",
+    "service": "apple",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-music-deezer",
+   "type": "music",
+   "size": "s",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "artist": "TBD",
+    "service": "deezer",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-music-soundcloud",
+   "type": "music",
+   "size": "s",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "artist": "TBD",
+    "service": "soundcloud",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-music-youtube",
+   "type": "music",
+   "size": "s",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "artist": "TBD",
+    "service": "youtube",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-radio-gospel",
+   "type": "radio",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "genre": "gospel",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-radio-classical",
+   "type": "radio",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "genre": "classical",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-radio-jazz",
+   "type": "radio",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "genre": "jazz",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-instr-piano",
+   "type": "instrument",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "name": "TBD",
+    "kind": "piano",
+    "since": "TBD",
+    "also": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-instr-bass",
+   "type": "instrument",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "name": "TBD",
+    "kind": "bass",
+    "since": "TBD",
+    "also": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-instr-sax",
+   "type": "instrument",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "name": "TBD",
+    "kind": "sax",
+    "since": "TBD",
+    "also": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-instr-voice",
+   "type": "instrument",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "name": "TBD",
+    "kind": "voice",
+    "since": "TBD",
+    "also": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-instr-other",
+   "type": "instrument",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "name": "TBD",
+    "kind": "other",
+    "since": "TBD",
+    "also": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-event",
+   "type": "event",
+   "size": "w",
+   "universe": "crea",
+   "data": {
+    "title": "TBD",
+    "date": "TBD",
+    "place": "TBD",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-s-personal",
+   "type": "section",
+   "size": "full",
+   "universe": "lifestyle",
+   "data": {
+    "title": "Personal"
+   }
+  },
+  {
+   "id": "sc-now",
+   "type": "now",
+   "size": "w",
+   "universe": "lifestyle",
+   "data": {
+    "text": "TBD",
+    "updated": "TBD"
+   }
+  },
+  {
+   "id": "sc-interest",
+   "type": "interest",
+   "size": "s",
+   "universe": "lifestyle",
+   "data": {
+    "title": "TBD",
+    "desc": "TBD",
+    "color": "",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-media-reading",
+   "type": "media",
+   "size": "s",
+   "universe": "lifestyle",
+   "data": {
+    "kind": "Reading",
+    "title": "TBD",
+    "by": "TBD",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-media-watching",
+   "type": "media",
+   "size": "s",
+   "universe": "lifestyle",
+   "data": {
+    "kind": "Watching",
+    "title": "TBD",
+    "by": "TBD",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-media-playing",
+   "type": "media",
+   "size": "s",
+   "universe": "lifestyle",
+   "data": {
+    "kind": "Playing",
+    "title": "TBD",
+    "by": "TBD",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-media-listening",
+   "type": "media",
+   "size": "s",
+   "universe": "lifestyle",
+   "data": {
+    "kind": "Listening",
+    "title": "TBD",
+    "by": "TBD",
+    "url": "TBD",
+    "image": ""
+   }
+  },
+  {
+   "id": "sc-team",
+   "type": "team",
+   "size": "s",
+   "universe": "lifestyle",
+   "data": {
+    "club": "TBD",
+    "league": "TBD",
+    "c1": "#0B3D91",
+    "c2": "#D7263D",
+    "url": "TBD"
+   }
+  },
+  {
+   "id": "sc-sport-calendar",
+   "type": "sport",
+   "size": "w",
+   "universe": "lifestyle",
+   "data": {
+    "follow": "f1",
+    "view": "calendar",
+    "f1follow": "TBD",
+    "title": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-sport-standings",
+   "type": "sport",
+   "size": "w",
+   "universe": "lifestyle",
+   "data": {
+    "follow": "f1",
+    "view": "standings",
+    "f1follow": "TBD",
+    "title": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-sport-teams",
+   "type": "sport",
+   "size": "w",
+   "universe": "lifestyle",
+   "data": {
+    "follow": "f1",
+    "view": "teams",
+    "f1follow": "TBD",
+    "title": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-sport-follow",
+   "type": "sport",
+   "size": "w",
+   "universe": "lifestyle",
+   "data": {
+    "follow": "f1",
+    "view": "follow",
+    "f1follow": "TBD",
+    "title": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-sport-results",
+   "type": "sport",
+   "size": "w",
+   "universe": "lifestyle",
+   "data": {
+    "follow": "f1",
+    "view": "results",
+    "f1follow": "TBD",
+    "title": "TBD",
+    "note": "TBD"
+   }
+  },
+  {
+   "id": "sc-countdown",
+   "type": "countdown",
+   "size": "s",
+   "universe": "lifestyle",
+   "data": {
+    "title": "TBD",
+    "date": "TBD"
+   }
+  },
+  {
+   "id": "sc-s-sizes",
+   "type": "section",
+   "size": "full",
+   "universe": "custom",
+   "data": {
+    "title": "Sizes"
+   }
+  },
+  {
+   "id": "sc-size-s",
+   "type": "text",
+   "size": "s",
+   "universe": "custom",
+   "data": {
+    "text": "TBD",
+    "style": "note"
+   }
+  },
+  {
+   "id": "sc-size-w",
+   "type": "text",
+   "size": "w",
+   "universe": "custom",
+   "data": {
+    "text": "TBD",
+    "style": "note"
+   }
+  },
+  {
+   "id": "sc-size-t",
+   "type": "text",
+   "size": "t",
+   "universe": "custom",
+   "data": {
+    "text": "TBD",
+    "style": "note"
+   }
+  },
+  {
+   "id": "sc-size-l",
+   "type": "text",
+   "size": "l",
+   "universe": "custom",
+   "data": {
+    "text": "TBD",
+    "style": "note"
+   }
+  },
+  {
+   "id": "sc-size-bar",
+   "type": "text",
+   "size": "bar",
+   "universe": "custom",
+   "data": {
+    "text": "TBD",
+    "style": "note"
+   }
+  },
+  {
+   "id": "sc-s-options",
+   "type": "section",
+   "size": "full",
+   "universe": "custom",
+   "data": {
+    "title": "Options"
+   }
+  },
+  {
+   "id": "sc-opt-spot",
+   "type": "link",
+   "size": "w",
+   "universe": "custom",
+   "data": {
+    "title": "TBD",
+    "url": "TBD",
+    "desc": "TBD",
+    "color": ""
+   },
+   "spot": true
+  },
+  {
+   "id": "sc-opt-hidden",
+   "type": "link",
+   "size": "w",
+   "universe": "custom",
+   "data": {
+    "title": "TBD",
+    "url": "TBD",
+    "desc": "TBD",
+    "color": ""
+   },
+   "hidden": true
+  },
+  {
+   "id": "sc-opt-scheduled",
+   "type": "link",
+   "size": "w",
+   "universe": "custom",
+   "data": {
+    "title": "TBD",
+    "url": "TBD",
+    "desc": "TBD",
+    "color": ""
+   },
+   "start": "2026-12-01",
+   "end": "2026-12-31"
+  }
+ ],
+ "journal": [
+  {
+   "id": "sc-journal-published",
+   "title": "TBD",
+   "excerpt": "",
+   "content": "TBD",
+   "date": "2026-11-28",
+   "universe": "pro",
+   "published": true
+  },
+  {
+   "id": "sc-journal-draft",
+   "title": "TBD",
+   "excerpt": "",
+   "content": "TBD",
+   "date": "2026-11-28",
+   "universe": "custom",
+   "published": false
+  }
+ ]
+}

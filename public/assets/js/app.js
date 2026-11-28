@@ -172,6 +172,9 @@ if(typeof window!=='undefined'&&window.TilesBento)window.TilesBento.enhance(T,F)
 /* Synthetic, read-only header inserted by the hub for each public section (never stored, never in the add-block catalog). */
 T.universe={label:'Section',cat:'',size:'full',fields:[],render:d=>`<div class="uni-head" id="${esc(d.slug)}"><h2>${esc(d.title)}</h2><p>${esc(d.question)}</p></div>`};
 const CATS=['Essentials','Work','Creative','Personal','Earn'];
+/* Order of blocks in « Add block », per category (most used first). Types missing here are appended, never hidden. */
+const CATALOGUE={Essentials:['link','social','contact','text','image','section','map','atlas'],Work:['project','company','experience','education','skills','languages','cv','stat','progress','testimonial','steps','faq','booking'],Creative:['gallery','video','music','radio','instrument','event'],Personal:['now','clock','interest','media','team','sport','countdown','faith'],Earn:['product','tip','form']};
+const catalogue=c=>{const own=(CATALOGUE[c]||[]).filter(k=>T[k]&&T[k].cat===c);return [...own,...Object.keys(T).filter(k=>T[k].cat===c&&!own.includes(k))];};
 const SIZES=[['s','Small',[1,0,0,0]],['w','Wide',[1,1,0,0]],['t','Tall',[1,0,1,0]],['l','Large',[1,1,1,1]],['bar','Strip',[1,1,0,0]]];
 
 /* ---------- State ---------- */
@@ -480,7 +483,7 @@ function openTile(id){
  <div class="row-btns"><button class="btn sm" type="button" data-tact="dup">${ic('copy',14)}Duplicate</button><button class="btn sm danger" type="button" data-tact="del">${ic('trash',14)}Delete</button></div>`,'tile');
 }
 function openAdd(){
- openDrawer('Add a block',`<div class="fld add-find"><label for="add-find">Chercher un bloc</label><input id="add-find" type="search" placeholder="FAQ, photo, heure…" autocomplete="off"><small id="add-find-n" class="muted" role="status"></small></div>`+CATS.map(c=>`<div class="cat"><h4>${c}</h4><div class="blocks">${Object.entries(T).filter(([,d])=>d.cat===c).map(([k,d])=>`<button class="blk" type="button" data-addtype="${k}"><b>${esc(d.label)}</b><small>${esc(d.hint)}</small></button>`).join('')}</div></div>`).join(''),'add');
+ openDrawer('Add a block',`<div class="fld add-find"><label for="add-find">Chercher un bloc</label><input id="add-find" type="search" placeholder="FAQ, photo, heure…" autocomplete="off"><small id="add-find-n" class="muted" role="status"></small></div>`+CATS.map(c=>`<div class="cat"><h4>${c}</h4><div class="blocks">${catalogue(c).map(k=>[k,T[k]]).map(([k,d])=>`<button class="blk" type="button" data-addtype="${k}"><b>${esc(d.label)}</b><small>${esc(d.hint)}</small></button>`).join('')}</div></div>`).join(''),'add');
 }
 function openProfile(){
  const p=S.profile;
@@ -570,7 +573,7 @@ dbody.addEventListener('click',e=>{
  if(b.dataset.font){S.theme.font=b.dataset.font;$$('[data-font]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.layout){S.theme.layout=b.dataset.layout;$$('[data-layout]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.xact==='copy'){const ta=$('#x-out');copyText(ta.value,ta);return}
- if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});o.rev=S.rev;S=o;window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Page imported')}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
+ if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});delete o._capabilities;o.rev=S.rev;S=o;window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Page imported')}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
  if(b.dataset.xact==='reset'){const old=S;S=seed();window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Sample page restored',()=>{S=old;window.TilesHub?.setUniverses(S.universes);save();render()});return}
 });
 
