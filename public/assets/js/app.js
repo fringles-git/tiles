@@ -309,7 +309,7 @@ window.addEventListener('beforeunload',e=>{if(dirty||saving){e.preventDefault();
 const byId=id=>S.tiles.find(t=>t.id===id);
 const inWindow=t=>{const now=new Date();if(t.start&&new Date(t.start+'T00:00:00')>now)return false;if(t.end&&new Date(t.end+'T23:59:59')<now)return false;return true};
 // A block whose fields are all empty is not shown to visitors (no "TBD", no blank card): flagged "Vide" in the editor.
-const DECOR_KEYS=new Set(['color','style','platform','logoFor','brand','zoom','mode','layout','tone','icon','kind','unit']);
+const DECOR_KEYS=new Set(['color','c1','c2','style','platform','logoFor','brand','logos','currency','zoom','mode','layout','tone','icon','kind','unit']);
 const SELF_CONTAINED=new Set(['clock']);
 function blank(t){if(SELF_CONTAINED.has(t.type))return false;const vals=Object.entries(t.data||{}).filter(([k])=>!DECOR_KEYS.has(k)).map(([,v])=>v);return !vals.some(v=>Array.isArray(v)?v.length>0:(typeof v==='string'?v.trim()!=='':v!=null&&v!==false&&v!==''))}
 const visible=t=>!t.hidden&&inWindow(t)&&T[t.type]&&!((PUBLIC||ui.mode==='preview')&&blank(t));
@@ -593,7 +593,7 @@ dbody.addEventListener('click',e=>{
  if(b.dataset.font){S.theme.font=b.dataset.font;$$('[data-font]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.layout){S.theme.layout=b.dataset.layout;$$('[data-layout]',dbody).forEach(x=>x.setAttribute('aria-pressed',x===b));applyTheme();save();return}
  if(b.dataset.xact==='copy'){const ta=$('#x-out');copyText(ta.value,ta);return}
- if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');if(!confirm('Remplacer toute la page (blocs, profil, journal) par ce JSON ?'))return;const before=JSON.parse(JSON.stringify(S));o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});delete o._capabilities;o.rev=S.rev;S=o;window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Page remplacée',()=>{S=before;window.TilesHub?.setUniverses(S.universes);save();render();openExport()})}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
+ if(b.dataset.xact==='import'){try{const o=JSON.parse($('#x-in').value);if(!(window.TilesHub?.validPage(o)))throw new Error('shape');if(!confirm('Remplacer toute la page (blocs, profil, journal) par ce JSON ?'))return;const before=JSON.parse(JSON.stringify(S));o.theme=Object.assign({},seed().theme,o.theme||{});o.stats=Object.assign({sample:false,views:0,days:Array(14).fill(0),clicks:{},leads:[]},o.stats||{});delete o._capabilities;o.rev=S.rev;S=o;window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Page remplacée',()=>{S=Object.assign(before,{rev:S.rev});window.TilesHub?.setUniverses(S.universes);save();render();openExport()})}catch(err){$('#x-msg').textContent='That is not a valid page JSON. It needs "profile" and "tiles".'}return}
  if(b.dataset.xact==='reset'){const old=S;S=seed();window.TilesHub?.setUniverses(S.universes);save();render();openExport();toast('Sample page restored',()=>{S=old;window.TilesHub?.setUniverses(S.universes);save();render()});return}
 });
 
