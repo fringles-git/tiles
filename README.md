@@ -67,6 +67,6 @@ npm run check
 npm test
 ```
 
-There are no npm dependencies to install. `test:js`, `test:php` and `test:http` run the suites separately. The HTTP suite starts an isolated PHP server with temporary data/uploads, exercises authentication, saves, media and private-path denials, and removes its fixtures. `PHP_BINARY` selects a non-default PHP executable. Node-only test runs skip the HTTP suite when PHP is unavailable; CI runs it on PHP 8.5, the minimum version (`src/paths.php` refuses to start below it).
+`composer.json` states the PHP constraint (`>=8.5`), the `Tiles\` PSR-4 namespace (`src/Tiles/`, empty until the first class) and the dev-only tools. Production needs no Composer and no `vendor/`: run `composer install` only to use the dev tools locally. There are no npm dependencies to install. `test:js`, `test:php` and `test:http` run the suites separately. The HTTP suite starts an isolated PHP server with temporary data/uploads, exercises authentication, saves, media and private-path denials, and removes its fixtures. `PHP_BINARY` selects a non-default PHP executable. Node-only test runs skip the HTTP suite when PHP is unavailable; CI runs it on PHP 8.5, the minimum version (`src/paths.php` refuses to start below it).
 
 See [API setup](docs/setup/api-setup.md), [interactive cards](docs/features/interactive-cards.md), and [integration decisions](docs/development/github-sync.md). Third-party asset licenses remain beside their vendored assets.
