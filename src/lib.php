@@ -207,6 +207,53 @@ function stats_for_editor(): array
     ];
 }
 
+/** One random nonce per response, for the inline TILES_BOOT script. */
+function csp_nonce(): string
+{
+    static $nonce = null;
+    return $nonce ??= rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
+}
+
+/**
+ * Content Security Policy for HTML pages. Third parties are listed one by one:
+ * YouTube (nocookie) and Spotify players, the map (MapLibre from unpkg, OpenFreeMap tiles),
+ * radio streams (any HTTPS host). Inline style attributes stay allowed: tile markup uses them.
+ */
+function csp_policy(string $nonce): string
+{
+    return implode('; ', [
+        "default-src 'self'",
+        "script-src 'self' 'nonce-$nonce' https://unpkg.com",
+        "style-src 'self' 'unsafe-inline' https://unpkg.com",
+        "img-src 'self' data: blob: https:",
+        "font-src 'self'",
+        "connect-src 'self' https://tiles.openfreemap.org",
+        "media-src 'self' blob: https:",
+        'frame-src https://www.youtube-nocookie.com https://open.spotify.com',
+        "worker-src 'self' blob:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'self'",
+    ]);
+}
+
+/**
+ * CSP starts in report-only mode (violations only appear in the browser console):
+ * set 'csp' => 'enforce' in config.php, or TILES_CSP=enforce, once the console stays clean.
+ */
+function send_security_headers(): void
+{
+    $mode = (string) (getenv('TILES_CSP') ?: (tiles_private_config()['csp'] ?? 'report'));
+    if ($mode !== 'off') {
+        header(($mode === 'enforce' ? 'Content-Security-Policy: ' : 'Content-Security-Policy-Report-Only: ') . csp_policy(csp_nonce()));
+    }
+    if (is_https()) {
+        // 180 days, this host only: subdomains keep their own policy.
+        header('Strict-Transport-Security: max-age=15552000');
+    }
+}
+
 function e(string $s): string
 {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
@@ -224,6 +271,7 @@ function render_shell(string $title, string $description, array $boot, string $e
     header('Content-Type: text/html; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
+    send_security_headers();
     $bootJson = json_encode(
         $boot,
         JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
@@ -256,7 +304,7 @@ function render_shell(string $title, string $description, array $boot, string $e
 <body>
 <?php readfile(__DIR__ . '/templates/markup.html'); ?>
 <?= $noscript ?>
-<script>window.TILES_BOOT=<?= $bootJson ?>;</script>
+<script nonce="<?= csp_nonce() ?>">window.TILES_BOOT=<?= $bootJson ?>;</script>
 </body>
 </html>
 <?php
