@@ -38,9 +38,8 @@ jobs:
         run: |
           composer install --no-interaction --no-progress
           vendor/bin/phpstan analyse --no-progress --error-format=github
-      - name: TEMP level survey
-        run: |
-          for l in 1 2 3 4 5; do n=$(vendor/bin/phpstan analyse --no-progress --level=$l --error-format=json | php -r '$j=json_decode(stream_get_contents(STDIN),true); echo $j["totals"]["file_errors"]+$j["totals"]["errors"];'); echo "::notice::phpstan level $l: $n errors"; done
+      - name: TEMP level 4 errors
+        run: vendor/bin/phpstan analyse --no-progress --level=4 --error-format=github || true
       - run: npm run check
       - run: npm run test:php
       - name: HTTP boundary, media, authentication and persistence
