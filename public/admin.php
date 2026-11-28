@@ -60,7 +60,7 @@ if (!is_admin()) {
 <meta name="robots" content="noindex">
 <title>Tiles · Log in</title>
 <link rel="stylesheet" href="assets/fonts/fonts.css?v=<?= asset_v('fonts/fonts.css') ?>">
-<style>
+<style nonce="<?= csp_nonce() ?>">
 :root{--bg:#ECEEF1;--surface:#fff;--fg:#14161A;--muted:#656B75;--line:rgba(18,22,30,.1);--accent:#0B7A75;--danger:#D6363F}
 @media (prefers-color-scheme:dark){:root{--bg:#0E1013;--surface:#171A1F;--fg:#F0F2F5;--muted:#99A0AA;--line:rgba(255,255,255,.1);color-scheme:dark}}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:15px/1.45 Figtree,system-ui,sans-serif;padding:16px}
@@ -71,6 +71,7 @@ label{font-size:12px;font-weight:700;color:var(--muted)}
 input{width:100%;border:1px solid var(--line);background:transparent;border-radius:12px;padding:11px 12px;font:inherit;color:inherit}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button{border:0;border-radius:999px;padding:11px;background:var(--fg);color:var(--bg);font:inherit;font-weight:700;cursor:pointer}
+.field{display:flex;flex-direction:column;gap:6px}
 .err{color:var(--danger);font-weight:600;font-size:13px;margin:0}
 </style>
 </head>
@@ -79,7 +80,7 @@ button{border:0;border-radius:999px;padding:11px;background:var(--fg);color:var(
   <span class="mark"><i></i><i></i><i></i></span>
   <h1>Tiles</h1>
   <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
-  <div style="display:flex;flex-direction:column;gap:6px">
+  <div class="field">
     <label for="password">Password</label>
     <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
   </div>

@@ -15,7 +15,7 @@ const brands={
 };
 // Authored outline controls share one 24px grid and stroke; brand marks keep their identities.
 const controlPaths={instagram:'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0M17.5 6.5h.01',search:'M21 21l-5-5M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15',globe:'M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',share:'M12 16V3M7 8l5-5 5 5M5 13v7h14v-7',qr:'M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM21 15v6h-6M18 12h3M12 3v3M12 12v9',download:'M12 3v12M7 10l5 5 5-5M4 17v4h16v-4',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1 1M18 18l1 1M5 19l1-1M18 6l1-1',moon:'M21 13a9 9 0 1 1-10-10 7 7 0 0 0 10 10',monitor:'M3 4h18v13H3zM8 21h8M12 17v4',code:'M8 7l-5 5 5 5M16 7l5 5-5 5',zoom:'M21 21l-5-5M7 10h6M10 7v6M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15',mail:'M4 6h16v12H4zM4 7l8 6 8-6',phone:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2',ext:'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',plus:'M12 5v14M5 12h14',play:'M8 5l11 7-11 7z'};
-function uiIcon(name,size=20,fallback){return `<svg class="ui-icon" style="--icon-size:${Number(size)||20}px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${controlPaths[name]||fallback||controlPaths.code}"/></svg>`;}
+function uiIcon(name,size=20,fallback){return `<svg class="ui-icon" data-css="--icon-size:${Number(size)||20}px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${controlPaths[name]||fallback||controlPaths.code}"/></svg>`;}
 function logoMarkup(name,src){const initials=name.split(/[ -]/).map(x=>x[0]).join('').slice(0,2);return `<span class="company-logo" aria-hidden="true"><span>${esc(initials)}</span>${src?`<img src="${esc(src)}" alt="" loading="lazy" decoding="async" data-company-logo>`:''}</span>`;}
 function languageSegments(level){const key=normalize(level).trim(),scores={a1:1,a2:2,b1:3,b2:4,'b2+':4,c1:5,c2:5,natif:5,bilingue:5,courant:4,notions:1};const n=scores[key];return n?`<span class="language-segments" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i${i<=n?' class="filled"':''}></i>`).join('')}</span>`:'';}
 const tech={html:'html5',html5:'html5',css:'css',javascript:'javascript',react:'react',php:'php',python:'python',bootstrap:'bootstrap',flutter:'flutter',github:'github'};
@@ -26,9 +26,9 @@ const colorLogos={html5:'html5-color',css:'css-color'};
 function skillMark(name){
  const key=tech[normalize(name)];
  if(colorLogos[key])return `<img class="skill-img" src="${esc(base+'brands/'+colorLogos[key]+'.svg')}" alt="" loading="lazy" decoding="async">`;
- if(key)return `<span class="skill-mark" style="--mark:${techColors[key]||'currentColor'};--mark-url:url('${esc(base+'brands/'+key+'.svg')}')" aria-hidden="true"></span>`;
+ if(key)return `<span class="skill-mark" data-css="--mark:${techColors[key]||'currentColor'};--mark-url:url('${esc(base+'brands/'+key+'.svg')}')" aria-hidden="true"></span>`;
  const letters=String(name).trim().split(/[\s-]+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase();
- return `<span class="skill-mono" style="--h:${hue(normalize(name))}" aria-hidden="true">${esc(letters)}</span>`;
+ return `<span class="skill-mono" data-css="--h:${hue(normalize(name))}" aria-hidden="true">${esc(letters)}</span>`;
 }
 let library=[];
 let employers=[];
@@ -49,7 +49,7 @@ function employerStrip(max=7){
  const logoOf=name=>{const lib=libraryLogo(name);return lib?lib.logo:Object.values(brands).find(b=>b.logo&&new RegExp('\\b(?:'+(b.match||'')+')\\b').test(normalize(name)))?.logo||'';};
  const ranked=employers.map((name,i)=>({name,logo:logoOf(name),i})).sort((a,b)=>(!a.logo)-(!b.logo)||a.i-b.i);
  const shown=ranked.slice(0,max).reverse(),rest=employers.length-shown.length;
- return `<div class="stat-logos" style="--count:${shown.length+(rest>0?1:0)}" aria-label="Entreprises : ${esc(employers.join(', '))}">${shown.map((e,i)=>`<span class="stat-logo" style="--i:${i};--n:${shown.length}" title="${esc(e.name)}">${logoMarkup(e.name,e.logo)}</span>`).join('')}${rest>0?`<span class="stat-logo more" style="--i:${shown.length};--n:${shown.length}">+${rest}</span>`:''}</div>`;
+ return `<div class="stat-logos" data-css="--count:${shown.length+(rest>0?1:0)}" aria-label="Entreprises : ${esc(employers.join(', '))}">${shown.map((e,i)=>`<span class="stat-logo" data-css="--i:${i};--n:${shown.length}" title="${esc(e.name)}">${logoMarkup(e.name,e.logo)}</span>`).join('')}${rest>0?`<span class="stat-logo more" data-css="--i:${shown.length};--n:${shown.length}">+${rest}</span>`:''}</div>`;
 }
 function libraryLogo(org){const t=normalize(org);return library.find(x=>x.key&&new RegExp('(?:^|[^a-z0-9])'+x.key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:$|[^a-z0-9])').test(t))||null}
 function span(dates){
@@ -90,9 +90,9 @@ const hz=(base,semi)=>Math.round(base*2**(semi/12)*100)/100;
 const NAMES=['Do','Ré♭','Ré','Mi♭','Mi','Fa','Sol♭','Sol','La♭','La','Si♭','Si'];
 function pads(kind){
  if(kind==='piano'){const whites=[['Do',261.63],['Ré',293.66],['Mi',329.63],['Fa',349.23],['Sol',392],['La',440],['Si',493.88],['Do aigu',523.25]],blacks=[['Do dièse',277.18,12.5],['Ré dièse',311.13,25],['Fa dièse',369.99,50],['Sol dièse',415.3,62.5],['La dièse',466.16,75]];
-  return `<div class="piano-keys" role="group" aria-label="Clavier de piano">${whites.map(([n,f])=>`<button type="button" class="key white" data-note="${f}" aria-label="Jouer ${n}"></button>`).join('')}${blacks.map(([n,f,l])=>`<button type="button" class="key black" data-note="${f}" style="left:${l}%" aria-label="Jouer ${n}"></button>`).join('')}</div>`;}
+  return `<div class="piano-keys" role="group" aria-label="Clavier de piano">${whites.map(([n,f])=>`<button type="button" class="key white" data-note="${f}" aria-label="Jouer ${n}"></button>`).join('')}${blacks.map(([n,f,l])=>`<button type="button" class="key black" data-note="${f}" data-css="left:${l}%" aria-label="Jouer ${n}"></button>`).join('')}</div>`;}
  if(kind==='bass'){const strings=[['Sol',98],['Ré',73.42],['La',55],['Mi',41.2]];
-  return `<div class="bass-neck" role="group" aria-label="Manche de basse, 4 cordes, 5 cases">${strings.map(([n,b],si)=>`<div class="string" style="--w:${1+si*.6}px">${[0,1,2,3,4].map(f=>`<button type="button" data-note="${hz(b,f)}" aria-label="Corde ${n}, ${f?'case '+f:'à vide'}"><i></i></button>`).join('')}</div>`).join('')}</div>`;}
+  return `<div class="bass-neck" role="group" aria-label="Manche de basse, 4 cordes, 5 cases">${strings.map(([n,b],si)=>`<div class="string" data-css="--w:${1+si*.6}px">${[0,1,2,3,4].map(f=>`<button type="button" data-note="${hz(b,f)}" aria-label="Corde ${n}, ${f?'case '+f:'à vide'}"><i></i></button>`).join('')}</div>`).join('')}</div>`;}
  if(kind==='sax'||kind==='voice'){const base=kind==='sax'?233.08:261.63,start=kind==='sax'?10:0,steps=[0,2,4,5,7,9,11,12];
   return `<div class="note-pads" role="group" aria-label="${kind==='sax'?'Saxophone':'Chant'} : notes">${steps.map(st=>`<button type="button" data-note="${hz(base,st)}">${NAMES[(start+st)%12]}</button>`).join('')}</div>`;}
  return '';

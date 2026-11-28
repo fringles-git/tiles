@@ -500,3 +500,35 @@ a.btn{color:inherit;text-decoration:none}
 .lead button{min-height:44px}
 .lead button:disabled{opacity:.6;cursor:wait}
 .lead [data-lead-error]{font-size:13px;color:var(--danger);line-height:1.4}
+
+/* Utilities: former inline style="" attributes, kept out of HTML for the CSP (style-src without 'unsafe-inline').
+   !important mirrors the precedence the inline style had over component rules. */
+.u-b0{border:0!important}
+.u-bg-none{background:none!important}
+.u-col{flex-direction:column!important}
+.u-fg{color:var(--fg)!important}
+.u-flex{display:flex!important}
+.u-fs13{font-size:13px!important}
+.u-fs14{font-size:14px!important}
+.u-fs24{font-size:24px!important}
+.u-gap10{gap:10px!important}
+.u-gap14{gap:14px!important}
+.u-gap3{gap:3px!important}
+.u-gap6{gap:6px!important}
+.u-gap7{gap:7px!important}
+.u-h100{height:100%!important}
+.u-h34{height:34px!important}
+.u-h36{height:36px!important}
+.u-icon16{--icon-size:16px!important}
+.u-lh115{line-height:1.15!important}
+.u-ml-auto{margin-left:auto!important}
+.u-mt-auto{margin-top:auto!important}
+.u-mt6{margin-top:6px!important}
+.u-p0{padding:0!important}
+.u-r-inherit{border-radius:inherit!important}
+.u-self-start{align-self:flex-start!important}
+.u-w34{width:34px!important}
+.u-w44{width:44px!important}
+.u-w600{font-weight:600!important}
+.u-w700{font-weight:700!important}
+.noscript-page{max-width:640px;margin:40px auto;padding:0 16px;font-family:sans-serif}
