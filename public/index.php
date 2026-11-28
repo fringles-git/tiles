@@ -72,7 +72,7 @@ if ($article) {
     $head .= '<script type="application/ld+json">' . json_encode(['@context' => 'https://schema.org', '@type' => 'BlogPosting', 'headline' => (string) $article['title'], 'description' => $description, 'datePublished' => (string) $article['date'], 'url' => $url, 'mainEntityOfPage' => $url, 'author' => ['@type' => 'Person', 'name' => $name, 'url' => $base]], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
 }
 // Plain-HTML fallback for visitors and crawlers that do not run JavaScript.
-$items = seo_body($section ? ['tiles' => section_tiles($page['tiles'] ?? [], $section['key'], $universeKeys)] + $page : $page, $now);
+$items = seo_body($section ? ['tiles' => section_tiles($page['tiles'], $section['key'], $universeKeys)] + $page : $page, $now);
 $noscript = '<noscript><main class="noscript-page">'
     . ($article
         ? '<article><h1>' . e((string) $article['title']) . '</h1><p><time datetime="' . e((string) $article['date']) . '">' . e((string) $article['date']) . '</time> · ' . e($name) . '</p>' . journal_markdown((string) $article['content']) . '</article>'
