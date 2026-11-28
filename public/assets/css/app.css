@@ -383,7 +383,8 @@ body{margin:0}
 img{max-width:100%}
 a.btn{color:inherit;text-decoration:none}
 .savestate{font-family:var(--f-body);font-size:12px;font-weight:600;color:var(--muted);margin-left:10px;letter-spacing:0}
-.savestate[data-state="dirty"],.savestate[data-state="busy"]{color:var(--warn)}
+.savestate[data-state="dirty"],.savestate[data-state="busy"]{color:var(--muted)}
+.savestate[data-state="draft"]{color:var(--warn)}
 .savestate[data-state="err"]{color:var(--danger)}
 .embed{display:block;width:100%;height:100%;border:0;border-radius:12px;background:var(--surface-2)}
 .is-public .page-in{padding-bottom:clamp(28px,6vw,72px)}
@@ -545,3 +546,4 @@ a.btn{color:inherit;text-decoration:none}
 .brand .acct{margin-left:4px;font-family:var(--f-body,inherit);font-weight:600;letter-spacing:0}
 /* Password and search fields: same look as the other inputs (were browser defaults, square black border). */
 .fld input[type=password],.fld input[type=search]{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:14px;min-height:44px}
+#bar [data-act="publish"]:disabled{opacity:.45;cursor:default}

@@ -293,16 +293,19 @@ function undo(){restoreFrom(hist?.undo(),'Modification annulée')}
 function redo(){restoreFrom(hist?.redo(),'Modification rétablie')}
 // Draft / published: the editor autosaves page.json; visitors see published.json until Publish.
 var PUB=BOOT.published||{rev:0,at:''};if(!PUBLIC)setTimeout(syncPublish);
-function syncPublish(){const b=$('[data-act="publish"]');if(!b)return;const pending=dirty||saving||(S.rev||0)!==PUB.rev;b.disabled=!pending;b.classList.toggle('pri',pending);b.querySelector('.lbl').textContent=pending?'Publier':'Publié';b.title=pending?'Rendre les modifications visibles sur la page publique':(PUB.at?'Publié le '+new Date(PUB.at).toLocaleString('fr-FR'):'Page publique à jour');const d=$('[data-act="discard"]');if(d)d.hidden=!pending||!PUB.rev}
+// One status for two axes: the save (in progress, failed) and the publish (draft vs public).
+// States: busy · err · dirty (edit waiting to save) · draft (saved, not public) · pub (public = editor).
+function pubState(){return dirty?'dirty':((S.rev||0)!==PUB.rev?'draft':'pub')}
+function syncPublish(){const b=$('[data-act="publish"]');if(!b)return;const st=pubState(),pending=st!=='pub'||saving;b.disabled=!pending;b.classList.toggle('pri',pending);b.querySelector('.lbl').textContent='Publier';b.title=pending?'Rendre les modifications visibles sur la page publique':'Rien à publier : la page publique est à jour';const d=$('[data-act="discard"]');if(d)d.hidden=!pending||!PUB.rev;const el=document.getElementById('savestate');if(el&&!['busy','err'].includes(el.dataset.state)){const txt={dirty:'Modifications en cours',draft:'Brouillon enregistré · non publié',pub:'Publié'+(PUB.at?' le '+new Date(PUB.at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'')};el.textContent=txt[st];el.dataset.state=st}}
 const settled=()=>new Promise((ok,ko)=>{let n=0;const t=setInterval(()=>{if(!dirty&&!saving){clearInterval(t);ok()}else if(++n>100){clearInterval(t);ko(new Error('enregistrement en attente'))}},100);if(dirty&&!saving)flush()});
 async function publish(){const b=$('[data-act="publish"]');b.disabled=true;try{await settled();const j=await api('publish',{rev:S.rev||0});PUB={rev:j.rev,at:j.at};toast('Page publiée')}catch(err){toast('Non publié : '+err.message)}syncPublish()}
-async function discard(){if(!confirm('Revenir à la version publiée ? Les modifications non publiées seront perdues.'))return;const pending=dirty;try{clearTimeout(saveT);dirty=false;await settled();await api('discard',{});location.reload()}catch(err){if(pending){dirty=true;setSaveState('Unsaved changes','dirty');saveT=setTimeout(flush,700)}toast(err.message)}}
-function setSaveState(t,cls){syncPublish();const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}}
-function save(){if(PUBLIC)return;if(hist&&!restoring){const f=document.activeElement;hist.record(snap(),f&&f.matches?.('#dbody input:not([type=checkbox]):not([type=radio]):not([type=range]),#dbody textarea')?f.id:'');syncHistory();}dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
-function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Saving…','busy');
+async function discard(){if(!confirm('Revenir à la version publiée ? Les modifications non publiées seront perdues.'))return;const pending=dirty;try{clearTimeout(saveT);dirty=false;await settled();await api('discard',{});location.reload()}catch(err){if(pending){dirty=true;setSaveState('','dirty');saveT=setTimeout(flush,700)}toast(err.message)}}
+function setSaveState(t,cls){const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}syncPublish();}
+function save(){if(PUBLIC)return;if(hist&&!restoring){const f=document.activeElement;hist.record(snap(),f&&f.matches?.('#dbody input:not([type=checkbox]):not([type=radio]):not([type=range]),#dbody textarea')?f.id:'');syncHistory();}dirty=true;setSaveState('','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
+function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Enregistrement…','busy');
  const page=Object.assign({},S);delete page.stats;
- api('save',{page,base:S.rev||0}).then(j=>{S.rev=j.rev;saving=false;setSaveState(dirty?'Unsaved changes':'Saved','ok');if(dirty)flush()})
- .catch(err=>{saving=false;dirty=true;setSaveState('Not saved','err');if(/mise à jour sur le serveur/.test(err.message)){toast(err.message);return}toast('Not saved: '+err.message+'. Retrying in 10 s.');clearTimeout(saveT);saveT=setTimeout(flush,10000)})}
+ api('save',{page,base:S.rev||0}).then(j=>{S.rev=j.rev;saving=false;setSaveState('','ok');if(dirty)flush()})
+ .catch(err=>{saving=false;dirty=true;setSaveState('Non enregistré · nouvel essai','err');if(/mise à jour sur le serveur/.test(err.message)){toast(err.message);return}toast('Not saved: '+err.message+'. Retrying in 10 s.');clearTimeout(saveT);saveT=setTimeout(flush,10000)})}
 window.addEventListener('beforeunload',e=>{if(dirty||saving){e.preventDefault();e.returnValue=''}});
 
 /* ---------- Helpers ---------- */
@@ -356,10 +359,10 @@ function profileExtras(p){
  if(rows.length)h+=`<div class="pcard">${rows.join('')}</div>`;
  else if(edit)h+=`<button type="button" class="pempty" data-act="profile">${ic('plus',16)}Ajouter téléphone, email et horaires</button>`;
  const secs=navSections();
- if(p.showNav!==false&&secs.length>=2)h+=`<nav class="jump" aria-label="Sur cette page"><span class="eyebrow">Sur cette page</span><ol>${secs.map((t,i)=>`<li><a href="#${t.id}" data-jump="${t.id}"><span class="jn">${String(i+1).padStart(2,'0')}</span>${esc(t.data.title)}</a></li>`).join('')}</ol></nav>`;
+ if(!edit&&p.showNav!==false&&secs.length>=2)h+=`<nav class="jump" aria-label="Sur cette page"><span class="eyebrow">Sur cette page</span><ol>${secs.map((t,i)=>`<li><a href="#${t.id}" data-jump="${t.id}"><span class="jn">${String(i+1).padStart(2,'0')}</span>${esc(t.data.title)}</a></li>`).join('')}</ol></nav>`;
  return h}
 function renderJumpbar(){const jb=document.getElementById('jumpbar');if(!jb)return;const secs=navSections();
- const show=S.profile.showNav!==false&&secs.length>=2;jb.hidden=!show;
+ const show=ui.mode!=='edit'&&S.profile.showNav!==false&&secs.length>=2;jb.hidden=!show;
  jb.innerHTML=show?secs.map(t=>`<a href="#${t.id}" data-jump="${t.id}">${esc(t.data.title)}</a>`).join(''):'';
  requestAnimationFrame(markActive)}
 let activeId='';
@@ -509,7 +512,7 @@ function openProfile(){
   <div class="two"${p.hours.allDay?' hidden':''} id="p-h-times"><div class="fld"><label for="p-h-from">De</label><input type="time" id="p-h-from" data-hk="from" value="${esc(p.hours.from)}"></div><div class="fld"><label for="p-h-to">À</label><input type="time" id="p-h-to" data-hk="to" value="${esc(p.hours.to)}"></div></div>
   <div class="fld"><label for="p-h-note">Note (facultatif)</label><input type="text" id="p-h-note" data-hk="note" value="${esc(p.hours.note||'')}" placeholder="Réponse sous 24 h"></div>
   <span class="hint">Le statut « Disponible maintenant » suit l’heure de Paris. Aucun jour coché = horaires masqués.</span></div>
- <div class="grp"><h4>Menu</h4><label class="chk"><input type="checkbox" id="p-showNav" data-pk="showNav"${p.showNav!==false?' checked':''}>Afficher le menu « Sur cette page »</label><span class="hint">Liste tes blocs « Section title » pour aller directement à une partie.</span></div></div>`,'profile');
+ <div class="grp"><h4>Menu</h4><label class="chk"><input type="checkbox" id="p-showNav" data-pk="showNav"${p.showNav!==false?' checked':''}>Afficher le menu « Sur cette page »</label><span class="hint">Sur la page publique : liste tes blocs « Titre de section » pour aller directement à une partie. Dans l’éditeur, la navigation se fait par univers.</span></div></div>`,'profile');
 }
 const SKINS=[['auto','Auto',['#ECEEF1','#FFFFFF','#171A1F']],['porcelain','Porcelain',['#ECEEF1','#FFFFFF','#DADDE2']],['graphite','Graphite',['#0E1013','#171A1F','#2A2F37']],['sage','Sage',['#E3EAE4','#F7FAF7','#C8D5CA']],['midnight','Midnight',['#0B1020','#141B31','#26315A']],['paper','Paper',['#F3F2EF','#FFFFFF','#E2E0DA']]];
 const ACCENTS=['#0B7A75','#2E5BFF','#E5484D','#D97706','#7C5CFF','#14161A','#DB2777','#16A34A'];
