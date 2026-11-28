@@ -79,6 +79,8 @@
 @supports (animation-timeline:view()){
   @media screen and (prefers-reduced-motion:no-preference){
     .is-public .grid .tile{animation:bento-reveal linear both;animation-timeline:view();animation-range:entry 5% entry 65%}
+    /* Spotlight tiles keep their wiggle (app.css): reveal and wiggle are composed, translate vs transform. */
+    .is-public .grid .tile.spot{animation:bento-reveal linear both,wiggle 4s ease-in-out infinite;animation-timeline:view(),auto;animation-range:entry 5% entry 65%,normal}
   }
 }
 @keyframes bento-reveal{from{opacity:0;translate:0 20px}}

@@ -94,5 +94,6 @@ test('motion CSS: every animation is opt-in and the reveal is progressive',()=>{
   const i=css.indexOf(sel);assert.ok(i>0,sel);assert.match(enclosing(css,i),/prefers-reduced-motion:no-preference/,sel);
  }
  assert.match(css,/@starting-style\{\s*:is\(\.project-dialog,\.explore-dialog,\.sports-dialog\)\[open\]/);
+ assert.match(css,/\.tile\.spot\{animation:bento-reveal[^}]*,wiggle 4s/,'scroll reveal must not drop the Spotlight wiggle');
  assert.match(css,/forced-colors:active\)\{\.hub-universes::before\{display:none\}/);
 });
