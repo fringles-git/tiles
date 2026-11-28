@@ -2,22 +2,22 @@
  "v": 1,
  "_capabilities": "Informational only, ignored by Tiles (removed on import). See docs/development/showcase.md.",
  "profile": {
-  "name": "TBD",
-  "role": "TBD",
-  "tags": "TBD",
-  "bio": "TBD",
-  "location": "TBD",
-  "status": "TBD",
+  "name": "Camille Arnaud",
+  "role": "Designer produit · front-end",
+  "tags": "Design system, UX, Vanilla JS",
+  "bio": "Je conçois des interfaces simples pour des produits utiles, de la recherche au code.",
+  "location": "Lyon",
+  "status": "Disponible en janvier",
   "statusOn": true,
   "avatar": "",
   "banner": "",
   "bannerStill": "",
   "header": "classic",
-  "email": "TBD",
-  "phone": "TBD",
-  "booking": "TBD",
+  "email": "camille@example.com",
+  "phone": "+33 1 99 00 12 34",
+  "booking": "https://example.com/rendez-vous",
   "cv": "",
-  "cvNote": "TBD",
+  "cvNote": "Mis à jour en novembre",
   "showNav": true,
   "hours": {
    "days": [
@@ -31,7 +31,7 @@
    ],
    "from": "09:00",
    "to": "18:00",
-   "note": "TBD"
+   "note": "Réponse sous 24 h"
   }
  },
  "theme": {
@@ -48,35 +48,35 @@
    "slug": "profil",
    "label": "Profil",
    "accent": "#9E5A3F",
-   "question": "TBD"
+   "question": "Qui suis-je, et comment me joindre ?"
   },
   {
    "key": "pro",
    "slug": "parcours",
    "label": "Parcours",
    "accent": "#0B3D91",
-   "question": "TBD"
+   "question": "Qu’ai-je fait, et pour qui ?"
   },
   {
    "key": "crea",
    "slug": "creations",
    "label": "Créations",
    "accent": "#7946BC",
-   "question": "TBD"
+   "question": "Que fais-je de mes mains et de ma tête ?"
   },
   {
    "key": "lifestyle",
    "slug": "passions",
    "label": "Passions",
    "accent": "#B51E27",
-   "question": "TBD"
+   "question": "Qu’est-ce qui me fait vibrer ?"
   },
   {
    "key": "custom",
    "slug": "univers-personnalise",
    "label": "Univers personnalisé",
    "accent": "#0B7A75",
-   "question": "TBD"
+   "question": "Un univers à ton nom : à toi de le définir."
   }
  ],
  "tiles": [
@@ -95,9 +95,9 @@
    "size": "w",
    "universe": "humain",
    "data": {
-    "title": "TBD",
-    "url": "TBD",
-    "desc": "TBD",
+    "title": "Mon portfolio complet",
+    "url": "https://example.com/portfolio",
+    "desc": "Études de cas détaillées.",
     "color": ""
    }
   },
@@ -107,9 +107,9 @@
    "size": "w",
    "universe": "humain",
    "data": {
-    "title": "TBD",
-    "email": "TBD",
-    "phone": "TBD"
+    "title": "Me contacter",
+    "email": "camille@example.com",
+    "phone": "+33 1 99 00 12 34"
    }
   },
   {
@@ -118,7 +118,7 @@
    "size": "w",
    "universe": "humain",
    "data": {
-    "text": "TBD",
+    "text": "Basée à Lyon, je travaille à distance avec des équipes partout en France.",
     "style": "note"
    }
   },
@@ -128,7 +128,7 @@
    "size": "w",
    "universe": "humain",
    "data": {
-    "text": "TBD",
+    "text": "« Le bon design se voit peu, il se sent. »",
     "style": "quote"
    }
   },
@@ -139,8 +139,8 @@
    "universe": "humain",
    "data": {
     "image": "",
-    "caption": "TBD",
-    "url": "TBD"
+    "caption": "Atelier, Lyon",
+    "url": "https://example.com/atelier"
    }
   },
   {
@@ -149,9 +149,9 @@
    "size": "s",
    "universe": "humain",
    "data": {
-    "place": "TBD",
-    "note": "TBD",
-    "url": "TBD"
+    "place": "Lyon, France",
+    "note": "Croix-Rousse",
+    "url": "https://example.com/carte"
    }
   },
   {
@@ -160,11 +160,11 @@
    "size": "l",
    "universe": "humain",
    "data": {
-    "place": "TBD",
-    "lat": "TBD",
-    "lon": "TBD",
-    "zoom": "TBD",
-    "note": "TBD"
+    "place": "Lyon",
+    "lat": "45.764",
+    "lon": "4.8357",
+    "zoom": "12",
+    "note": "Mon quartier de travail"
    }
   },
   {
@@ -173,7 +173,7 @@
    "size": "s",
    "universe": "humain",
    "data": {
-    "place": "TBD",
+    "place": "Lyon",
     "tz": "Europe/Paris"
    }
   },
@@ -193,9 +193,9 @@
    "universe": "humain",
    "data": {
     "platform": "instagram",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "@camille.studio",
+    "url": "https://example.com/instagram",
+    "cta": "Suivre"
    }
   },
   {
@@ -205,9 +205,9 @@
    "universe": "humain",
    "data": {
     "platform": "tiktok",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "@camille.studio",
+    "url": "https://example.com/tiktok",
+    "cta": "Suivre"
    }
   },
   {
@@ -217,9 +217,9 @@
    "universe": "humain",
    "data": {
     "platform": "youtube",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "@CamilleStudio",
+    "url": "https://example.com/youtube",
+    "cta": "Suivre"
    }
   },
   {
@@ -229,9 +229,9 @@
    "universe": "humain",
    "data": {
     "platform": "x",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "@camille_ux",
+    "url": "https://example.com/x",
+    "cta": "Suivre"
    }
   },
   {
@@ -241,9 +241,9 @@
    "universe": "humain",
    "data": {
     "platform": "linkedin",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camille-arnaud",
+    "url": "https://example.com/linkedin",
+    "cta": "Suivre"
    }
   },
   {
@@ -253,9 +253,9 @@
    "universe": "humain",
    "data": {
     "platform": "github",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camille-arnaud",
+    "url": "https://example.com/github",
+    "cta": "Suivre"
    }
   },
   {
@@ -265,9 +265,9 @@
    "universe": "humain",
    "data": {
     "platform": "behance",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camillearnaud",
+    "url": "https://example.com/behance",
+    "cta": "Suivre"
    }
   },
   {
@@ -277,9 +277,9 @@
    "universe": "humain",
    "data": {
     "platform": "dribbble",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camillearnaud",
+    "url": "https://example.com/dribbble",
+    "cta": "Suivre"
    }
   },
   {
@@ -289,9 +289,9 @@
    "universe": "humain",
    "data": {
     "platform": "twitch",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camille_live",
+    "url": "https://example.com/twitch",
+    "cta": "Suivre"
    }
   },
   {
@@ -301,9 +301,9 @@
    "universe": "humain",
    "data": {
     "platform": "whatsapp",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "Écrire sur WhatsApp",
+    "url": "https://example.com/whatsapp",
+    "cta": "Suivre"
    }
   },
   {
@@ -313,9 +313,9 @@
    "universe": "humain",
    "data": {
     "platform": "threads",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "@camille.studio",
+    "url": "https://example.com/threads",
+    "cta": "Suivre"
    }
   },
   {
@@ -325,9 +325,9 @@
    "universe": "humain",
    "data": {
     "platform": "facebook",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camille.studio",
+    "url": "https://example.com/facebook",
+    "cta": "Suivre"
    }
   },
   {
@@ -337,9 +337,9 @@
    "universe": "humain",
    "data": {
     "platform": "vimeo",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camillestudio",
+    "url": "https://example.com/vimeo",
+    "cta": "Suivre"
    }
   },
   {
@@ -349,9 +349,9 @@
    "universe": "humain",
    "data": {
     "platform": "soundcloud",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camille-sons",
+    "url": "https://example.com/soundcloud",
+    "cta": "Suivre"
    }
   },
   {
@@ -361,9 +361,9 @@
    "universe": "humain",
    "data": {
     "platform": "pinterest",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camillestudio",
+    "url": "https://example.com/pinterest",
+    "cta": "Suivre"
    }
   },
   {
@@ -373,9 +373,9 @@
    "universe": "humain",
    "data": {
     "platform": "discord",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camille#0042",
+    "url": "https://example.com/discord",
+    "cta": "Suivre"
    }
   },
   {
@@ -385,9 +385,9 @@
    "universe": "humain",
    "data": {
     "platform": "snapchat",
-    "handle": "TBD",
-    "url": "TBD",
-    "cta": "TBD"
+    "handle": "camille.studio",
+    "url": "https://example.com/snapchat",
+    "cta": "Suivre"
    }
   },
   {
@@ -396,10 +396,10 @@
    "size": "w",
    "universe": "lifestyle",
    "data": {
-    "verse": "TBD",
-    "ref": "TBD",
-    "church": "TBD",
-    "url": "TBD"
+    "verse": "Tout ce que vous faites, faites-le de bon cœur.",
+    "ref": "Colossiens 3:23",
+    "church": "Communauté de Lyon",
+    "url": "https://example.com/communaute"
    }
   },
   {
@@ -417,16 +417,16 @@
    "size": "l",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "role": "TBD",
-    "year": "TBD",
-    "desc": "TBD",
+    "title": "Tableau de bord Atelier",
+    "role": "Design produit · front",
+    "year": "2026",
+    "desc": "Un SaaS de planning pour ateliers de réparation.",
     "tags": "SaaS",
     "image": "",
-    "url": "TBD",
-    "problem": "TBD",
-    "solution": "TBD",
-    "outcome": "TBD"
+    "url": "https://example.com/projets/saas",
+    "problem": "Les équipes jonglaient avec trois outils.",
+    "solution": "Un seul tableau, glisser-déposer, hors-ligne.",
+    "outcome": "−40 % de temps de saisie en 3 mois."
    },
    "spot": true
   },
@@ -436,16 +436,16 @@
    "size": "l",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "role": "TBD",
-    "year": "TBD",
-    "desc": "TBD",
+    "title": "Appli Pas à pas",
+    "role": "Design mobile",
+    "year": "2025",
+    "desc": "Une appli de marche guidée pour les seniors.",
     "tags": "App",
     "image": "",
-    "url": "TBD",
-    "problem": "TBD",
-    "solution": "TBD",
-    "outcome": "TBD"
+    "url": "https://example.com/projets/app",
+    "problem": "Les applis existantes étaient trop denses.",
+    "solution": "Gros boutons, voix, un écran par étape.",
+    "outcome": "4,7/5 sur 1 200 avis."
    }
   },
   {
@@ -454,16 +454,16 @@
    "size": "l",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "role": "TBD",
-    "year": "TBD",
-    "desc": "TBD",
+    "title": "Site Maison Verte",
+    "role": "Site vitrine",
+    "year": "2025",
+    "desc": "Le site d’une coopérative de paysagistes.",
     "tags": "Site",
     "image": "",
-    "url": "TBD",
-    "problem": "TBD",
-    "solution": "TBD",
-    "outcome": "TBD"
+    "url": "https://example.com/projets/site",
+    "problem": "Aucune demande de devis en ligne.",
+    "solution": "Formulaire court, photos avant/après.",
+    "outcome": "3× plus de demandes de devis."
    }
   },
   {
@@ -472,16 +472,16 @@
    "size": "l",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "role": "TBD",
-    "year": "TBD",
-    "desc": "TBD",
-    "tags": "TBD",
+    "title": "Typo vivante",
+    "role": "Expérience",
+    "year": "2024",
+    "desc": "Une fonte variable qui réagit au son.",
+    "tags": "Web Audio, Typo",
     "image": "",
-    "url": "TBD",
-    "problem": "TBD",
-    "solution": "TBD",
-    "outcome": "TBD"
+    "url": "https://example.com/projets/experiment",
+    "problem": "Explorer la typo en mouvement.",
+    "solution": "Web Audio + axes variables.",
+    "outcome": "Présentée à un meetup local."
    }
   },
   {
@@ -491,8 +491,8 @@
    "universe": "pro",
    "data": {
     "brand": "action",
-    "title": "TBD",
-    "desc": "TBD",
+    "title": "Mission design system",
+    "desc": "Refonte des composants pour 40 magasins.",
     "image": ""
    }
   },
@@ -502,9 +502,9 @@
    "size": "t",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "items": "TBD",
-    "logoFor": "TBD",
+    "title": "Expériences",
+    "items": "Designer produit | Studio Nord | 2023–2026 | Lyon\nDesigner UX | Agence Cobalt | 2020–2023 | Paris\nStage UI | Atelier Pixel | 2019 | Lille",
+    "logoFor": "Studio Nord",
     "logo": ""
    }
   },
@@ -514,9 +514,9 @@
    "size": "t",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "items": "TBD",
-    "logoFor": "TBD",
+    "title": "Formation",
+    "items": "Master design d’interaction | École Exemple | 2018–2020 | Lyon\nLicence arts appliqués | Université Exemple | 2015–2018",
+    "logoFor": "École Exemple",
     "logo": ""
    }
   },
@@ -526,8 +526,8 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "items": "TBD"
+    "title": "Compétences",
+    "items": "Figma, Design system, Recherche UX, HTML, CSS, JavaScript, Accessibilité"
    }
   },
   {
@@ -536,8 +536,8 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "items": "TBD"
+    "title": "Langues",
+    "items": "Français | natif |\nAnglais | courant | C1\nEspagnol | intermédiaire | B1"
    }
   },
   {
@@ -546,10 +546,10 @@
    "size": "s",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "updated": "TBD",
+    "title": "Mon CV",
+    "updated": "Novembre 2026",
     "file": "",
-    "url": "TBD"
+    "url": "https://example.com/cv.pdf"
    }
   },
   {
@@ -558,8 +558,8 @@
    "size": "s",
    "universe": "pro",
    "data": {
-    "value": "TBD",
-    "label": "TBD",
+    "value": "48",
+    "label": "projets livrés",
     "color": "",
     "logos": ""
    }
@@ -570,8 +570,8 @@
    "size": "s",
    "universe": "pro",
    "data": {
-    "value": "TBD",
-    "label": "TBD",
+    "value": "12",
+    "label": "entreprises accompagnées",
     "color": "",
     "logos": "employers"
    }
@@ -582,8 +582,8 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "items": "TBD",
+    "title": "Projet en cours",
+    "items": "Recherche | 100\nMaquettes | 70\nDéveloppement | 35",
     "color": ""
    }
   },
@@ -593,9 +593,9 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "quote": "TBD",
-    "author": "TBD",
-    "role": "TBD"
+    "quote": "Camille a transformé un outil interne confus en produit que l’équipe adore.",
+    "author": "Julie M.",
+    "role": "Directrice produit"
    }
   },
   {
@@ -604,8 +604,8 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "items": "TBD"
+    "title": "Ma méthode",
+    "items": "Écouter | Entretiens et observation\nEsquisser | Plusieurs pistes, vite\nTester | Avec de vrais utilisateurs\nLivrer | Code propre et documenté"
    }
   },
   {
@@ -614,8 +614,8 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "items": "TBD"
+    "title": "Questions fréquentes",
+    "items": "Travailles-tu à distance ? | Oui, partout en France.\nQuel délai pour démarrer ? | Deux à trois semaines en général."
    }
   },
   {
@@ -624,9 +624,9 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "duration": "TBD",
-    "url": "TBD"
+    "title": "Appel découverte",
+    "duration": "30 min",
+    "url": "https://example.com/rendez-vous"
    }
   },
   {
@@ -644,11 +644,11 @@
    "size": "s",
    "universe": "pro",
    "data": {
-    "name": "TBD",
-    "price": "TBD",
-    "desc": "TBD",
+    "name": "Kit d’icônes Lignes",
+    "price": "19 €",
+    "desc": "240 icônes SVG, licence commerciale.",
     "image": "",
-    "url": "TBD"
+    "url": "https://example.com/boutique/icones"
    }
   },
   {
@@ -657,11 +657,11 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "desc": "TBD",
-    "amounts": "TBD",
-    "currency": "TBD",
-    "url": "TBD"
+    "title": "M’offrir un café",
+    "desc": "Si mes ressources gratuites t’aident.",
+    "amounts": "3, 5, 10",
+    "currency": "EUR",
+    "url": "https://example.com/soutien"
    }
   },
   {
@@ -670,9 +670,9 @@
    "size": "w",
    "universe": "pro",
    "data": {
-    "title": "TBD",
-    "desc": "TBD",
-    "button": "TBD"
+    "title": "Ma lettre mensuelle",
+    "desc": "Un projet, une astuce, une lecture.",
+    "button": "S’inscrire"
    }
   },
   {
@@ -690,9 +690,9 @@
    "size": "l",
    "universe": "crea",
    "data": {
-    "title": "TBD",
+    "title": "Croquis",
     "images": [],
-    "url": "TBD"
+    "url": "https://example.com/croquis"
    }
   },
   {
@@ -701,9 +701,9 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "title": "TBD",
-    "platform": "TBD",
-    "url": "TBD",
+    "title": "Big Buck Bunny (court métrage libre)",
+    "platform": "youtube",
+    "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     "image": ""
    }
   },
@@ -713,10 +713,10 @@
    "size": "s",
    "universe": "crea",
    "data": {
-    "title": "TBD",
-    "artist": "TBD",
+    "title": "Nuits claires",
+    "artist": "Les Ondes",
     "service": "spotify",
-    "url": "TBD",
+    "url": "https://example.com/musique/spotify",
     "image": ""
    }
   },
@@ -726,10 +726,10 @@
    "size": "s",
    "universe": "crea",
    "data": {
-    "title": "TBD",
-    "artist": "TBD",
+    "title": "Matin calme",
+    "artist": "Trio Lumen",
     "service": "apple",
-    "url": "TBD",
+    "url": "https://example.com/musique/apple",
     "image": ""
    }
   },
@@ -739,10 +739,10 @@
    "size": "s",
    "universe": "crea",
    "data": {
-    "title": "TBD",
-    "artist": "TBD",
+    "title": "Rue des Arts",
+    "artist": "Mona K",
     "service": "deezer",
-    "url": "TBD",
+    "url": "https://example.com/musique/deezer",
     "image": ""
    }
   },
@@ -752,10 +752,10 @@
    "size": "s",
    "universe": "crea",
    "data": {
-    "title": "TBD",
-    "artist": "TBD",
+    "title": "Esquisse n°3",
+    "artist": "Camille Arnaud",
     "service": "soundcloud",
-    "url": "TBD",
+    "url": "https://example.com/musique/soundcloud",
     "image": ""
    }
   },
@@ -765,10 +765,10 @@
    "size": "s",
    "universe": "crea",
    "data": {
-    "title": "TBD",
-    "artist": "TBD",
+    "title": "Live au studio",
+    "artist": "Camille Arnaud",
     "service": "youtube",
-    "url": "TBD",
+    "url": "https://example.com/musique/youtube",
     "image": ""
    }
   },
@@ -778,9 +778,9 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "title": "TBD",
+    "title": "Gospel du dimanche",
     "genre": "gospel",
-    "note": "TBD"
+    "note": "Pour bien commencer."
    }
   },
   {
@@ -789,9 +789,9 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "title": "TBD",
+    "title": "Classique au travail",
     "genre": "classical",
-    "note": "TBD"
+    "note": "Concentration."
    }
   },
   {
@@ -800,9 +800,9 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "title": "TBD",
+    "title": "Jazz du soir",
     "genre": "jazz",
-    "note": "TBD"
+    "note": "Pour décompresser."
    }
   },
   {
@@ -811,11 +811,11 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "name": "TBD",
+    "name": "Piano",
     "kind": "piano",
-    "since": "TBD",
-    "also": "TBD",
-    "note": "TBD"
+    "since": "2009",
+    "also": "Jazz, gospel",
+    "note": "Une heure chaque soir."
    }
   },
   {
@@ -824,11 +824,11 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "name": "TBD",
+    "name": "Basse",
     "kind": "bass",
-    "since": "TBD",
-    "also": "TBD",
-    "note": "TBD"
+    "since": "2014",
+    "also": "Groove, soul",
+    "note": "Au sein d’un groupe amateur."
    }
   },
   {
@@ -837,11 +837,11 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "name": "TBD",
+    "name": "Saxophone alto",
     "kind": "sax",
-    "since": "TBD",
-    "also": "TBD",
-    "note": "TBD"
+    "since": "2019",
+    "also": "Standards",
+    "note": "En apprentissage."
    }
   },
   {
@@ -850,11 +850,11 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "name": "TBD",
+    "name": "Voix",
     "kind": "voice",
-    "since": "TBD",
-    "also": "TBD",
-    "note": "TBD"
+    "since": "2012",
+    "also": "Chorale",
+    "note": "Pupitre alto."
    }
   },
   {
@@ -863,11 +863,11 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "name": "TBD",
+    "name": "Ukulélé",
     "kind": "other",
-    "since": "TBD",
-    "also": "TBD",
-    "note": "TBD"
+    "since": "2021",
+    "also": "Folk",
+    "note": "Pour les voyages."
    }
   },
   {
@@ -876,10 +876,10 @@
    "size": "w",
    "universe": "crea",
    "data": {
-    "title": "TBD",
-    "date": "TBD",
-    "place": "TBD",
-    "url": "TBD"
+    "title": "Talk : le design sobre",
+    "date": "2027-02-20",
+    "place": "Lyon, La Halle",
+    "url": "https://example.com/talk"
    }
   },
   {
@@ -897,8 +897,8 @@
    "size": "w",
    "universe": "lifestyle",
    "data": {
-    "text": "TBD",
-    "updated": "TBD"
+    "text": "Je refonds un design system et j’apprends le saxophone.",
+    "updated": "Novembre 2026"
    }
   },
   {
@@ -907,10 +907,10 @@
    "size": "s",
    "universe": "lifestyle",
    "data": {
-    "title": "TBD",
-    "desc": "TBD",
+    "title": "Céramique",
+    "desc": "Tour de potier le samedi matin.",
     "color": "",
-    "url": "TBD"
+    "url": "https://example.com/ceramique"
    }
   },
   {
@@ -920,9 +920,9 @@
    "universe": "lifestyle",
    "data": {
     "kind": "Reading",
-    "title": "TBD",
-    "by": "TBD",
-    "url": "TBD",
+    "title": "Le design du quotidien",
+    "by": "Don Norman",
+    "url": "https://example.com/media/reading",
     "image": ""
    }
   },
@@ -933,9 +933,9 @@
    "universe": "lifestyle",
    "data": {
     "kind": "Watching",
-    "title": "TBD",
-    "by": "TBD",
-    "url": "TBD",
+    "title": "Abstract",
+    "by": "Netflix",
+    "url": "https://example.com/media/watching",
     "image": ""
    }
   },
@@ -946,9 +946,9 @@
    "universe": "lifestyle",
    "data": {
     "kind": "Playing",
-    "title": "TBD",
-    "by": "TBD",
-    "url": "TBD",
+    "title": "Monument Valley",
+    "by": "ustwo games",
+    "url": "https://example.com/media/playing",
     "image": ""
    }
   },
@@ -959,9 +959,9 @@
    "universe": "lifestyle",
    "data": {
     "kind": "Listening",
-    "title": "TBD",
-    "by": "TBD",
-    "url": "TBD",
+    "title": "Design Matters",
+    "by": "Debbie Millman",
+    "url": "https://example.com/media/listening",
     "image": ""
    }
   },
@@ -971,11 +971,11 @@
    "size": "s",
    "universe": "lifestyle",
    "data": {
-    "club": "TBD",
-    "league": "TBD",
+    "club": "Lyon Volley Exemple",
+    "league": "Championnat régional",
     "c1": "#0B3D91",
     "c2": "#D7263D",
-    "url": "TBD"
+    "url": "https://example.com/club"
    }
   },
   {
@@ -986,9 +986,9 @@
    "data": {
     "follow": "f1",
     "view": "calendar",
-    "f1follow": "TBD",
-    "title": "TBD",
-    "note": "TBD"
+    "f1follow": "team:ferrari",
+    "title": "Calendrier F1",
+    "note": "Mis à jour automatiquement"
    }
   },
   {
@@ -999,9 +999,9 @@
    "data": {
     "follow": "f1",
     "view": "standings",
-    "f1follow": "TBD",
-    "title": "TBD",
-    "note": "TBD"
+    "f1follow": "team:ferrari",
+    "title": "Classement",
+    "note": "Mis à jour automatiquement"
    }
   },
   {
@@ -1012,9 +1012,9 @@
    "data": {
     "follow": "f1",
     "view": "teams",
-    "f1follow": "TBD",
-    "title": "TBD",
-    "note": "TBD"
+    "f1follow": "team:ferrari",
+    "title": "Écuries",
+    "note": "Mis à jour automatiquement"
    }
   },
   {
@@ -1025,9 +1025,9 @@
    "data": {
     "follow": "f1",
     "view": "follow",
-    "f1follow": "TBD",
-    "title": "TBD",
-    "note": "TBD"
+    "f1follow": "team:ferrari",
+    "title": "Mon écurie",
+    "note": "Mis à jour automatiquement"
    }
   },
   {
@@ -1038,9 +1038,9 @@
    "data": {
     "follow": "f1",
     "view": "results",
-    "f1follow": "TBD",
-    "title": "TBD",
-    "note": "TBD"
+    "f1follow": "team:ferrari",
+    "title": "Derniers résultats",
+    "note": "Mis à jour automatiquement"
    }
   },
   {
@@ -1049,8 +1049,8 @@
    "size": "s",
    "universe": "lifestyle",
    "data": {
-    "title": "TBD",
-    "date": "TBD"
+    "title": "Lancement du kit v2",
+    "date": "2027-03-15"
    }
   },
   {
@@ -1068,7 +1068,7 @@
    "size": "s",
    "universe": "custom",
    "data": {
-    "text": "TBD",
+    "text": "Petit : une info clé.",
     "style": "note"
    }
   },
@@ -1078,7 +1078,7 @@
    "size": "w",
    "universe": "custom",
    "data": {
-    "text": "TBD",
+    "text": "Large : une phrase ou un lien.",
     "style": "note"
    }
   },
@@ -1088,7 +1088,7 @@
    "size": "t",
    "universe": "custom",
    "data": {
-    "text": "TBD",
+    "text": "Haut : une liste courte.",
     "style": "note"
    }
   },
@@ -1098,7 +1098,7 @@
    "size": "l",
    "universe": "custom",
    "data": {
-    "text": "TBD",
+    "text": "Grand : un projet phare.",
     "style": "note"
    }
   },
@@ -1108,7 +1108,7 @@
    "size": "bar",
    "universe": "custom",
    "data": {
-    "text": "TBD",
+    "text": "Bandeau : une annonce sur toute la largeur.",
     "style": "note"
    }
   },
@@ -1127,9 +1127,9 @@
    "size": "w",
    "universe": "custom",
    "data": {
-    "title": "TBD",
-    "url": "TBD",
-    "desc": "TBD",
+    "title": "Mon portfolio complet",
+    "url": "https://example.com/portfolio",
+    "desc": "Études de cas détaillées.",
     "color": ""
    },
    "spot": true
@@ -1140,9 +1140,9 @@
    "size": "w",
    "universe": "custom",
    "data": {
-    "title": "TBD",
-    "url": "TBD",
-    "desc": "TBD",
+    "title": "Mon portfolio complet",
+    "url": "https://example.com/portfolio",
+    "desc": "Études de cas détaillées.",
     "color": ""
    },
    "hidden": true
@@ -1153,9 +1153,9 @@
    "size": "w",
    "universe": "custom",
    "data": {
-    "title": "TBD",
-    "url": "TBD",
-    "desc": "TBD",
+    "title": "Mon portfolio complet",
+    "url": "https://example.com/portfolio",
+    "desc": "Études de cas détaillées.",
     "color": ""
    },
    "start": "2026-12-01",
@@ -1165,18 +1165,18 @@
  "journal": [
   {
    "id": "sc-journal-published",
-   "title": "TBD",
-   "excerpt": "",
-   "content": "TBD",
-   "date": "2026-11-28",
+   "title": "Refondre un design system sans tout casser",
+   "excerpt": "Trois règles qui ont sauvé notre migration.",
+   "content": "## Le contexte\n\nQuarante écrans, trois équipes, un seul trimestre.\n\n## Ce qui a marché\n\n- Migrer composant par composant\n- Mesurer avant de supprimer\n- Écrire la doc en même temps que le code",
+   "date": "2026-11-20",
    "universe": "pro",
    "published": true
   },
   {
    "id": "sc-journal-draft",
-   "title": "TBD",
+   "title": "Notes de céramique (brouillon)",
    "excerpt": "",
-   "content": "TBD",
+   "content": "Ce que le tour de potier m’apprend sur l’itération.",
    "date": "2026-11-28",
    "universe": "custom",
    "published": false

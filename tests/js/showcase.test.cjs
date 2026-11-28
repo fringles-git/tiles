@@ -35,10 +35,14 @@ test('the showcase is a valid page for the browser and the server',()=>{
  const php=spawnSync(process.env.PHP_BINARY||'php',['-r','require "src/page-validation.php";echo valid_page(json_decode(stream_get_contents(STDIN),true))?"ok":"bad";'],{cwd:root,input:JSON.stringify(page),encoding:'utf8'});
  if(!php.error)assert.equal(php.stdout,'ok',php.stderr);
 });
-test('the showcase holds placeholders only: no personal data, no invented content',()=>{
+test('the showcase is a realistic demo: no placeholder, no personal data, fictional contacts only',()=>{
  const json=JSON.stringify(page);
- assert.doesNotMatch(json,/brandon|lazarre|outlook|gmail|troyes|@|\+33|\b0[1-9](?:\s?\d{2}){4}\b|https?:\/\//i);
- const strings=[];const walk=v=>{if(typeof v==='string')strings.push(v);else if(v&&typeof v==='object')Object.values(v).forEach(walk);};walk({profile:page.profile,tiles:page.tiles,journal:page.journal});
- for(const s of strings)assert.ok(s.length<=40,'long free text: '+s.slice(0,60));
- for(const u of page.universes)assert.equal(u.question,'TBD');
+ assert.doesNotMatch(json,/\bTBD\b/,'no placeholder left: empty fields are hidden, placeholders are not');
+ assert.doesNotMatch(json,/brandon|lazarre|outlook|gmail|troyes/i,'no real personal data');
+ // Contacts and links are fictional: reserved example domains, fiction phone range (+33 1 99 00).
+ for(const m of json.matchAll(/[\w.+-]+@([\w.-]+)/g))assert.match(m[1],/^example\.(com|org|net)$/,'e-mail on a reserved domain: '+m[0]);
+ const urls=[...json.matchAll(/https?:\/\/([^\/\s"]+)/g)].map(m=>m[1]);
+ for(const host of urls)assert.ok(/^example\.(com|org|net)$/.test(host)||host==='www.youtube.com','link on a reserved domain: '+host);
+ for(const m of json.matchAll(/\+33[\d\s]+/g))assert.match(m[0].replace(/\s/g,''),/^\+33199/,'fiction phone number: '+m[0]);
+ for(const u of page.universes)assert.ok(u.question&&u.question!=='TBD','each universe has its question');
 });
