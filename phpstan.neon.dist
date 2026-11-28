@@ -1,8 +1,8 @@
 # Static analysis, dev only (composer install, then composer analyse).
-# Start at level 0; raise one level per PR. A baseline (phpstan-baseline.neon) holds
-# accepted existing errors once generated, so new code is checked at the current level.
+# Level 5: levels 0 to 5 pass with no error and no baseline. Raise one level per PR;
+# if a level brings existing errors, fix them or record them in phpstan-baseline.neon.
 parameters:
-    level: 0
+    level: 5
     phpVersion: 80500
     paths:
         - src

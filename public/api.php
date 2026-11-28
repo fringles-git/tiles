@@ -57,7 +57,8 @@ if ($action === 'track') {
             $salt = stats_salt($stored, $now);
             if ($salt !== $stored) { write_json('salt.json', $salt); }
             $host = strtolower((string) preg_replace('/:\d+\z/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
-            $field = static fn(string $k, int $max): string => is_array($in) && is_string($in[$k] ?? null) ? substr($in[$k], 0, $max) : '';
+            // $in is an array here: a non-array body gives $type '' and is refused above.
+            $field = static fn(string $k, int $max): string => is_string($in[$k] ?? null) ? substr($in[$k], 0, $max) : '';
             $st = stats_audience($st, stats_visitor((string) ($_SERVER['REMOTE_ADDR'] ?? ''), $ua, $salt['salt']),
                 stats_source($field('ref', 2048), $ua, $field('utm', 64), $host), stats_device($ua), $now);
         }
@@ -167,8 +168,7 @@ switch ($action) {
         $info = @getimagesize($f['tmp_name']);
         $type = $info[2] ?? 0;
         // GD decodes to ~4 bytes per pixel: cap pixels before decoding (decompression bomb, memory_limit).
-        if ($info && (($info[0] ?? 0) > UPLOAD_MAX_SIDE || ($info[1] ?? 0) > UPLOAD_MAX_SIDE
-            || ($info[0] ?? 0) * ($info[1] ?? 0) > UPLOAD_MAX_PIXELS)) {
+        if ($info && ($info[0] > UPLOAD_MAX_SIDE || $info[1] > UPLOAD_MAX_SIDE || $info[0] * $info[1] > UPLOAD_MAX_PIXELS)) {
             out(['error' => 'The image is too large. Use at most ' . UPLOAD_MAX_SIDE . ' px per side (' . intdiv(UPLOAD_MAX_PIXELS, 1000000) . ' megapixels).'], 400);
         }
         $img = match ($type) {

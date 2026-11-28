@@ -38,8 +38,6 @@ jobs:
         run: |
           composer install --no-interaction --no-progress
           vendor/bin/phpstan analyse --no-progress --error-format=github
-      - name: TEMP level 4 errors
-        run: vendor/bin/phpstan analyse --no-progress --level=4 --error-format=github || true
       - run: npm run check
       - run: npm run test:php
       - name: HTTP boundary, media, authentication and persistence
