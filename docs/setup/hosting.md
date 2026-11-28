@@ -118,3 +118,7 @@ But : `brandonlazarre.fr` sert la page, `tiles.brandonlazarre.fr` sert l'admin. 
 HTML pages send a Content Security Policy built in `src/lib.php` (`csp_policy()`), with a fresh nonce for the inline `TILES_BOOT` script. It starts as `Content-Security-Policy-Report-Only`: violations show in the browser console and nothing is blocked. Once the console stays clean on the public page, the editor, the map, the radio, YouTube and Spotify, set `'csp' => 'enforce'` in `config/config.php` (or `TILES_CSP=enforce`). `'off'` removes the header.
 
 Over HTTPS, pages also send `Strict-Transport-Security: max-age=15552000` (180 days, this host only). Browsers then refuse plain HTTP for that time: keep the SSL certificate renewed.
+
+## Email signups (GDPR)
+
+The Email signup block stores addresses in `data/leads.json` (private), with the signup time, nothing else. Under the field, visitors see a privacy note, editable per block (default: the address is only used for these mailings, unsubscribe on request). The editor's stats panel lists every address with a Delete button and a Delete all button: erase an address as soon as someone asks. Addresses stay until deleted; export them before deleting if you send mailings from another tool.
