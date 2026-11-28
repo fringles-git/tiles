@@ -1,8 +1,8 @@
 # Showcase page and capability inventory — 28 November 2026
 
-`examples/showcase/page.json` is one sanitized page that uses every capability of the editor, so the live version can be checked against it. All content is `TBD`: real data and the universe questions come later.
+`examples/showcase/page.json` is one demo page that uses every capability of the editor, so the live version can be checked against it. The content is realistic but fictional (persona « Camille Arnaud »): e-mails and links on reserved `example.com` domains, phone in the fiction range `+33 1 99 00`, no `TBD` placeholder. A block left empty is hidden on the public page, so placeholders are never needed.
 
-`tests/js/showcase.test.cjs` keeps it honest. It fails when a block type, social network or size is missing; when the file is no longer a valid page in PHP or JS; when the Add-block catalogue drifts; or when the file contains real data (names, e-mails, phone numbers, URLs, long text).
+`tests/js/showcase.test.cjs` keeps it honest. It fails when a block type, social network or size is missing; when the file is no longer a valid page in PHP or JS; when the Add-block catalogue drifts; or when the file contains a `TBD` placeholder, real personal data, or a contact or link outside the reserved demo domains.
 
 ## Use it
 
@@ -17,7 +17,7 @@
 ### Universes
 | Item | Supported | In showcase |
 |---|---|---|
-| Default universes | Profil, Parcours, Créations, Passions (keys `humain`, `pro`, `crea`, `lifestyle`) | 4, questions `TBD` |
+| Default universes | Profil, Parcours, Créations, Passions (keys `humain`, `pro`, `crea`, `lifestyle`) | 4, each with its question |
 | Custom universes | Up to 12 in total: name ≤ 40, address `[a-z0-9-]` ≤ 40 and not reserved, colour, question ≤ 200 | `Univers personnalisé` at `/univers-personnalise` |
 | Per universe | Own URL, sitemap entry, crawler HTML, nav tab with count, journal filter | yes |
 | Unknown or deleted address | 404 + `noindex` | to test: `/nope` |
