@@ -2,6 +2,7 @@
 'use strict';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base=new URL('../images/',document.currentScript?.src||location.href).href;
+const qrSrc=document.currentScript?.dataset?.qr?new URL(document.currentScript.dataset.qr,location.href).href:'';
 const image=s=>typeof s==='string'&&(/^uploads\/[A-Za-z0-9_-]+\.(png|jpe?g|webp|gif)$/.test(s)||/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(s));
 const url=u=>{try{const x=new URL(u);return ['https:','http:'].includes(x.protocol)&&!x.username?x.href:''}catch{return ''}};
 const brands={
@@ -144,8 +145,14 @@ function download(blob,name){const a=document.createElement('a');a.href=URL.crea
 function openQR(){
  const link=publicUrl();if(!link)return;
  show('Partager mon profil',`<p>Scannez ce code pour ouvrir mon profil.</p><div class="qr-frame" id="profile-qr" role="img" aria-label="QR code de mon profil"></div><div class="qr-download"><button type="button" data-qr-download>Télécharger le QR</button><button type="button" data-share>Copier / partager le lien</button></div>`);
- const target=document.getElementById('profile-qr');
- try{if(!window.QRCode)throw Error('QR unavailable');new window.QRCode(target,{text:link,width:256,height:256,colorDark:'#111111',colorLight:'#ffffff',correctLevel:window.QRCode.CorrectLevel.M})}catch{target.textContent='QR indisponible. Utilisez le partage du lien.'}
+ const target=document.getElementById('profile-qr');target.textContent='Chargement du QR…';
+ loadQR().then(()=>{if(!target.isConnected)return;target.textContent='';new window.QRCode(target,{text:link,width:256,height:256,colorDark:'#111111',colorLight:'#ffffff',correctLevel:window.QRCode.CorrectLevel.M})}).catch(()=>{target.textContent='QR indisponible. Utilisez le partage du lien.'});
+}
+// The QR library (20 KB) loads on the first "QR" click only; the shell passes its versioned URL.
+let qrLoad=null;
+function loadQR(){
+ if(window.QRCode)return Promise.resolve();
+ return qrLoad||(qrLoad=new Promise((resolve,reject)=>{if(!qrSrc)return reject(Error('QR unavailable'));const s=document.createElement('script');s.src=qrSrc;s.async=true;s.onload=()=>window.QRCode?resolve():reject(Error('QR unavailable'));s.onerror=()=>{qrLoad=null;s.remove();reject(Error('QR unavailable'))};document.head.appendChild(s)}));
 }
 function show(title,html,photo){
  let dialog=document.getElementById('explore-dialog');

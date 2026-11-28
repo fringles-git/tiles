@@ -223,19 +223,19 @@ function render_shell(string $title, string $description, array $boot, string $e
 <link rel="stylesheet" href="assets/css/hub.css?v=<?= asset_v('css/hub.css') ?>">
 <link rel="stylesheet" href="assets/css/polish.css?v=<?= asset_v('css/polish.css') ?>">
 <link rel="stylesheet" href="assets/css/bento.css?v=<?= asset_v('css/bento.css') ?>">
+<!-- Deferred: fetched in parallel with the markup, run in this order after TILES_BOOT. -->
+<script defer src="assets/js/widgets.js?v=<?= asset_v('js/widgets.js') ?>"></script>
+<script defer src="assets/js/experience.js?v=<?= asset_v('js/experience.js') ?>" data-qr="assets/vendor/qrcode.min.js?v=<?= asset_v('vendor/qrcode.min.js') ?>"></script>
+<script defer src="assets/js/hub.js?v=<?= asset_v('js/hub.js') ?>"></script>
+<script defer src="assets/js/polish.js?v=<?= asset_v('js/polish.js') ?>"></script>
+<script defer src="assets/js/bento.js?v=<?= asset_v('js/bento.js') ?>"></script>
+<?php if (($boot['mode'] ?? '') === 'admin'): ?><script defer src="assets/js/editor.js?v=<?= asset_v('js/editor.js') ?>"></script><?php endif; ?>
+<script defer src="assets/js/app.js?v=<?= asset_v('js/app.js') ?>"></script>
 </head>
 <body>
 <?php readfile(__DIR__ . '/templates/markup.html'); ?>
 <?= $noscript ?>
 <script>window.TILES_BOOT=<?= $bootJson ?>;</script>
-<script src="assets/js/widgets.js?v=<?= asset_v('js/widgets.js') ?>"></script>
-<script src="assets/js/experience.js?v=<?= asset_v('js/experience.js') ?>"></script>
-<script src="assets/vendor/qrcode.min.js?v=<?= asset_v('vendor/qrcode.min.js') ?>"></script>
-<script src="assets/js/hub.js?v=<?= asset_v('js/hub.js') ?>"></script>
-<script src="assets/js/polish.js?v=<?= asset_v('js/polish.js') ?>"></script>
-<script src="assets/js/bento.js?v=<?= asset_v('js/bento.js') ?>"></script>
-<?php if (($boot['mode'] ?? '') === 'admin'): ?><script src="assets/js/editor.js?v=<?= asset_v('js/editor.js') ?>"></script><?php endif; ?>
-<script src="assets/js/app.js?v=<?= asset_v('js/app.js') ?>"></script>
 </body>
 </html>
 <?php
