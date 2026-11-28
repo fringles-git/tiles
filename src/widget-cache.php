@@ -159,9 +159,9 @@ function widget_cached(string $resource, string $directory, ?callable $fetch = n
         return ['ok' => false, 'status' => 503, 'retryAfter' => 3600, 'reason' => 'not_configured'];
     }
     $now = $clock ?? time();
-    if (!is_dir($directory) && !@mkdir($directory, 0755, true) && !is_dir($directory)) { return ['ok' => false, 'status' => 503, 'retryAfter' => 3600]; }
+    if (!is_dir($directory) && !@mkdir($directory, 0755, true) && !is_dir($directory)) { tiles_log('widget cache directory unavailable'); return ['ok' => false, 'status' => 503, 'retryAfter' => 3600]; }
     $lock = @fopen($directory . '/gateway.lock', 'c');
-    if (!$lock || !flock($lock, LOCK_EX)) { if ($lock) { fclose($lock); } return ['ok' => false, 'status' => 503, 'retryAfter' => 60]; }
+    if (!$lock || !flock($lock, LOCK_EX)) { if ($lock) { fclose($lock); } tiles_log('widget cache lock unavailable'); return ['ok' => false, 'status' => 503, 'retryAfter' => 60]; }
     try {
         $cacheFile = $directory . '/' . $resource . '.json';
         $cache = is_file($cacheFile) ? json_decode((string) file_get_contents($cacheFile), true) : null;
@@ -172,13 +172,13 @@ function widget_cached(string $resource, string $directory, ?callable $fetch = n
         $reservation = widget_reserve($usage, $config['provider'], $now);
         $fallback = is_array($cache) && $now - (int) ($cache['at'] ?? 0) < 7 * 86400 ? $cache['data'] + ['ok' => true, 'stale' => true] : ['ok' => false, 'status' => 503, 'retryAfter' => $reservation['retryAfter'] ?: 300];
         if (!$reservation['allowed'] || getenv('TILES_WIDGETS_OFF') === '1') { return $fallback; }
-        if (file_put_contents($usageFile, json_encode($reservation['state']), LOCK_EX) === false) { return $fallback; }
+        if (file_put_contents($usageFile, json_encode($reservation['state']), LOCK_EX) === false) { tiles_log('widget usage write failed'); return $fallback; }
         try {
             $raw = ($fetch ?? 'widget_request')($config['url']);
             $data = widget_normalize($resource, $raw) + ['updatedAt' => gmdate('c', $now)];
             $json = json_encode(['at' => $now, 'data' => $data], JSON_THROW_ON_ERROR);
             $tmp = $cacheFile . '.tmp';
-            if (file_put_contents($tmp, $json) === false || !rename($tmp, $cacheFile)) { return $fallback; }
+            if (file_put_contents($tmp, $json) === false || !rename($tmp, $cacheFile)) { tiles_log('widget cache write failed', ['resource' => $resource]); return $fallback; }
             return $data + ['ok' => true, 'stale' => false];
         } catch (Throwable $e) {
             // No retry loop. A shared cooldown applies to all resources of the provider.

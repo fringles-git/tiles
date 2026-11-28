@@ -4,11 +4,17 @@ $tmp = sys_get_temp_dir() . '/tiles-errors-' . bin2hex(random_bytes(4));
 mkdir($tmp);
 putenv('TILES_DATA_DIR=' . $tmp);
 putenv('TILES_UPLOAD_DIR=' . $tmp . '/uploads');
+// widgets.php only loads widget-cache.php: error handling must already be active through paths.php.
+require dirname(__DIR__, 2) . '/src/widget-cache.php';
+$widgetsLog = ini_get('error_log');
+$handler = set_exception_handler(null);
+set_exception_handler($handler);
 require dirname(__DIR__, 2) . '/src/lib.php';
 function check(bool $condition, string $message): void { if (!$condition) { throw new RuntimeException($message); } echo "PASS: $message\n"; }
 
 $log = DATA_DIR . '/logs/php-error.log';
 check(ini_get('error_log') === $log && ini_get('log_errors') === '1', 'errors logged to a private file under data/');
+check($widgetsLog === $log && $handler === 'tiles_fail', 'widgets endpoint chain logs and handles exceptions too');
 
 tiles_log("line one\nforged line", ['file' => 'x.json']);
 $text = (string) file_get_contents($log);

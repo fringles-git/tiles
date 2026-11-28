@@ -39,3 +39,4 @@ define('TILES_MODE', in_array($mode, ['full', 'public', 'admin'], true) ? $mode 
 unset($cfgDir, $mode);
 define('SEED_DATA_DIR', ROOT_DIR . '/seed/data');
 define('SEED_UPLOAD_DIR', ROOT_DIR . '/seed/uploads');
+require_once __DIR__ . '/errors.php';
