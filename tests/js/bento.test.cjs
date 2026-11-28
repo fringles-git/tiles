@@ -21,7 +21,7 @@ test('FAQ uses native details/summary, never a heading inside summary',()=>{
 });
 test('progress shows the percentage as text and hides the decorative bar',()=>{
  const html=types().progress.render({title:'Niveaux',items:'PHP | 80'});
- assert.match(html,/<b>80 %<\/b>/);assert.match(html,/class="pbar" aria-hidden="true"><i style="--p:0.8">/);
+ assert.match(html,/<b>80 %<\/b>/);assert.match(html,/class="pbar" aria-hidden="true"><i data-css="--p:0.8">/);
 });
 test('new block types register with a category, defaults and flow height',()=>{
  const T=types();for(const k of ['faq','progress','steps','clock']){assert.ok(T[k].label&&T[k].cat&&T[k].def&&T[k].fields.length,k);}

@@ -66,7 +66,7 @@ function enhance(T,F){
   fields:[F('title','Titre'),F('items','Une par ligne : Libellé | pourcentage','area'),F('color','Couleur','color')],
   def:{title:'Niveaux',items:'Design UI | 85\nPHP | 80\nJavaScript | 75',color:''},
   tint:d=>/^#[0-9a-f]{3,8}$/i.test(d.color||'')?d.color:'',
-  render:d=>`<span class="eyebrow">${esc(d.title)}</span><ul class="pbars">${rows(d.items).map(([l,v])=>{const p=pct(v);return `<li><span class="pbar-h"><span>${esc(l)}</span><b>${p} %</b></span><span class="pbar" aria-hidden="true"><i style="--p:${p/100}"></i></span></li>`}).join('')}</ul>`};
+  render:d=>`<span class="eyebrow">${esc(d.title)}</span><ul class="pbars">${rows(d.items).map(([l,v])=>{const p=pct(v);return `<li><span class="pbar-h"><span>${esc(l)}</span><b>${p} %</b></span><span class="pbar" aria-hidden="true"><i data-css="--p:${p/100}"></i></span></li>`}).join('')}</ul>`};
  T.steps={label:'Process',cat:'Work',hint:'Étapes numérotées de ta méthode',size:'w',flow:true,
   fields:[F('title','Titre'),F('items','Une par ligne : Étape | Détail','area')],
   def:{title:'Ma méthode',items:'Écoute | On cadre le besoin et le budget.\nMaquette | Une proposition visuelle à valider.\nLivraison | Mise en ligne, tests et passation.'},
@@ -126,7 +126,7 @@ function tabIndicator(nav){
 }
 
 /* Copy confirmation on the button itself: the icon becomes a check for 1.5 s (the toast still announces it). */
-const CHECK='<svg class="ui-icon" style="--icon-size:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+const CHECK='<svg class="ui-icon u-icon16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
 function copied(btn,ms=1500){
  if(!btn||btn.classList.contains('is-copied'))return;
  const html=btn.innerHTML;btn.classList.add('is-copied');btn.innerHTML=CHECK;

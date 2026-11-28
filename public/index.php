@@ -73,7 +73,7 @@ if ($article) {
 }
 // Plain-HTML fallback for visitors and crawlers that do not run JavaScript.
 $items = seo_body($section ? ['tiles' => section_tiles($page['tiles'] ?? [], $section['key'], $universeKeys)] + $page : $page, $now);
-$noscript = '<noscript><main style="max-width:640px;margin:40px auto;padding:0 16px;font-family:sans-serif">'
+$noscript = '<noscript><main class="noscript-page">'
     . ($article
         ? '<article><h1>' . e((string) $article['title']) . '</h1><p><time datetime="' . e((string) $article['date']) . '">' . e((string) $article['date']) . '</time> · ' . e($name) . '</p>' . journal_markdown((string) $article['content']) . '</article>'
         : ($section

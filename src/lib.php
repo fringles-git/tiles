@@ -223,14 +223,15 @@ function csp_nonce(): string
 /**
  * Content Security Policy for HTML pages. Third parties are listed one by one:
  * YouTube (nocookie) and Spotify players, the map tiles (OpenFreeMap; MapLibre itself is self-hosted),
- * radio streams (any HTTPS host). Inline style attributes stay allowed: tile markup uses them.
+ * radio streams (any HTTPS host).
  */
 function csp_policy(string $nonce): string
 {
     return implode('; ', [
         "default-src 'self'",
         "script-src 'self' 'nonce-$nonce'",
-        "style-src 'self' 'unsafe-inline'",
+        // No 'unsafe-inline': tile styles go through data-css + CSSOM (assets/js/style-attr.js).
+        "style-src 'self' 'nonce-$nonce'",
         "img-src 'self' data: blob: https:",
         "font-src 'self'",
         "connect-src 'self' https://tiles.openfreemap.org",
@@ -299,6 +300,7 @@ function render_shell(string $title, string $description, array $boot, string $e
 <link rel="stylesheet" href="assets/css/polish.css?v=<?= asset_v('css/polish.css') ?>">
 <link rel="stylesheet" href="assets/css/bento.css?v=<?= asset_v('css/bento.css') ?>">
 <!-- Deferred: fetched in parallel with the markup, run in this order after TILES_BOOT. -->
+<script defer src="assets/js/style-attr.js?v=<?= asset_v('js/style-attr.js') ?>"></script>
 <script defer src="assets/js/widgets.js?v=<?= asset_v('js/widgets.js') ?>"></script>
 <script defer src="assets/js/experience.js?v=<?= asset_v('js/experience.js') ?>" data-qr="assets/vendor/qrcode.min.js?v=<?= asset_v('vendor/qrcode.min.js') ?>"></script>
 <script defer src="assets/js/hub.js?v=<?= asset_v('js/hub.js') ?>"></script>
