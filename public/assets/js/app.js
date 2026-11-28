@@ -416,7 +416,9 @@ function renderGrid(){
  const counter=$('#explore-count');if(counter)counter.textContent=tiles.filter(t=>t.type!=='section').length+' éléments';
  document.getElementById('statsbox').innerHTML=mode==='stats'?statsHTML():'';
  const empty=mode==='preview'&&!tiles.some(t=>t.type!=='section'&&t.type!=='universe')&&!hub?.articleCount()? `<section class="portfolio-empty"><h3>Aucun résultat</h3><p>${ui.query?`Aucun bloc ne correspond à « ${esc(ui.query)} ». `:''}Essayez une suggestion ou réinitialisez les filtres.</p><div class="empty-suggestions"><button type="button" data-search-suggestion="React">React</button><button type="button" data-search-suggestion="SaaS">SaaS</button></div><button type="button" class="btn" data-reset-explorer>Tout afficher</button></section>`:'';
- grid.innerHTML=empty+tiles.map(tileHTML).join('')+(mode==='edit'?`<button class="add-tile" type="button" data-act="add">${ic('plus',22)}Add block</button>`:'')+(mode==='preview'?`<p class="footer-note">Fait avec Tiles</p>`:'');
+ /* One packing run per heading: dense packing fills gaps inside a section but never lifts a tile above its heading. */
+ const runs=[];for(const t of tiles){if(!runs.length||t.type==='section'||t.type==='universe')runs.push([]);runs[runs.length-1].push(t)}
+ grid.innerHTML=empty+runs.map(r=>`<div class="grid-run">${r.map(tileHTML).join('')}</div>`).join('')+(mode==='edit'?`<button class="add-tile" type="button" data-act="add">${ic('plus',22)}Add block</button>`:'')+(mode==='preview'?`<p class="footer-note">Fait avec Tiles</p>`:'');
  if(hub)hub.update();
  window.TilesPolish?.highlightTitles(grid,ui.query);
 }
@@ -448,7 +450,7 @@ document.addEventListener('keydown',e=>{
  const k=e.key.toLowerCase();
  if((e.ctrlKey||e.metaKey)&&!e.altKey&&!typing&&(k==='z'||k==='y')){e.preventDefault();if(k==='y'||e.shiftKey)redo();else undo();return}
  /* Alt + arrows move the focused block; focus and an announcement follow it. */
- const tile=e.target.closest?.('#grid > .tile');
+ const tile=e.target.closest?.('#grid .tile');
  if(tile&&e.target===tile&&e.altKey&&!e.ctrlKey&&!e.metaKey&&['ArrowLeft','ArrowUp','ArrowRight','ArrowDown'].includes(e.key)){
   e.preventDefault();const id=tile.dataset.id;const dir=e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:1;const i=S.tiles.findIndex(t=>t.id===id);
   if(i+dir<0||i+dir>=S.tiles.length){toast(dir<0?'Déjà en première position':'Déjà en dernière position');return}

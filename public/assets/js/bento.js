@@ -80,7 +80,7 @@ function enhance(T,F){
 /* ---------- Motion: view transitions between filters, pointer spotlight ---------- */
 let running=null;
 const tileName=id=>'tile-'+String(id).replace(/[^A-Za-z0-9_-]/g,'');
-function nameTiles(grid,on){for(const el of grid.children){const id=el.dataset&&el.dataset.id;if(!id)continue;el.style.viewTransitionName=on?tileName(id):'';el.style.viewTransitionClass=on?'tile':'';}}
+function nameTiles(grid,on){for(const el of grid.querySelectorAll('.tile')){const id=el.dataset&&el.dataset.id;if(!id)continue;el.style.viewTransitionName=on?tileName(id):'';el.style.viewTransitionClass=on?'tile':'';}}
 /* Animate a grid re-render (filter, search, section). Falls back to an instant update when the API,
  * the grid or the motion preference says no, in the editor, or while another transition runs. */
 function transition(update){
@@ -99,7 +99,7 @@ function spotlight(grid){
 /* First paint only: tiles rise in order, capped so the last ones never wait long. */
 function intro(grid){
  if(reduced()||!document.body.classList.contains('is-public'))return;
- [...grid.children].forEach((el,i)=>el.style.setProperty('--i',Math.min(i,12)));
+ [...grid.querySelectorAll('.tile')].forEach((el,i)=>el.style.setProperty('--i',Math.min(i,12)));
  document.body.classList.add('tiles-intro');setTimeout(()=>document.body.classList.remove('tiles-intro'),1400);
 }
 
