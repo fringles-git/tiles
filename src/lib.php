@@ -215,9 +215,8 @@ function render_shell(string $title, string $description, array $boot, string $e
 <title><?= e($title) ?></title>
 <meta name="description" content="<?= e($description) ?>">
 <?= $extraHead ?>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Figtree:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preload" href="assets/fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts/fonts.css?v=<?= asset_v('fonts/fonts.css') ?>">
 <link rel="stylesheet" href="assets/css/app.css?v=<?= asset_v('css/app.css') ?>">
 <link rel="stylesheet" href="assets/css/widgets.css?v=<?= asset_v('css/widgets.css') ?>">
 <link rel="stylesheet" href="assets/css/experience.css?v=<?= asset_v('css/experience.css') ?>">

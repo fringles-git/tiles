@@ -51,7 +51,7 @@ if (!is_admin()) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Tiles · Log in</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Figtree:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/fonts/fonts.css?v=<?= asset_v('fonts/fonts.css') ?>">
 <style>
 :root{--bg:#ECEEF1;--surface:#fff;--fg:#14161A;--muted:#656B75;--line:rgba(18,22,30,.1);--accent:#0B7A75;--danger:#D6363F}
 @media (prefers-color-scheme:dark){:root{--bg:#0E1013;--surface:#171A1F;--fg:#F0F2F5;--muted:#99A0AA;--line:rgba(255,255,255,.1);color-scheme:dark}}

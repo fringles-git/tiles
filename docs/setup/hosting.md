@@ -30,6 +30,8 @@ root /srv/tiles/public;
 index index.php;
 
 location / { try_files $uri $uri/ =404; }
+# Self-hosted fonts never change under the same name.
+location ~ ^/assets/fonts/.+\.woff2$ { add_header Cache-Control "public, max-age=31536000, immutable"; }
 location ~ ^/uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))$ {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root/media.php;
