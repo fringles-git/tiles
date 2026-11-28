@@ -367,7 +367,7 @@ document.addEventListener('click',e=>{
  if(j){e.preventDefault();const el=grid.querySelector(`[data-id="${j.dataset.jump}"]`);if(el){const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});activeId='';setTimeout(markActive,reduce?0:600)}return}
  const pc=e.target.closest('[data-pclick]');if(pc&&PUBLIC)beacon({type:'click',id:pc.dataset.pclick});
  if(e.target.closest('#prof a[href^="tel:"]')&&PUBLIC)beacon({type:'click',id:'p-phone'});
- const cp=e.target.closest('#prof [data-copy]');if(cp){e.preventDefault();copyText(cp.dataset.copy,cp.closest('.prow')&&cp.closest('.prow').querySelector('.pv span'));return}
+ const cp=e.target.closest('#prof [data-copy]');if(cp){e.preventDefault();copyText(cp.dataset.copy,cp.closest('.prow')&&cp.closest('.prow').querySelector('.pv span'),cp);return}
 });
 const FLOW=['experience','education','skills','text','now','faith','testimonial','instrument','contact'];
 function sizeIcon(cells){return `<span class="sz-ico">${cells.map(c=>`<i class="${c?'f':''}"></i>`).join('')}</span>`}
@@ -592,8 +592,8 @@ function delTile(id){const i=S.tiles.findIndex(t=>t.id===id);if(i<0)return;const
 function reorder(fromId,toId,after){const from=S.tiles.findIndex(x=>x.id===fromId);if(from<0||!byId(toId))return;const [m]=S.tiles.splice(from,1);let to=S.tiles.findIndex(x=>x.id===toId);if(after)to++;S.tiles.splice(to,0,m);renderGrid();save();toast(`Position ${to+1} sur ${S.tiles.length}`,undo)}
 function moveTile(id,dir){const i=S.tiles.findIndex(t=>t.id===id);const j=i+dir;if(i<0||j<0||j>=S.tiles.length)return;[S.tiles[i],S.tiles[j]]=[S.tiles[j],S.tiles[i]];renderGrid();save();const el=grid.querySelector(`[data-id="${id}"] [data-tb="${dir<0?'left':'right'}"]`);if(el)el.focus()}
 
-function copyText(text,fallbackEl){
- const done=()=>toast(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)?'Email copié':'Copié');
+function copyText(text,fallbackEl,btn){
+ const done=()=>{toast(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)?'Email copié':'Copié');window.TilesBento?.copied(btn)};
  try{navigator.clipboard.writeText(text).then(done,()=>{sel(fallbackEl)})}catch(e){sel(fallbackEl)}
  function sel(el){if(!el)return;if(el.select){el.focus();el.select()}else{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}toast('Selected. Press Ctrl+C to copy.')}
 }
@@ -615,7 +615,7 @@ grid.addEventListener('click',e=>{
  if(study){openCaseStudy(study.dataset.project);return}
  const yt=e.target.closest('.tile') && tile.querySelector('[data-yt]');
  if(yt&&!e.target.closest('[data-copy]')){e.preventDefault();count(id);const v=yt.dataset.yt;const box=tile.querySelector('.ti');box.outerHTML=`<div class="ti" style="padding:0"><iframe class="embed" style="border-radius:inherit" src="https://www.youtube-nocookie.com/embed/${v}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe></div>`;return}
- const cp=e.target.closest('[data-copy]');if(cp){copyText(cp.dataset.copy,cp.previousElementSibling);count(id);return}
+ const cp=e.target.closest('[data-copy]');if(cp){copyText(cp.dataset.copy,cp.previousElementSibling,cp);count(id);return}
  if(e.target.closest('[data-track]'))count(id);
 });
 grid.addEventListener('keydown',e=>{

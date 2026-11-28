@@ -112,15 +112,25 @@ function intro(grid){
 /* Sliding indicator under the universe tabs: follows aria-current, survives nav rebuilds, resizes and late fonts. */
 function tabIndicator(nav){
  if(!nav||typeof ResizeObserver!=='function'||typeof MutationObserver!=='function')return;
- let raf=0;
+ let raf=0,last=null;
  const place=()=>{raf=0;const a=nav.querySelector('[aria-current]');
   if(nav.hidden||!a||!a.offsetWidth){nav.classList.remove('has-ind');return;}
   const st=nav.style;st.setProperty('--tab-x',a.offsetLeft+'px');st.setProperty('--tab-y',a.offsetTop+'px');st.setProperty('--tab-w',a.offsetWidth+'px');st.setProperty('--tab-h',a.offsetHeight+'px');
+  /* On a narrow screen the strip scrolls: bring a newly active tab into view (deep link, popstate, click). */
+  if(a!==last){last=a;const l=a.offsetLeft,r=l+a.offsetWidth;if(l<nav.scrollLeft||r>nav.scrollLeft+nav.clientWidth)nav.scrollTo?.({left:Math.max(0,l-16),behavior:reduced()?'auto':'smooth'});}
   /* Shown one frame after the first placement, so it never slides in from the left edge. */
   if(!nav.classList.contains('has-ind'))requestAnimationFrame(()=>nav.classList.add('has-ind'));};
  const queue=()=>{if(!raf)raf=requestAnimationFrame(place)};
  new MutationObserver(queue).observe(nav,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-current','hidden']});
  new ResizeObserver(queue).observe(nav);document.fonts?.ready?.then(queue);queue();
+}
+
+/* Copy confirmation on the button itself: the icon becomes a check for 1.5 s (the toast still announces it). */
+const CHECK='<svg class="ui-icon" style="--icon-size:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+function copied(btn,ms=1500){
+ if(!btn||btn.classList.contains('is-copied'))return;
+ const html=btn.innerHTML;btn.classList.add('is-copied');btn.innerHTML=CHECK;
+ setTimeout(()=>{btn.innerHTML=html;btn.classList.remove('is-copied')},ms);
 }
 
 /* ---------- Runtime: clocks and figures, public view only ---------- */
@@ -143,5 +153,5 @@ function bind({grid,isPublic}){
  document.addEventListener('visibilitychange',start);start();
 }
 
-window.TilesBento={enhance,bind,intro,transition,tileName,nameTiles,tabIndicator,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
+window.TilesBento={enhance,bind,intro,transition,tileName,nameTiles,tabIndicator,copied,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
 })();
