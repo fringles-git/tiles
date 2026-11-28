@@ -6,6 +6,8 @@ const sizeCount=s=>({bar:1,s:1,w:3,t:5,l:8}[s]||1);
 const coord=(v,min,max,fallback)=>v!==''&&v!=null&&Number.isFinite(+v)&&+v>=min&&+v<=max?+v:fallback;
 const state=new Map(),requests=new Map(),maps=new Set();
 const gateway=new URL('../../widgets.php',document.currentScript?.src||location.href).href;
+// MapLibre is self-hosted (no third-party script); loaded only when a visitor opens the map.
+const mapVendor=new URL('../vendor/maplibre-gl-6.16.0/',document.currentScript?.src||location.href).href;
 let audio=null,playing=null,mapModule=null,enabled=false;
 const catalogue=window.TILES_BOOT?.sports||[{key:'f1',name:'Formule 1',url:'https://www.formula1.com/'},{key:'psg',name:'Paris Saint-Germain',url:'https://www.psg.fr/'},{key:'france',name:'France · équipe masculine',url:'https://www.fff.fr/equipe-nationale/'}];
 const followed=d=>catalogue.find(x=>x.key===(d.follow||'f1'))||catalogue[0];
@@ -164,8 +166,8 @@ async function startMap(card,d){
  let map,record;
  try{
   if(!mapModule){
-   const css=document.createElement('link');css.rel='stylesheet';css.href='https://unpkg.com/maplibre-gl@6.16.0/dist/maplibre-gl.css';document.head.appendChild(css);
-   mapModule=import('https://unpkg.com/maplibre-gl@6.16.0/dist/maplibre-gl.mjs').catch(e=>{mapModule=null;css.remove();throw e});
+   const css=document.createElement('link');css.rel='stylesheet';css.href=mapVendor+'maplibre-gl.css';document.head.appendChild(css);
+   mapModule=import(mapVendor+'maplibre-gl.mjs').catch(e=>{mapModule=null;css.remove();throw e});
   }
   const gl=await mapModule;if(!card.isConnected||document.hidden)return;
   body.innerHTML=`<div class="w-map" role="region" aria-label="Carte de ${esc(d.place||'Troyes')}"></div><div class="w-map-actions"><button type="button" data-w-action="recenter">Recentrer</button><button type="button" data-w-action="close-map">Fermer la carte</button></div>${sourceLink('https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=;'+lat+','+lon,'Itinéraire')}`;

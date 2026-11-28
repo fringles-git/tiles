@@ -2,14 +2,11 @@
 declare(strict_types=1);
 require_once __DIR__ . '/paths.php';
 require_once __DIR__ . '/widget-config.php';
-
-ini_set('display_errors', '0');
+require_once __DIR__ . '/throttle.php';
 
 // Uploads: GD needs ~4 bytes per pixel, so the cap protects memory_limit (40 MP ≈ 160 MB).
 const UPLOAD_MAX_SIDE = 10000;
 const UPLOAD_MAX_PIXELS = 40_000_000;
-error_reporting(E_ALL);
-
 /**
  * First run: copy the starting content out of seed/data/ into data/ and uploads/.
  * Runtime files are never tracked in Git, so redeploying the code never
@@ -117,10 +114,12 @@ function write_json(string $file, array $data): bool
     $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     if ($json === false || file_put_contents($tmp, $json, LOCK_EX) === false) {
         @unlink($tmp);
+        tiles_log('write_json failed', ['file' => $file, 'step' => $json === false ? 'encode' : 'write']);
         return false;
     }
     if (!rename($tmp, $path)) {
         @unlink($tmp);
+        tiles_log('write_json failed', ['file' => $file, 'step' => 'rename']);
         return false;
     }
     return true;
@@ -129,8 +128,15 @@ function write_json(string $file, array $data): bool
 /** Run $fn while holding an exclusive lock, so concurrent requests never lose updates. */
 function with_lock(string $name, callable $fn)
 {
-    $handle = fopen(DATA_DIR . '/' . $name . '.lock', 'c');
-    flock($handle, LOCK_EX);
+    // No lock, no run: a failed open or flock throws instead of writing unprotected.
+    $handle = @fopen(DATA_DIR . '/' . $name . '.lock', 'c');
+    if ($handle === false) {
+        throw new RuntimeException("Lock file unavailable: $name");
+    }
+    if (!flock($handle, LOCK_EX)) {
+        fclose($handle);
+        throw new RuntimeException("Lock not acquired: $name");
+    }
     try {
         return $fn();
     } finally {
@@ -216,15 +222,15 @@ function csp_nonce(): string
 
 /**
  * Content Security Policy for HTML pages. Third parties are listed one by one:
- * YouTube (nocookie) and Spotify players, the map (MapLibre from unpkg, OpenFreeMap tiles),
+ * YouTube (nocookie) and Spotify players, the map tiles (OpenFreeMap; MapLibre itself is self-hosted),
  * radio streams (any HTTPS host). Inline style attributes stay allowed: tile markup uses them.
  */
 function csp_policy(string $nonce): string
 {
     return implode('; ', [
         "default-src 'self'",
-        "script-src 'self' 'nonce-$nonce' https://unpkg.com",
-        "style-src 'self' 'unsafe-inline' https://unpkg.com",
+        "script-src 'self' 'nonce-$nonce'",
+        "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https:",
         "font-src 'self'",
         "connect-src 'self' https://tiles.openfreemap.org",

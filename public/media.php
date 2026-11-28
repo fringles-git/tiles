@@ -21,7 +21,9 @@ $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 $allowed = ['jpg'=>'image/jpeg', 'jpeg'=>'image/jpeg', 'png'=>'image/png', 'webp'=>'image/webp', 'gif'=>'image/gif', 'pdf'=>'application/pdf'];
 $type = (new finfo(FILEINFO_MIME_TYPE))->file($file);
 if ($type !== $allowed[$extension]) { http_response_code(404); exit; }
-$etag = '"' . hash_file('sha256', $file) . '"';
+// Cheap validator: modification time + size + inode, read from one stat() (no full-file hash per request).
+$stat = stat($file);
+$etag = '"' . dechex($stat['mtime']) . '-' . dechex($stat['size']) . '-' . dechex($stat['ino']) . '"';
 header('Content-Type: ' . $type);
 header('Content-Disposition: inline; filename="' . $name . '"');
 header('Cache-Control: public, max-age=3600');

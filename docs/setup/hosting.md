@@ -30,6 +30,7 @@ root /srv/tiles/public;
 index index.php;
 
 location / { try_files $uri $uri/ =404; }
+# Self-hosted MapLibre is an ES module: `.mjs` must be served as JavaScript (recent mime.types already map it).
 # Self-hosted fonts never change under the same name.
 location ~ ^/assets/fonts/.+\.woff2$ { add_header Cache-Control "public, max-age=31536000, immutable"; }
 location ~ ^/uploads/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif|pdf))$ {
@@ -118,6 +119,10 @@ But : `brandonlazarre.fr` sert la page, `tiles.brandonlazarre.fr` sert l'admin. 
 HTML pages send a Content Security Policy built in `src/lib.php` (`csp_policy()`), with a fresh nonce for the inline `TILES_BOOT` script. It starts as `Content-Security-Policy-Report-Only`: violations show in the browser console and nothing is blocked. Once the console stays clean on the public page, the editor, the map, the radio, YouTube and Spotify, set `'csp' => 'enforce'` in `config/config.php` (or `TILES_CSP=enforce`). `'off'` removes the header.
 
 Over HTTPS, pages also send `Strict-Transport-Security: max-age=15552000` (180 days, this host only). Browsers then refuse plain HTTP for that time: keep the SSL certificate renewed.
+
+## Error log
+
+PHP errors and uncaught exceptions go to `data/logs/php-error.log` (private: `data/` is never served). The file rotates to `php-error.log.1` past 1 MB. Visitors only see a generic "Server error" message. Failed JSON writes and lock failures are logged with the file name, never with request content.
 
 ## Email signups (GDPR)
 
