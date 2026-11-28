@@ -15,7 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     } else {
         // Per client: 5 wrong passwords in 10 minutes. Global backstop: 50, so one attacker
         // can no longer lock the real admin out by failing 5 times.
-        $result = !throttle('login-fail', 5, 600, false) ? 'locked' : with_lock('login', function () {
+        // Checked inside the login lock: attempts queued behind it see the failures before them.
+        $result = with_lock('login', function () {
+            if (!throttle('login-fail', 5, 600, false)) {
+                return 'locked';
+            }
             $state = read_json('login.json', ['fails' => 0, 'until' => 0]);
             if (time() < (int) ($state['until'] ?? 0)) {
                 return 'locked';
