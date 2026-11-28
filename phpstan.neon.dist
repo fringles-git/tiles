@@ -1,0 +1,16 @@
+# Static analysis, dev only (composer install, then composer analyse).
+# Start at level 0; raise one level per PR. A baseline (phpstan-baseline.neon) holds
+# accepted existing errors once generated, so new code is checked at the current level.
+parameters:
+    level: 0
+    phpVersion: 80500
+    paths:
+        - src
+        - public
+        - scripts
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+    dynamicConstantNames:
+        - DATA_DIR
+        - UPLOAD_DIR
+        - TILES_MODE
