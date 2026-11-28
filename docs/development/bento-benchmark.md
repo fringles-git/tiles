@@ -1,6 +1,6 @@
 # Benchmark Bento : 23 modèles Framer, recherches et plan — 27 novembre 2026
 
-PR liées : #38 (cartes), #39 (micro-interactions, renforcée par #46), #40 (éditeur), #41 (stats). Elles sont empilées : merger dans l'ordre.
+PR liées : #38 (cartes), #39 (micro-interactions, renforcée par #46 et #47), #40 (éditeur), #41 (stats). Elles sont empilées : merger dans l'ordre.
 
 ## Méthode et limites
 
@@ -133,7 +133,7 @@ Source : [ShowMotion](https://showmotion.bohehub.com/fr/), 259 motifs en 15 cat�
 - **Container Transform** de la tuile projet vers l'étude de cas (View Transition vers un `<dialog>` en top layer) : géométrie trop différente, à prototyper.
 - **Skeleton Shimmer** pour les widgets en direct (sports, radio) pendant le chargement.
 - **Crossfade Page Transition** (`@view-transition { navigation: auto }`) si les études de cas deviennent des pages.
-- **Copy-to-Clipboard Feedback** : icône copier qui devient coche 1,2 s, en plus du toast.
+- ~~**Copy-to-Clipboard Feedback**~~ : livré dans #47 (coche 1,5 s).
 
 ## 7. Deuxième tri : pawr.link et clones Bento — 28 novembre 2026
 
@@ -141,7 +141,7 @@ Sources : [pawr.link](https://pawr.link/) (accueil + profil `/max`), [Bento_Clon
 
 **Limite.** Les trois clones Vercel ne montrent que des pages d'accueil marketing : ni éditeur, ni profil public, aucune interaction décrite. `bento-box-clone` ne rend que trois paragraphes. Les captures et les classes CSS de pawr.link n'ont pas pu être lues : survols et durées non mesurés. Le tri vient donc surtout de pawr.link et du README.
 
-### Appliqué (PR `feat/motion-3`)
+### Appliqué (#47)
 
 | Idée | Source | Dans Tiles |
 |---|---|---|
