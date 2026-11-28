@@ -11,4 +11,6 @@
 </IfModule>
 <IfModule mod_mime.c>
   AddType font/woff2 .woff2
+  # ES modules (self-hosted MapLibre) must be served as JavaScript or the browser refuses them.
+  AddType text/javascript .mjs
 </IfModule>
