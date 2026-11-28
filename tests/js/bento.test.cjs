@@ -55,3 +55,44 @@ test('transition runs the update immediately when the API is missing',()=>{
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../public/assets/js/bento.js'),'utf8'),{window:w,Intl,Date,document});
  w.TilesBento.transition(()=>ran++);assert.equal(ran,1);
 });
+const load=ctx=>{const w={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../public/assets/js/bento.js'),'utf8'),{window:w,Intl,Date,...ctx});return w.TilesBento;};
+const fakeTile=(id,top)=>({dataset:{id},style:{},classList:new Set(),getBoundingClientRect:()=>({top,bottom:top+200}),_props:{},
+ setProperty(){}});
+test('view-transition names only go to tiles near the viewport',()=>{
+ const m=load({innerHeight:800});const tiles=[fakeTile('a',0),fakeTile('b',1100),fakeTile('c',3000),fakeTile('d',-900)];
+ m.nameTiles({querySelectorAll:()=>tiles},true);
+ assert.deepEqual(tiles.map(t=>t.style.viewTransitionName),['tile-a','tile-b','','']);
+ m.nameTiles({querySelectorAll:()=>tiles},false);assert.ok(tiles.every(t=>t.style.viewTransitionName===''));
+});
+test('intro: first screen only, once per session, never in the editor',()=>{
+ const store={};const sessionStorage={getItem:k=>store[k]??null,setItem:(k,v)=>{store[k]=v}};
+ const body={classList:{contains:c=>c==='is-public'}};
+ const mk=()=>{const t=[0,300,900,1600].map((y,i)=>{const el=fakeTile('t'+i,y);el.classList={list:new Set(),add(c){this.list.add(c)},remove(c){this.list.delete(c)}};el.style={setProperty(k,v){el.style[k]=v}};return el});return t;};
+ const m=load({innerHeight:800,sessionStorage,document:{body},setTimeout:()=>0,matchMedia:()=>({matches:false})});
+ const a=mk();m.intro({querySelectorAll:()=>a});
+ assert.deepEqual(a.map(t=>t.classList.list.has('rise')),[true,true,false,false]);assert.equal(a[1].style['--i'],1);
+ const b=mk();m.intro({querySelectorAll:()=>b});assert.ok(b.every(t=>!t.classList.list.has('rise')),'second load of the session stays still');
+ const e=load({innerHeight:800,sessionStorage:{getItem:()=>null,setItem(){}},document:{body:{classList:{contains:()=>false}}},matchMedia:()=>({matches:false})});
+ const c=mk();e.intro({querySelectorAll:()=>c});assert.ok(c.every(t=>!t.classList.list.has('rise')));
+});
+test('tab indicator: no-op without observers, follows aria-current otherwise',()=>{
+ load({}).tabIndicator({});
+ let mo,ro,frames=[];const props={},cls=new Set();
+ const a={offsetLeft:120,offsetTop:2,offsetWidth:90,offsetHeight:44};
+ const nav={hidden:false,querySelector:()=>a,style:{setProperty:(k,v)=>{props[k]=v}},classList:{contains:c=>cls.has(c),add:c=>cls.add(c),remove:c=>cls.delete(c)}};
+ const m=load({MutationObserver:class{constructor(f){mo=f}observe(){}},ResizeObserver:class{constructor(f){ro=f}observe(){}},requestAnimationFrame:f=>frames.push(f),document:{}});
+ m.tabIndicator(nav);const flush=()=>{while(frames.length)frames.shift()()};flush();
+ assert.deepEqual(props,{'--tab-x':'120px','--tab-y':'2px','--tab-w':'90px','--tab-h':'44px'});assert.ok(cls.has('has-ind'));
+ nav.hidden=true;mo();flush();assert.ok(!cls.has('has-ind'),'hidden nav (editor) drops the indicator');
+});
+/* Prelude of the block that encloses position i (walks back over balanced braces). */
+const enclosing=(css,i)=>{let d=0;for(let k=i;k>=0;k--){if(css[k]==='}')d++;else if(css[k]==='{'){if(d===0)return css.slice(css.lastIndexOf('}',k)+1,k);d--;}}return '';};
+test('motion CSS: every animation is opt-in and the reveal is progressive',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../../public/assets/css/bento.css'),'utf8');
+ assert.match(css,/@supports \(animation-timeline:view\(\)\)\{\s*@media screen and \(prefers-reduced-motion:no-preference\)/);
+ for(const sel of ['.grid .tile.rise{animation','::backdrop{opacity:0;transition','.hub-universes.has-ind::before{transition']){
+  const i=css.indexOf(sel);assert.ok(i>0,sel);assert.match(enclosing(css,i),/prefers-reduced-motion:no-preference/,sel);
+ }
+ assert.match(css,/@starting-style\{\s*:is\(\.project-dialog,\.explore-dialog,\.sports-dialog\)\[open\]/);
+ assert.match(css,/forced-colors:active\)\{\.hub-universes::before\{display:none\}/);
+});

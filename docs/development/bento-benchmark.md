@@ -1,6 +1,6 @@
 # Benchmark Bento : 23 modèles Framer, recherches et plan — 27 novembre 2026
 
-PR liées : #38 (cartes), #39 (micro-interactions), #40 (éditeur), #41 (stats). Elles sont empilées : merger dans l'ordre.
+PR liées : #38 (cartes), #39 (micro-interactions, renforcée par #46), #40 (éditeur), #41 (stats). Elles sont empilées : merger dans l'ordre.
 
 ## Méthode et limites
 
@@ -103,3 +103,34 @@ Freemium possible : 7 jours de stats en gratuit ; 30/90 jours, sources, appareil
 - `npm run test:js` : `bento.test.cjs` et `editor.test.cjs`.
 - `npm run test:php` : `stats.test.php` (19 nouveaux contrôles).
 - Étapes manuelles : section « Tester » de chaque PR.
+
+## 6. Renfort du mouvement : tri ShowMotion — 28 novembre 2026
+
+Source : [ShowMotion](https://showmotion.bohehub.com/fr/), 259 motifs en 15 catégories. Critères : utile à une page link-in-bio, natif (CSS ou quelques lignes de JS), désactivé avec `prefers-reduced-motion`, sans forme ronde ni pilule.
+
+### Appliqué (#46)
+
+| Motif ShowMotion | Dans Tiles | Technique |
+|---|---|---|
+| Scroll-Triggered / Scroll-Linked Animation | Les tuiles sous la ligne de flottaison montent à leur entrée dans l'écran | `animation-timeline: view()` sous `@supports`, aucun JS ; sans support, tuiles statiques |
+| Stagger | Montée limitée au premier écran et à la première visite de la session | `sessionStorage`, classe `.rise` retirée après 1,4 s |
+| Modal Scale-Fade In + Backdrop Scrim Fade | Étude de cas, explorateur, journal, sports : entrée et sortie en fondu-zoom | `@starting-style`, `overlay` et `display` en `allow-discrete` |
+| Tab Indicator Slide | Un repère glisse sous l'onglet d'univers actif | Variables CSS posées par `bento.js` (MutationObserver + ResizeObserver) |
+| Hover Border Gradient (avec Card Spotlight existant) | Liseré d'accent de 1 px qui suit le pointeur, en plus du halo | `mask` `exclude`, mêmes variables `--mx` / `--my` |
+| — (performance) | Noms `view-transition-name` posés seulement sur les tuiles à moins d'un demi-écran | Moins de captures sur les longues pages |
+
+### Écarté
+
+- **Curseurs** (Custom Cursor, Follower, Trail, Magnetic, Blend-Mode) : gêne la lecture, sans gain sur un lien.
+- **Fonds ambiants** (Aurora, Meteors, Particles, Starfield, Vortex…) : coût GPU permanent, détourne du contenu.
+- **3D** (Tilt, Glare, Coverflow, Cube) : gadget, mal au tactile.
+- **Texte animé** (Glitch, Scramble, Typewriter, Split Text…) : nuit à la lecture et aux lecteurs d'écran.
+- **Ping / Pulse sur le point « Disponible »** : amplifie une forme ronde, contraire au thème squircle.
+- **Ripple, Confetti, Heart Burst** : Material ou ludique, hors ton.
+
+### Retenu pour plus tard
+
+- **Container Transform** de la tuile projet vers l'étude de cas (View Transition vers un `<dialog>` en top layer) : géométrie trop différente, à prototyper.
+- **Skeleton Shimmer** pour les widgets en direct (sports, radio) pendant le chargement.
+- **Crossfade Page Transition** (`@view-transition { navigation: auto }`) si les études de cas deviennent des pages.
+- **Copy-to-Clipboard Feedback** : icône copier qui devient coche 1,2 s, en plus du toast.

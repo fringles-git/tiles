@@ -77,10 +77,14 @@ function enhance(T,F){
   render:d=>{const c=clockParts(d);return `<span class="eyebrow">Heure locale</span><span class="big clock-time" data-clock="${esc(c.tz)}"><time>${esc(c.time)}</time></span><span class="bottom"><b>${esc(d.place)}</b> <small class="muted">${esc(c.offset)}</small><small class="muted clock-rel" data-clock-rel>${esc(c.relative)}</small></span><span class="clock-sky ${c.day?'day':'night'}" aria-hidden="true"></span>`}};
 }
 
-/* ---------- Motion: view transitions between filters, pointer spotlight ---------- */
+/* ---------- Motion: view transitions, pointer spotlight, intro, tab indicator ---------- */
 let running=null;
 const tileName=id=>'tile-'+String(id).replace(/[^A-Za-z0-9_-]/g,'');
-function nameTiles(grid,on){for(const el of grid.querySelectorAll('.tile')){const id=el.dataset&&el.dataset.id;if(!id)continue;el.style.viewTransitionName=on?tileName(id):'';el.style.viewTransitionClass=on?'tile':'';}}
+const vh=()=>globalThis.innerHeight||800;
+/* Only tiles within half a screen of the viewport get a name: off-screen ones join the root crossfade,
+ * so a long page never captures dozens of snapshots. A tile leaving the viewport fades out, one arriving fades in. */
+const near=el=>{const r=el.getBoundingClientRect(),h=vh();return r.bottom>-h/2&&r.top<h*1.5};
+function nameTiles(grid,on){for(const el of grid.querySelectorAll('.tile')){const id=el.dataset&&el.dataset.id;if(!id)continue;const n=on&&near(el);el.style.viewTransitionName=n?tileName(id):'';el.style.viewTransitionClass=n?'tile':'';}}
 /* Animate a grid re-render (filter, search, section). Falls back to an instant update when the API,
  * the grid or the motion preference says no, in the editor, or while another transition runs. */
 function transition(update){
@@ -96,11 +100,27 @@ function spotlight(grid){
  let frame=0,last=null;
  grid.addEventListener('pointermove',e=>{last=e;if(frame)return;frame=requestAnimationFrame(()=>{frame=0;const t=last.target.closest&&last.target.closest('.tile');if(!t)return;const r=t.getBoundingClientRect();t.style.setProperty('--mx',Math.round(last.clientX-r.left)+'px');t.style.setProperty('--my',Math.round(last.clientY-r.top)+'px');});},{passive:true});
 }
-/* First paint only: tiles rise in order, capped so the last ones never wait long. */
+/* First paint of the session only: tiles in the first screen rise in order, capped so the last ones never wait.
+ * Tiles below the fold are left to the CSS scroll reveal (view() timeline) instead. */
 function intro(grid){
  if(reduced()||!document.body.classList.contains('is-public'))return;
- [...grid.querySelectorAll('.tile')].forEach((el,i)=>el.style.setProperty('--i',Math.min(i,12)));
- document.body.classList.add('tiles-intro');setTimeout(()=>document.body.classList.remove('tiles-intro'),1400);
+ try{if(sessionStorage.getItem('tiles-intro'))return;sessionStorage.setItem('tiles-intro','1')}catch{}
+ const h=vh();let i=0;
+ for(const el of grid.querySelectorAll('.tile')){if(el.getBoundingClientRect().top>=h)continue;el.classList.add('rise');el.style.setProperty('--i',Math.min(i++,12));}
+ setTimeout(()=>{for(const el of grid.querySelectorAll('.rise'))el.classList.remove('rise')},1400);
+}
+/* Sliding indicator under the universe tabs: follows aria-current, survives nav rebuilds, resizes and late fonts. */
+function tabIndicator(nav){
+ if(!nav||typeof ResizeObserver!=='function'||typeof MutationObserver!=='function')return;
+ let raf=0;
+ const place=()=>{raf=0;const a=nav.querySelector('[aria-current]');
+  if(nav.hidden||!a||!a.offsetWidth){nav.classList.remove('has-ind');return;}
+  const st=nav.style;st.setProperty('--tab-x',a.offsetLeft+'px');st.setProperty('--tab-y',a.offsetTop+'px');st.setProperty('--tab-w',a.offsetWidth+'px');st.setProperty('--tab-h',a.offsetHeight+'px');
+  /* Shown one frame after the first placement, so it never slides in from the left edge. */
+  if(!nav.classList.contains('has-ind'))requestAnimationFrame(()=>nav.classList.add('has-ind'));};
+ const queue=()=>{if(!raf)raf=requestAnimationFrame(place)};
+ new MutationObserver(queue).observe(nav,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-current','hidden']});
+ new ResizeObserver(queue).observe(nav);document.fonts?.ready?.then(queue);queue();
 }
 
 /* ---------- Runtime: clocks and figures, public view only ---------- */
@@ -118,9 +138,10 @@ function observeFigures(grid,isPublic){
 function bind({grid,isPublic}){
  observeFigures(grid,isPublic);
  spotlight(grid);
+ tabIndicator(document.querySelector('.hub-universes'));
  const start=()=>{clearInterval(clockTimer);clockTimer=0;if(document.visibilityState==='visible'){tickClocks();clockTimer=setInterval(tickClocks,20000)}};
  document.addEventListener('visibilitychange',start);start();
 }
 
-window.TilesBento={enhance,bind,intro,transition,tileName,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
+window.TilesBento={enhance,bind,intro,transition,tileName,nameTiles,tabIndicator,rows,pct,zoneOffset,zoneTime,fmtOffset,relative,clockParts,parseFigure,formatFigure,countUp,ZONES,tickClocks};
 })();
