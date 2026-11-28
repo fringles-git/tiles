@@ -123,3 +123,7 @@ Over HTTPS, pages also send `Strict-Transport-Security: max-age=15552000` (180 d
 ## Error log
 
 PHP errors and uncaught exceptions go to `data/logs/php-error.log` (private: `data/` is never served). The file rotates to `php-error.log.1` past 1 MB. Visitors only see a generic "Server error" message. Failed JSON writes and lock failures are logged with the file name, never with request content.
+
+## Email signups (GDPR)
+
+The Email signup block stores addresses in `data/leads.json` (private), with the signup time, nothing else. Under the field, visitors see a privacy note, editable per block (default: the address is only used for these mailings, unsubscribe on request). The editor's stats panel lists every address with a Delete button and a Delete all button: erase an address as soon as someone asks. Addresses stay until deleted; export them before deleting if you send mailings from another tool.

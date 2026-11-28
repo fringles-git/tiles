@@ -310,7 +310,7 @@ p{margin:0}
 .top .barx{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
 .top .barx i{display:block;height:100%;background:var(--accent);border-radius:4px}
 .top b{font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
-.leads{display:flex;flex-wrap:wrap;gap:6px}
+.leads{display:flex;flex-direction:column;gap:6px;list-style:none;margin:0;padding:0;max-height:280px;overflow:auto}.leads li{display:flex;align-items:center;justify-content:space-between;gap:8px}.leads li button,.leads-clear{font:inherit;font-size:12px;border:1px solid var(--line);background:transparent;color:inherit;border-radius:8px;padding:4px 8px;cursor:pointer}.leads-clear{margin:8px 0 4px}.lead-note{display:block;margin-top:6px;font-size:11px}
 .leads span{font-size:12px;font-family:var(--f-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
 .samp{font-size:11px;font-weight:700;color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);padding:3px 9px;border-radius:999px}
 

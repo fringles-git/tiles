@@ -244,6 +244,24 @@ switch ($action) {
         }
         out(['url' => 'uploads/' . $name]);
 
+    case 'lead-delete':
+        // GDPR: the admin erases one address on request (or all of them with "all": true).
+        $in = json_decode($raw, true);
+        $all = ($in['all'] ?? false) === true;
+        $email = trim((string) ($in['email'] ?? ''));
+        if (!$all && $email === '') {
+            out(['error' => 'Missing email.'], 400);
+        }
+        $left = with_lock('leads', function () use ($all, $email): ?array {
+            $leads = $all ? [] : array_values(array_filter(read_json('leads.json', []),
+                fn ($l) => strcasecmp((string) ($l['email'] ?? ''), $email) !== 0));
+            return write_json('leads.json', $leads) ? $leads : null;
+        });
+        if ($left === null) {
+            out(['error' => 'The server could not save the list.'], 500);
+        }
+        out(['leads' => array_map(fn ($l) => (string) ($l['email'] ?? ''), $left)]);
+
     case 'reset-stats':
         with_lock('stats', fn() => write_json('stats.json', ['views' => 0, 'days' => [], 'clicks' => []]));
         out([]);

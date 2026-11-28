@@ -22,6 +22,7 @@ function paintIcons(root=document){$$('[class^="i-"],[class*=" i-"]',root).forEa
 
 /* platforms */
 const PLAT={instagram:['Instagram','#E1306C','IG','https://instagram.com/'],tiktok:['TikTok','#111318','TT','https://tiktok.com/@'],youtube:['YouTube','#FF0033','YT','https://youtube.com/@'],x:['X','#111318','X','https://x.com/'],linkedin:['LinkedIn','#0A66C2','in','https://linkedin.com/in/'],github:['GitHub','#24292F','GH','https://github.com/'],behance:['Behance','#1769FF','Bē','https://behance.net/'],dribbble:['Dribbble','#EA4C89','Dr','https://dribbble.com/'],twitch:['Twitch','#9146FF','Tw','https://twitch.tv/'],whatsapp:['WhatsApp','#25D366','WA','https://wa.me/'],threads:['Threads','#111318','@','https://threads.net/@'],facebook:['Facebook','#1877F2','f','https://facebook.com/'],vimeo:['Vimeo','#1AB7EA','Vi','https://vimeo.com/'],soundcloud:['SoundCloud','#FF5500','SC','https://soundcloud.com/'],pinterest:['Pinterest','#E60023','Pi','https://pinterest.com/'],discord:['Discord','#5865F2','Dc','https://discord.gg/'],snapchat:['Snapchat','#E8C800','Sn','https://snapchat.com/add/']};
+const LEAD_PRIVACY='Votre adresse sert uniquement à ces envois. Désinscription sur simple demande.';
 const MUSIC={spotify:['Spotify','#1DB954'],apple:['Apple Music','#FA2D48'],deezer:['Deezer','#A238FF'],soundcloud:['SoundCloud','#FF5500'],youtube:['YouTube Music','#FF0033']};
 
 /* fields */
@@ -162,9 +163,9 @@ const T={
   def:{name:'Lightroom presets',price:'15 €',desc:'',image:'',url:''},href:d=>d.url,
   render:d=>`<div class="pr"><div class="ph" style="${bg(d.image,d.name+'p')}"><span class="price">${esc(d.price)}</span></div><div class="pr-t"><div class="grow"><b class="clamp2" style="font-size:14px">${esc(d.name)}</b>${d.desc?`<small class="muted">${esc(d.desc)}</small>`:''}</div><span class="pill">Acheter</span></div></div>`},
  form:{label:'Email signup',cat:'Earn',hint:'Collect emails or leads',size:'w',interactive:true,
-  fields:[F('title','Title'),F('desc','Description'),F('button','Button label')],
-  def:{title:'Newsletter',desc:'New work, once a month.',button:'Subscribe'},
-  render:(d,t)=>`<form class="lead" data-form="${t.id}"><b class="t-title">${esc(d.title)}</b><small class="muted">${esc(d.desc)}</small><div class="lead-row"><input id="lead-${t.id}" type="email" required placeholder="vous@email.fr" aria-label="Email address"><button type="submit">${esc(d.button)}</button></div></form>`}
+  fields:[F('title','Title'),F('desc','Description'),F('button','Button label'),F('privacy','Privacy note (shown under the field)','area')],
+  def:{title:'Newsletter',desc:'New work, once a month.',button:'Subscribe',privacy:LEAD_PRIVACY},
+  render:(d,t)=>`<form class="lead" data-form="${t.id}"><b class="t-title">${esc(d.title)}</b><small class="muted">${esc(d.desc)}</small><div class="lead-row"><input id="lead-${t.id}" type="email" required placeholder="vous@email.fr" aria-label="Email address" aria-describedby="lead-note-${t.id}"><button type="submit">${esc(d.button)}</button></div><small class="lead-note muted" id="lead-note-${t.id}">${esc(d.privacy||LEAD_PRIVACY)}</small></form>`}
 };
 if(typeof window!=='undefined'&&window.TilesWidgets)Object.assign(T,window.TilesWidgets.definitions(F));
 if(typeof window!=='undefined'&&window.TilesExperience)window.TilesExperience.enhance(T,F);
@@ -406,7 +407,7 @@ function statsHTML(){
  <div class="stats-cols"><div><span class="eyebrow">Par canal</span><div class="tops">${sum.channels.length?sum.channels.map(([c,v])=>`<div class="top"><span>${esc(chName(c))}</span><span class="barx"><i style="width:${(v/cmax*100).toFixed(1)}%;background:${chColor(c)}"></i></span><b>${fr(v)}</b></div>`).join(''):'<p class="muted">Aucun clic sur la période.</p>'}</div></div>
  <div><span class="eyebrow">Par lien</span><table class="stats-table"><thead><tr><th scope="col">Bloc</th><th scope="col">Clics</th><th scope="col">Part</th><th scope="col" title="Clics sur ce bloc divisés par les vues de la page">Taux</th><th scope="col" title="Visites passées par le lien court /go/${sum.exact?' sur la période':', depuis le début'}">/go/</th></tr></thead><tbody>${sum.rows.map(r=>`<tr><td>${esc(rowName(r))}</td><td>${fr(r.clicks)}</td><td>${r.share}%</td><td>${sum.exact&&sum.views?Math.round(r.clicks/sum.views*1000)/10+'%':'–'}</td><td>${r.go?fr(r.go):'–'}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">Aucun clic sur la période.</td></tr>'}</tbody></table></div></div>
  ${aud.tracked?`<div class="stats-cols"><div><span class="eyebrow">Sources des visites</span><div class="tops">${bars(aud.sources,k=>names.SOURCE_NAMES[k]||k,k=>(PLAT[k]||[])[1]||'var(--accent)')}</div></div><div><span class="eyebrow">Appareils</span><div class="tops">${bars(aud.devices,k=>names.DEVICE_NAMES[k]||k,()=>'var(--accent)')}</div></div></div>`:'<p class="hint">Sources, appareils et visiteurs uniques : enregistrés à partir des prochaines visites.</p>'}
- ${st.leads.length?`<div><span class="eyebrow">Inscriptions</span><div class="leads" style="margin-top:6px">${st.leads.slice(-12).map(l=>`<span>${esc(l)}</span>`).join('')}</div></div>`:''}
+ ${st.leads.length?`<div><span class="eyebrow">Inscriptions (${fr(st.leads.length)})</span><ul class="leads" style="margin-top:6px">${st.leads.map(l=>`<li><span>${esc(l)}</span><button type="button" data-lead-del="${esc(l)}" aria-label="Supprimer ${esc(l)}">Supprimer</button></li>`).join('')}</ul><button type="button" class="leads-clear" data-lead-del-all>Tout supprimer</button><small class="muted">Supprime une adresse dès qu'une personne le demande (RGPD). Les adresses restent sur ton serveur jusqu'à suppression.</small></div>`:''}
  <small class="muted">Visites et clics de la page publique, enregistrés sur ton serveur, sans cookie. Ajoute <code>?utm_source=instagram</code> à ton lien de bio pour attribuer les visites sans référent.</small></section>`;
 }
 function renderGrid(){
@@ -712,6 +713,8 @@ function handleAct(a){
  if(a==='logout'){flush();api('logout',{}).finally(()=>{location.href='admin.php'});return}
 }
 document.addEventListener('click',e=>{
+ const leadDel=e.target.closest('[data-lead-del],[data-lead-del-all]');
+ if(leadDel){const all=leadDel.hasAttribute('data-lead-del-all');if(all&&!confirm('Supprimer toutes les adresses ? Action définitive.'))return;leadDel.disabled=true;api('lead-delete',all?{all:true}:{email:leadDel.dataset.leadDel}).then(j=>{S.stats.leads=j.leads;render();toast(all?'Toutes les adresses sont supprimées':'Adresse supprimée')}).catch(err=>{leadDel.disabled=false;toast(err.message)});return;}
  if(e.target.closest('[data-reset-explorer]')){hub?.reset();setExplorer('','all','all');return;}
  const suggestion=e.target.closest('[data-search-suggestion]');if(suggestion){hub?.reset();setExplorer(suggestion.dataset.searchSuggestion,'projects','all');return;}
  const kind=e.target.closest('[data-project-kind]');if(kind){setExplorer(ui.query,'projects',kind.dataset.projectKind);return;}
