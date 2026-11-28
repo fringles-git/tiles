@@ -65,10 +65,10 @@ function section_by_slug(mixed $slug, array $page = []): ?array
 
 /** Tile ids assigned to a section before the explicit `universe` field existed (mirror of hub.js `legacy`). */
 const TILES_LEGACY_SECTIONS = [
-    'humain' => ['f4vi4kt', '4mqulb4', 'sgl7x4k', 'x8yglf1', 'ylannek', 'uu48n57', 'hktzame'],
+    'humain' => ['f4vi4kt', '4mqulb4', 'sgl7x4k', 'x8yglf1', 'ylannek', 'uu48n57'],
     'pro' => ['h5wjvno', 'hvjxay8', 'kppny3l', '8wfmcoj', 'o3c3tj4', 'dsu8mgy', '1qjivdm', '6p4sx89', 'edu2026a', 'lang2026a'],
     'crea' => ['c7mleu5', 'dqbsdn1', 'u5p8z5b', 'xy6x628', 'gu7os67', '0ry1y9r', 'n3q4pwv', 'o98bybn', '01v9xrx', 'sezmm2a', 'kti0n15', 'go0rwep', 'tb3awaw', 't45m79z', 'wlg7uyt', 'j8581xd', 'gc7otp1'],
-    'lifestyle' => ['wojpaqd', '4j1ho8k', '5h9duug'],
+    'lifestyle' => ['wojpaqd', '4j1ho8k', '5h9duug', 'hktzame'],
 ];
 
 /**
@@ -84,9 +84,10 @@ function tile_universe(array $tile, ?array $keys = null): string
     foreach (TILES_LEGACY_SECTIONS as $key => $ids) { if (in_array($tile['id'] ?? null, $ids, true)) { $guess = $key; break; } }
     $type = (string) ($tile['type'] ?? '');
     $guess ??= match (true) {
-        in_array($type, ['faith', 'contact', 'map', 'social', 'atlas', 'clock'], true) => 'humain',
+        // Faith is personal, not contact: Passions, never beside the social profiles in Profil.
+        in_array($type, ['contact', 'map', 'social', 'atlas', 'clock'], true) => 'humain',
         in_array($type, ['instrument', 'image', 'gallery', 'video', 'music', 'radio'], true) => 'crea',
-        in_array($type, ['team', 'sport', 'interest', 'media'], true) => 'lifestyle',
+        in_array($type, ['team', 'sport', 'interest', 'media', 'faith'], true) => 'lifestyle',
         default => 'pro',
     };
     return in_array($guess, $keys, true) ? $guess : (string) ($keys[0] ?? 'pro');
