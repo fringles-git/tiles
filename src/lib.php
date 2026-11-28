@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/paths.php';
 require_once __DIR__ . '/widget-config.php';
+require_once __DIR__ . '/throttle.php';
 
 // Uploads: GD needs ~4 bytes per pixel, so the cap protects memory_limit (40 MP ≈ 160 MB).
 const UPLOAD_MAX_SIDE = 10000;

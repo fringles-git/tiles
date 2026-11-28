@@ -13,7 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     if (!hash_equals($_SESSION['csrf'], (string) ($_POST['csrf'] ?? ''))) {
         $error = 'Your session expired. Try again.';
     } else {
+        // Per client: 5 wrong passwords in 10 minutes. Global backstop: 50, so one attacker
+        // can no longer lock the real admin out by failing 5 times.
+        // Checked inside the login lock: attempts queued behind it see the failures before them.
         $result = with_lock('login', function () {
+            if (!throttle('login-fail', 5, 600, false)) {
+                return 'locked';
+            }
             $state = read_json('login.json', ['fails' => 0, 'until' => 0]);
             if (time() < (int) ($state['until'] ?? 0)) {
                 return 'locked';
@@ -23,8 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
                 write_json('login.json', ['fails' => 0, 'until' => 0]);
                 return 'ok';
             }
+            throttle('login-fail', 5, 600);
             $fails = (int) ($state['fails'] ?? 0) + 1;
-            write_json('login.json', $fails >= 5
+            write_json('login.json', $fails >= 50
                 ? ['fails' => 0, 'until' => time() + 600]
                 : ['fails' => $fails, 'until' => 0]);
             return 'wrong';

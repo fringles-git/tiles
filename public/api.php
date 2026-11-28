@@ -25,6 +25,10 @@ $raw = (string) file_get_contents('php://input', false, null, 0, 6000000);
 /* ---------- Public: visit and click tracking, email signups ---------- */
 
 if ($action === 'track') {
+    // 120 events a minute per client: far above a real visit, low enough to stop a script.
+    if (!throttle('track', 120, 60)) {
+        out(['error' => 'Too many requests.'], 429);
+    }
     $in = json_decode($raw, true);
     $type = is_array($in) ? (string) ($in['type'] ?? '') : '';
     $id = is_array($in) ? (string) ($in['id'] ?? '') : '';
@@ -67,6 +71,9 @@ if ($action === 'lead') {
     $email = trim((string) ($in['email'] ?? ''));
     if (strlen($email) > 200 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         out(['error' => 'Enter a valid email address.'], 400);
+    }
+    if (!throttle('lead', 5, 3600)) {
+        out(['error' => 'Too many signups from this connection. Try again in an hour.'], 429);
     }
     $stored = with_lock('leads', function () use ($email): bool {
         $leads = read_json('leads.json', []);
