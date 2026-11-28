@@ -6,7 +6,7 @@ require dirname(__DIR__) . '/src/sections.php';
 require dirname(__DIR__) . '/src/journal.php';
 redirect_public_to_site();
 
-$page = read_json('page.json', null);
+$page = public_page();
 if (!$page) {
     http_response_code(503);
     echo 'This page is being set up.';

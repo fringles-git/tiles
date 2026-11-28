@@ -9,7 +9,7 @@ header('X-Robots-Tag: noindex, nofollow');
 header('X-Content-Type-Options: nosniff');
 
 $id = (string) ($_GET['id'] ?? '');
-$target = leap_target(read_json('page.json', []), $id, time());
+$target = leap_target(public_page() ?? [], $id, time());
 if ($target === null || !in_array($_SERVER['REQUEST_METHOD'] ?? '', ['GET', 'HEAD'], true)) {
     http_response_code(404);
     header('Content-Type: text/plain; charset=utf-8');
