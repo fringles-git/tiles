@@ -92,6 +92,7 @@ button{border:0;border-radius:999px;padding:11px;background:var(--fg);color:var(
     exit;
 }
 
+with_lock('page', 'published_init');
 $page = read_json('page.json', null);
 render_shell(
     'Tiles · Editor',

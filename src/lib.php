@@ -140,12 +140,24 @@ function public_page(): ?array
     if (!is_array($page)) {
         return null;
     }
-    with_lock('page', function () use ($page): void {
-        if (!is_file(DATA_DIR . '/published.json')) {
-            write_json('published.json', $page + ['publishedAt' => gmdate('c')]);
-        }
-    });
-    return $page;
+    with_lock('page', 'published_init');
+    return read_json('published.json', null) ?? $page;
+}
+
+/**
+ * Create published.json from the current page.json if it does not exist yet. Call while holding
+ * the 'page' lock, before any write to page.json: the first draft save after deploying must not
+ * become the public version.
+ */
+function published_init(): void
+{
+    if (is_file(DATA_DIR . '/published.json')) {
+        return;
+    }
+    $page = read_json('page.json', null);
+    if (is_array($page)) {
+        write_json('published.json', $page + ['publishedAt' => gmdate('c')]);
+    }
 }
 
 /** Revision and date of the published copy, for the editor's Publish button. */

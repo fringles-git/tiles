@@ -129,6 +129,7 @@ switch ($action) {
         unset($page['stats']);
         $base = $in['base'] ?? null;
         $rev = with_lock('page', function () use ($page, $base) {
+            published_init();
             $current = read_json('page.json', []);
             $currentRev = (int) ($current['rev'] ?? 0);
             if ($currentRev > 0 && (int) $base !== $currentRev) {
