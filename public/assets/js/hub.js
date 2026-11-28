@@ -57,7 +57,7 @@ function bind({getPage,getMode,save,openDrawer,dbody,render,toast,visible,getQue
  const buildNav=()=>{const sig=JSON.stringify(universes);if(sig===navSig)return;navSig=sig;if(active!=='all'&&!universes[active])active='all';nav.innerHTML=`<a href="${esc(sectionHref(location.pathname,'all'))}" data-hub-universe="all">Tout voir</a>`+Object.entries(universes).map(([k,v])=>`<a href="${esc(sectionHref(location.pathname,k))}" data-hub-universe="${esc(k)}" title="${esc(v.question)}">${esc(v.label)}<small data-hub-count="${esc(k)}"></small></a>`).join('');};buildNav();
  document.querySelector('.explore-tools').before(nav);
  const journal=document.createElement('section');journal.className='hub-journal';journal.setAttribute('aria-label','Journal');document.getElementById('grid').after(journal);
- const button=document.createElement('button');button.className='btn';button.type='button';button.dataset.act='journal';button.innerHTML='<span class="i-doc"></span><span class="lbl">Journal</span>';document.querySelector('.acts').insertBefore(button,document.querySelector('[data-act="export"]'));
+ // The Journal entry lives in the editor's "⋮" menu (markup.html); nothing to inject.
  const entries=()=>Array.isArray(getPage().journal)?getPage().journal:[];
  const published=()=>entries().filter(j=>j.published&&j.title&&j.content&&(active==='all'||j.universe===active)&&(!getQuery()||normalize(j.title+' '+j.content).includes(normalize(getQuery())))).sort((a,b)=>b.date.localeCompare(a.date));
  const date=s=>new Date(s+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});

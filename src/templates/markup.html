@@ -1,22 +1,38 @@
 <div id="app">
   <header class="bar" id="bar">
     <div class="bar-in">
-      <div class="brand"><span class="brand-mark"><i></i><i></i><i></i></span>Tiles<span id="savestate" class="savestate" aria-live="polite"></span><button class="btn sm ghost acct" type="button" data-act="account" aria-label="Compte : mot de passe et déconnexion">Compte</button></div>
+      <div class="brand"><span class="brand-mark"><i></i><i></i><i></i></span>Tiles<span id="savestate" class="savestate" role="status"></span></div>
       <div class="seg" role="group" aria-label="Mode">
-        <button data-mode="edit" aria-pressed="true">Edit</button>
-        <button data-mode="preview" aria-pressed="false">Preview</button>
+        <button data-mode="edit" aria-pressed="true">Modifier</button>
+        <button data-mode="preview" aria-pressed="false">Aperçu</button>
         <button data-mode="stats" aria-pressed="false">Stats</button>
       </div>
       <div class="acts">
-        <button class="btn" data-act="undo" aria-label="Annuler (Ctrl+Z)" title="Annuler (Ctrl+Z)" disabled><span aria-hidden="true">↶</span></button>
-        <button class="btn" data-act="redo" aria-label="Rétablir (Ctrl+Maj+Z)" title="Rétablir (Ctrl+Maj+Z)" disabled><span aria-hidden="true">↷</span></button>
-        <button class="btn" data-act="connections" aria-label="Connexions API"><span aria-hidden="true">⚙</span><span class="lbl">APIs</span></button>
-        <button class="btn" data-act="discard" hidden title="Revenir à la version publiée">Annuler les modifs</button>
-        <button class="btn" data-act="publish" disabled title="Rendre les modifications visibles sur la page publique"><span class="lbl">Publié</span></button>
-        <a class="btn ghost" href="./" target="_blank" rel="noopener" aria-label="Open public page"><span class="i-eye"></span><span class="lbl">Live page</span></a>
-        <button class="btn" data-act="design" aria-label="Design"><span class="i-pal"></span><span class="lbl">Design</span></button>
-        <button class="btn" data-act="export" aria-label="Export and import"><span class="i-code"></span><span class="lbl">Export</span></button>
-        <button class="btn pri" data-act="add" aria-label="Add block"><span class="i-plus"></span><span class="lbl">Add block</span></button>
+        <button class="btn ib-btn" data-act="undo" aria-label="Annuler la dernière action (Ctrl+Z)" title="Annuler la dernière action (Ctrl+Z)" disabled><span aria-hidden="true">↶</span></button>
+        <button class="btn ib-btn" data-act="redo" aria-label="Rétablir (Ctrl+Maj+Z)" title="Rétablir (Ctrl+Maj+Z)" disabled><span aria-hidden="true">↷</span></button>
+        <button class="btn" data-act="add" aria-label="Ajouter un bloc"><span class="i-plus" aria-hidden="true"></span><span class="lbl">Ajouter un bloc</span></button>
+        <span class="pub-group">
+          <button class="btn pri" data-act="publish" title="Rendre les modifications visibles sur la page publique">Publier</button>
+          <button class="btn pri pub-more" type="button" aria-label="Options de publication" title="Options de publication" aria-haspopup="menu" aria-expanded="false" popovertarget="pub-menu" hidden><span aria-hidden="true">▾</span></button>
+          <a class="btn" data-live href="./" target="_blank" rel="noopener" hidden aria-label="Voir la page publique (nouvel onglet)" title="Voir la page publique (nouvel onglet)"><span class="i-eye" aria-hidden="true"></span><span class="lbl">Voir en ligne</span><span aria-hidden="true">↗</span></a>
+        </span>
+        <button class="btn ib-btn" type="button" aria-label="Plus d’options" title="Plus d’options" aria-haspopup="menu" aria-expanded="false" popovertarget="more-menu"><span aria-hidden="true">⋮</span></button>
+      </div>
+      <div id="pub-menu" class="tb-menu" popover>
+        <div focusgroup="menu nomemory" aria-label="Options de publication">
+          <button type="button" data-act="discard" class="danger">Revenir à la version publiée…</button>
+        </div>
+      </div>
+      <div id="more-menu" class="tb-menu" popover>
+        <div focusgroup="menu nomemory" aria-label="Plus d’options">
+          <a href="./" target="_blank" rel="noopener" data-menu-link><span class="i-eye" aria-hidden="true"></span>Page publique <span class="muted">(nouvel onglet ↗)</span></a>
+          <button type="button" data-act="design"><span class="i-pal" aria-hidden="true"></span>Apparence</button>
+          <button type="button" data-act="journal"><span class="i-doc" aria-hidden="true"></span>Journal · articles</button>
+          <button type="button" data-act="connections"><span aria-hidden="true">⚙</span>Connexions (données en direct)</button>
+          <button type="button" data-act="export"><span class="i-code" aria-hidden="true"></span>Exporter / importer</button>
+          <hr>
+          <button type="button" data-act="account"><span aria-hidden="true">◐</span>Compte</button>
+        </div>
       </div>
     </div>
   </header>

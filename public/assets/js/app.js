@@ -293,14 +293,32 @@ function undo(){restoreFrom(hist?.undo(),'Modification annulée')}
 function redo(){restoreFrom(hist?.redo(),'Modification rétablie')}
 // Draft / published: the editor autosaves page.json; visitors see published.json until Publish.
 var PUB=BOOT.published||{rev:0,at:''};if(!PUBLIC)setTimeout(syncPublish);
-// One status for two axes: the save (in progress, failed) and the publish (draft vs public).
-// States: busy · err · dirty (edit waiting to save) · draft (saved, not public) · pub (public = editor).
-function pubState(){return dirty?'dirty':((S.rev||0)!==PUB.rev?'draft':'pub')}
-function syncPublish(){const b=$('[data-act="publish"]');if(!b)return;const st=pubState(),pending=st!=='pub'||saving;b.disabled=!pending;b.classList.toggle('pri',pending);b.querySelector('.lbl').textContent='Publier';b.title=pending?'Rendre les modifications visibles sur la page publique':'Rien à publier : la page publique est à jour';const d=$('[data-act="discard"]');if(d)d.hidden=!pending||!PUB.rev;const el=document.getElementById('savestate');if(el&&!['busy','err'].includes(el.dataset.state)){const txt={dirty:'Modifications en cours',draft:'Brouillon enregistré · non publié',pub:'Publié'+(PUB.at?' le '+new Date(PUB.at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'')};el.textContent=txt[st];el.dataset.state=st}}
+// Publication state machine (3 states + save error), one chip and one action slot:
+//  unsaved  dirty or saving   grey dot   "Modifications non enregistrées" / "Enregistrement…"  Publier (waits for the save)
+//  error    save failed       red dot    "Non enregistré · nouvel essai"                         Publier
+//  draft    saved ≠ public    amber dot  "Brouillon enregistré · non publié"                     Publier + ▾ (revert)
+//  public   saved = public    green dot  "Publié le …"                                           Voir en ligne ↗
+function pubState(){const el=document.getElementById('savestate');if(el?.dataset.err==='1')return 'error';if(dirty||saving)return 'unsaved';return (S.rev||0)!==PUB.rev?'draft':'public'}
+function syncPublish(){const st=pubState(),el=document.getElementById('savestate');
+ if(el){const day=PUB.at?' le '+new Date(PUB.at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'';el.dataset.state=st;el.textContent={unsaved:saving?'Enregistrement…':'Modifications non enregistrées',error:'Non enregistré · nouvel essai',draft:'Brouillon enregistré · non publié',public:'Publié'+day}[st]}
+ const b=$('[data-act="publish"]'),more=$('.pub-more'),live=$('[data-live]');if(!b)return;
+ b.hidden=st==='public';b.disabled=false;if(more)more.hidden=st!=='draft'||!PUB.rev;if(live)live.hidden=st!=='public'}
 const settled=()=>new Promise((ok,ko)=>{let n=0;const t=setInterval(()=>{if(!dirty&&!saving){clearInterval(t);ok()}else if(++n>100){clearInterval(t);ko(new Error('enregistrement en attente'))}},100);if(dirty&&!saving)flush()});
 async function publish(){const b=$('[data-act="publish"]');b.disabled=true;try{await settled();const j=await api('publish',{rev:S.rev||0});PUB={rev:j.rev,at:j.at};toast('Page publiée')}catch(err){toast('Non publié : '+err.message)}syncPublish()}
-async function discard(){if(!confirm('Revenir à la version publiée ? Les modifications non publiées seront perdues.'))return;const pending=dirty;try{clearTimeout(saveT);dirty=false;await settled();await api('discard',{});location.reload()}catch(err){if(pending){dirty=true;setSaveState('','dirty');saveT=setTimeout(flush,700)}toast(err.message)}}
-function setSaveState(t,cls){const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}syncPublish();}
+async function discard(){if(!confirm('Revenir à la version publiée ?\n\nToutes les modifications faites depuis la dernière publication seront supprimées. Action définitive.'))return;const pending=dirty;try{clearTimeout(saveT);dirty=false;await settled();await api('discard',{});location.reload()}catch(err){if(pending){dirty=true;setSaveState('','dirty');saveT=setTimeout(flush,700)}toast(err.message)}}
+// Toolbar menus (native popover). Close after a choice, keep aria-expanded in sync, focus the first item on open.
+// Fallbacks: arrow keys + menu roles where focusgroup is missing; script placement where anchor positioning is missing.
+(function menus(){const menusEl=document.querySelectorAll('.tb-menu');if(!menusEl.length)return;
+ const native=('focusGroup' in HTMLElement.prototype),anchored=CSS.supports('position-area:block-end');
+ menusEl.forEach(m=>{const box=m.firstElementChild,items=()=>[...box.querySelectorAll('button,a')].filter(x=>!x.hidden);
+  if(!native){box.setAttribute('role','menu');items().forEach(x=>{x.setAttribute('role','menuitem');x.tabIndex=-1});
+   box.addEventListener('keydown',e=>{const l=items(),i=l.indexOf(document.activeElement);const n={ArrowDown:i+1,ArrowUp:i-1,Home:0,End:l.length-1}[e.key];if(n==null)return;e.preventDefault();l[(n+l.length)%l.length].focus()})}
+  m.addEventListener('keydown',e=>{if(e.key==='Tab')m.hidePopover()});
+  m.addEventListener('toggle',e=>{const trig=document.querySelector(`[popovertarget="${m.id}"]`);const open=e.newState==='open';trig?.setAttribute('aria-expanded',String(open));
+   if(open){if(!anchored&&trig){const r=trig.getBoundingClientRect();m.style.left=Math.max(8,Math.min(r.right-m.offsetWidth,innerWidth-m.offsetWidth-8))+'px';m.style.top=(r.bottom+6)+'px'}items()[0]?.focus()}});
+  m.addEventListener('click',e=>{if(e.target.closest('button,a'))m.hidePopover()})});
+})();
+function setSaveState(t,cls){const el=document.getElementById('savestate');if(el)el.dataset.err=cls==='err'?'1':'';syncPublish();}
 function save(){if(PUBLIC)return;if(hist&&!restoring){const f=document.activeElement;hist.record(snap(),f&&f.matches?.('#dbody input:not([type=checkbox]):not([type=radio]):not([type=range]),#dbody textarea')?f.id:'');syncHistory();}dirty=true;setSaveState('','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
 function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Enregistrement…','busy');
  const page=Object.assign({},S);delete page.stats;
