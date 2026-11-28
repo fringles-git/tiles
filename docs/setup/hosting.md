@@ -127,3 +127,7 @@ PHP errors and uncaught exceptions go to `data/logs/php-error.log` (private: `da
 ## Email signups (GDPR)
 
 The Email signup block stores addresses in `data/leads.json` (private), with the signup time, nothing else. Under the field, visitors see a privacy note, editable per block (default: the address is only used for these mailings, unsubscribe on request). The editor's stats panel lists every address with a Delete button and a Delete all button: erase an address as soon as someone asks. Addresses stay until deleted; export them before deleting if you send mailings from another tool.
+
+## Draft and published page
+
+The editor autosaves to `data/page.json` (working copy). Visitors, the sitemap, `/go/` links and click tracking read `data/published.json`, written by the editor's **Publier** button. The first request after deploying this version creates `published.json` from `page.json`, so the live page does not change on deploy. **Annuler les modifs** copies the published page back over the working copy. Back up both files.

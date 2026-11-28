@@ -36,7 +36,7 @@ if ($action === 'track') {
         if (!preg_match('/^[a-z0-9-]{1,24}$/', $id)) {
             out(['error' => 'Bad id.'], 400);
         }
-        $ids = array_column(read_json('page.json', ['tiles' => []])['tiles'] ?? [], 'id');
+        $ids = array_column(public_page()['tiles'] ?? [], 'id');
         if (!in_array($id, $ids, true) && !in_array($id, ['p-cv', 'p-phone', 'p-mail', 'p-rdv'], true)) {
             out(['error' => 'Unknown block.'], 400);
         }
@@ -154,6 +154,46 @@ switch ($action) {
             }
             return $page['rev'];
         });
+        out(['rev' => $rev]);
+
+    case 'publish':
+        // Copy the working copy to what visitors see. The editor sends the revision it saved last:
+        // publishing anything else (a save still in flight, another tab) is refused.
+        $in = json_decode($raw, true);
+        $state = with_lock('page', function () use ($in): array {
+            $page = read_json('page.json', null);
+            if (!is_array($page) || !valid_page($page)) {
+                return ['error' => 'The saved page is invalid. Reload the editor.', 'code' => 500];
+            }
+            if ((int) ($in['rev'] ?? -1) !== (int) ($page['rev'] ?? 0)) {
+                return ['error' => 'Des modifications ne sont pas encore enregistrées. Réessaie dans un instant.', 'code' => 409];
+            }
+            $page['publishedAt'] = gmdate('c');
+            if (!write_json('published.json', $page)) {
+                return ['error' => 'The server could not write the published page.', 'code' => 500];
+            }
+            return ['rev' => (int) ($page['rev'] ?? 0), 'at' => $page['publishedAt']];
+        });
+        if (isset($state['error'])) {
+            out(['error' => $state['error']], $state['code']);
+        }
+        out($state);
+
+    case 'discard':
+        // Drop unpublished changes: the working copy goes back to the published one (new revision).
+        $rev = with_lock('page', function (): ?int {
+            $published = read_json('published.json', null);
+            if (!is_array($published)) {
+                return null;
+            }
+            $page = $published;
+            unset($page['publishedAt']);
+            $page['rev'] = (int) (read_json('page.json', [])['rev'] ?? 0) + 1;
+            return write_json('page.json', $page) ? $page['rev'] : null;
+        });
+        if ($rev === null) {
+            out(['error' => 'Nothing published to go back to.'], 409);
+        }
         out(['rev' => $rev]);
 
     case 'upload':

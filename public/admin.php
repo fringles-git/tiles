@@ -96,6 +96,6 @@ $page = read_json('page.json', null);
 render_shell(
     'Tiles · Editor',
     'Editor',
-    ['mode' => 'admin', 'page' => $page, 'stats' => stats_for_editor(), 'csrf' => $_SESSION['csrf']],
+    ['mode' => 'admin', 'page' => $page, 'published' => published_state(), 'stats' => stats_for_editor(), 'csrf' => $_SESSION['csrf']],
     '<meta name="robots" content="noindex">'
 );

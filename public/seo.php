@@ -8,8 +8,8 @@ require dirname(__DIR__) . '/src/journal.php';
 $file = (string) ($_GET['f'] ?? '');
 $base = seo_base_url();
 $now = time();
-$pagePath = DATA_DIR . '/page.json';
-$page = read_json('page.json', []);
+$pagePath = is_file(DATA_DIR . '/published.json') ? DATA_DIR . '/published.json' : DATA_DIR . '/page.json';
+$page = public_page() ?? [];
 
 if (TILES_MODE === 'admin' && $file === 'robots.txt') {
     header('Content-Type: text/plain; charset=utf-8');

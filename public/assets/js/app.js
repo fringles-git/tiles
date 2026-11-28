@@ -291,7 +291,13 @@ function syncHistory(){for(const [act,ok] of [['undo',hist?.canUndo()],['redo',h
 function restoreFrom(state,label){if(!state)return;const o=JSON.parse(state);S.sample=o.sample;S.profile=o.profile;S.theme=o.theme;S.tiles=o.tiles;if(o.universes)S.universes=o.universes;else delete S.universes;for(const [id,u] of o.journalUniverses||[]){const j=(S.journal||[]).find(x=>x.id===id);if(j)j.universe=u}window.TilesHub?.setUniverses(S.universes);if(ui.drawer)closeDrawer();ui.sel=null;restoring=true;try{render();save()}finally{restoring=false}syncHistory();toast(label)}
 function undo(){restoreFrom(hist?.undo(),'Modification annulée')}
 function redo(){restoreFrom(hist?.redo(),'Modification rétablie')}
-function setSaveState(t,cls){const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}}
+// Draft / published: the editor autosaves page.json; visitors see published.json until Publish.
+var PUB=BOOT.published||{rev:0,at:''};if(!PUBLIC)setTimeout(syncPublish);
+function syncPublish(){const b=$('[data-act="publish"]');if(!b)return;const pending=dirty||saving||(S.rev||0)!==PUB.rev;b.disabled=!pending;b.classList.toggle('pri',pending);b.querySelector('.lbl').textContent=pending?'Publier':'Publié';b.title=pending?'Rendre les modifications visibles sur la page publique':(PUB.at?'Publié le '+new Date(PUB.at).toLocaleString('fr-FR'):'Page publique à jour');const d=$('[data-act="discard"]');if(d)d.hidden=!pending||!PUB.rev}
+const settled=()=>new Promise((ok,ko)=>{let n=0;const t=setInterval(()=>{if(!dirty&&!saving){clearInterval(t);ok()}else if(++n>100){clearInterval(t);ko(new Error('enregistrement en attente'))}},100);if(dirty&&!saving)flush()});
+async function publish(){const b=$('[data-act="publish"]');b.disabled=true;try{await settled();const j=await api('publish',{rev:S.rev||0});PUB={rev:j.rev,at:j.at};toast('Page publiée')}catch(err){toast('Non publié : '+err.message)}syncPublish()}
+async function discard(){if(!confirm('Revenir à la version publiée ? Les modifications non publiées seront perdues.'))return;try{clearTimeout(saveT);dirty=false;await settled();await api('discard',{});location.reload()}catch(err){toast(err.message)}}
+function setSaveState(t,cls){syncPublish();const el=document.getElementById('savestate');if(el){el.textContent=t;el.dataset.state=cls||''}}
 function save(){if(PUBLIC)return;if(hist&&!restoring){const f=document.activeElement;hist.record(snap(),f&&f.matches?.('#dbody input:not([type=checkbox]):not([type=radio]):not([type=range]),#dbody textarea')?f.id:'');syncHistory();}dirty=true;setSaveState('Unsaved changes','dirty');clearTimeout(saveT);saveT=setTimeout(flush,700)}
 function flush(){if(PUBLIC||saving||!dirty)return;saving=true;dirty=false;setSaveState('Saving…','busy');
  const page=Object.assign({},S);delete page.stats;
@@ -700,6 +706,8 @@ function handleAct(a){
  if(a==='journal')return hub?.manager();
  if(a==='universes')return hub?.universeManager();
  if(a==='add')return openAdd();
+ if(a==='publish')return publish();
+ if(a==='discard')return discard();
  if(a==='undo')return undo();
  if(a==='redo')return redo();
  if(a==='connections')return openConnections();

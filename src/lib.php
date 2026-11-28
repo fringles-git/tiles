@@ -125,6 +125,38 @@ function write_json(string $file, array $data): bool
     return true;
 }
 
+/**
+ * What visitors see: the last published copy (published.json). The editor saves to page.json
+ * (the working copy) and Publish copies it here. The first call creates published.json from
+ * page.json, so deploying this change leaves the live page exactly as it was.
+ */
+function public_page(): ?array
+{
+    $published = read_json('published.json', null);
+    if (is_array($published)) {
+        return $published;
+    }
+    $page = read_json('page.json', null);
+    if (!is_array($page)) {
+        return null;
+    }
+    with_lock('page', function () use ($page): void {
+        if (!is_file(DATA_DIR . '/published.json')) {
+            write_json('published.json', $page + ['publishedAt' => gmdate('c')]);
+        }
+    });
+    return $page;
+}
+
+/** Revision and date of the published copy, for the editor's Publish button. */
+function published_state(): array
+{
+    $published = read_json('published.json', null);
+    return is_array($published)
+        ? ['rev' => (int) ($published['rev'] ?? 0), 'at' => (string) ($published['publishedAt'] ?? '')]
+        : ['rev' => 0, 'at' => ''];
+}
+
 /** Run $fn while holding an exclusive lock, so concurrent requests never lose updates. */
 function with_lock(string $name, callable $fn)
 {
